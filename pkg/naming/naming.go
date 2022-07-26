@@ -3,11 +3,12 @@ package naming
 import (
 	"context"
 	"github.com/hashicorp/consul/api"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"google.golang.org/grpc"
 	"log"
 )
 
-var consulAddress = "127.0.0.1:8500"
+var consulAddress string
 var client *api.Client
 
 type ServiceRegistration struct {
@@ -17,10 +18,11 @@ type ServiceRegistration struct {
 }
 
 func init() {
+	consulAddress = config.Config.Consul.Address
 	// 初始化 consul 客户端
-	config := api.DefaultConfig()
-	config.Address = consulAddress
-	c, err := api.NewClient(config)
+	conf := api.DefaultConfig()
+	conf.Address = consulAddress
+	c, err := api.NewClient(conf)
 	if err != nil {
 		panic(err)
 	}
