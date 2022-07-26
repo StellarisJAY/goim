@@ -1,0 +1,9 @@
+syntax = "proto3";
+package client;
+option go_package = "./pb";
+
+message HandshakeRequest{
+  string token = 1;
+  string userId = 2;
+  string deviceId = 3;
+}

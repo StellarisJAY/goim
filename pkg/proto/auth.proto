@@ -1,0 +1,35 @@
+syntax = "proto3";
+package auth;
+option go_package = "./pb";
+
+message AuthRequest {
+  string userId = 1;
+  string deviceId = 2;
+  string password = 3;
+}
+message AuthResponse {
+  int32 code = 1;
+  string message = 2;
+  string token = 3;
+}
+
+message LoginRequest {
+  string token = 1;
+  string gateway = 2;
+  string channel = 3;
+  string userId = 4;
+  string deviceId = 5;
+}
+
+message LoginResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+// 授权服务
+service Auth {
+  // AuthorizeDevice 设备授权，客户端设备登录时会调用该接口，生成与设备ID、用户ID绑定的Token，作为后续的权限认证Token
+  rpc AuthorizeDevice(AuthRequest) returns (AuthResponse) {}
+  // LoginDevice 设备登录，客户端设备调用该接口完成websocket连接的授权，并在缓存中存储设备的会话信息（网关id、网关channel）
+  rpc LoginDevice(LoginRequest) returns (LoginResponse) {}
+}
