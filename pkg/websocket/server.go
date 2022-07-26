@@ -45,7 +45,7 @@ func (s *Server) Start() error {
 			return
 		}
 		connection := NewConnection(conn)
-		channel := NewChannel(connection)
+		channel := NewChannel(connection, channelID)
 		s.Channels.Store(channelID, channel)
 		go func() {
 			_ = channel.Start()

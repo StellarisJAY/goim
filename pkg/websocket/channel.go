@@ -20,9 +20,10 @@ type Channel struct {
 	closed     context.Context
 	cancel     context.CancelFunc
 	status     uint32
+	id         string
 }
 
-func NewChannel(connection *Connection) *Channel {
+func NewChannel(connection *Connection, id string) *Channel {
 	c := &Channel{
 		connection: connection,
 		writeChan:  make(chan []byte, 1<<20),
@@ -113,4 +114,12 @@ func (c *Channel) Close() {
 func (c *Channel) gracefulShutdown() {
 	_ = c.connection.Close()
 	close(c.writeChan)
+}
+
+func (c *Channel) Available() bool {
+	return atomic.LoadUint32(&c.status) == StatusStarted
+}
+
+func (c *Channel) ID() string {
+	return c.id
 }
