@@ -1,0 +1,30 @@
+syntax = "proto3";
+import "common.proto";
+import "msg.proto";
+package relay;
+option go_package = "./pb";
+
+message PushMsgRequest{
+  string channel = 1;
+  msg.BaseMsg message = 2;
+}
+
+message PushMsgResponse{
+  common.BaseResponse base = 1;
+}
+
+message BroadcastRequest{
+  msg.BaseMsg message = 1;
+  repeated string channels = 2;
+}
+
+message BroadcastResponse{
+  repeated string fails = 1;
+}
+
+service Relay{
+  // 向Gateway推送消息，Gateway将消息转发给客户端
+  rpc PushMessage(PushMsgRequest) returns (PushMsgResponse) {}
+  // 广播消息，向Gateway的多个channel广播消息
+  rpc Broadcast(BroadcastRequest) returns (BroadcastResponse) {}
+}

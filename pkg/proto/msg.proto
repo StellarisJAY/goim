@@ -1,0 +1,39 @@
+syntax = "proto3";
+package msg;
+option go_package = "./pb";
+
+
+message BaseMsg {
+  string from = 1;
+  string to = 2;
+  string content = 3;
+  uint32 flag = 4;
+}
+
+message SendMsgRequest{
+  BaseMsg msg = 1;
+}
+
+message SendMsgResponse{
+  string code = 1;
+  string messageId = 2;
+  int64 timestamp = 3;
+}
+
+message SyncMsgRequest{
+  int64 lastSeq = 1;
+}
+
+message SyncMsgResponse{
+  int64 initSeq = 1;
+  int64 lastSeq = 2;
+  repeated BaseMsg messages = 3;
+}
+
+// 消息相关的gRPC接口定义
+service msg {
+  // SendMessage 发送消息
+  rpc SendMessage(SendMsgRequest) returns (SendMsgResponse) {}
+  // SyncMessage 接收离线消息
+  rpc SyncMessage(SyncMsgRequest) returns (SyncMsgResponse) {}
+}
