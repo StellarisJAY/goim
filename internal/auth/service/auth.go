@@ -4,6 +4,8 @@ import (
 	context "context"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/stellarisJAY/goim/pkg/db"
+	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"log"
 	"time"
@@ -23,6 +25,23 @@ type Claims struct {
 
 // AuthServiceImpl 授权服务实现
 type AuthServiceImpl struct {
+}
+
+func (as *AuthServiceImpl) Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+	tx := db.DB.MySQL.Create(&model.User{
+		Account:   request.Account,
+		Password:  request.Password,
+		NickName:  request.NickName,
+		CreatedAt: time.Now(),
+	})
+	response := new(pb.RegisterResponse)
+	if tx.Error != nil {
+		response.Code = pb.Error
+		response.Message = tx.Error.Error()
+	} else {
+		response.Code = pb.Success
+	}
+	return response, nil
 }
 
 // AuthorizeDevice 为用户设备授权，检查请求的密码，最终生成一个与用户ID和设备ID绑定的Token
