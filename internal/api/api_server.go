@@ -19,7 +19,7 @@ func Init() {
 	// 授权服务API
 	authParty := application.Party("/auth")
 	{
-		authParty.Post("/login", handler.LoginHandler)
+		authParty.Post("/login", handler.AuthHandler)
 		authParty.Post("/register", handler.RegisterHandler)
 	}
 }

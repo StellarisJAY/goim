@@ -3,9 +3,10 @@ package auth;
 option go_package = "./pb";
 
 message AuthRequest {
-  string userId = 1;
-  string deviceId = 2;
+  string account = 1;
+  string deviceID = 2;
   string password = 3;
+  string ip = 4;
 }
 message AuthResponse {
   int32 code = 1;
@@ -17,8 +18,8 @@ message LoginRequest {
   string token = 1;
   string gateway = 2;
   string channel = 3;
-  string userId = 4;
-  string deviceId = 5;
+  int64 userID = 4;
+  string deviceID = 5;
 }
 
 message LoginResponse {

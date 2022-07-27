@@ -2,13 +2,16 @@ package service
 
 import (
 	context "context"
+	"crypto/md5"
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stellarisJAY/goim/pkg/config"
-	"github.com/stellarisJAY/goim/pkg/db"
+	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
+	"github.com/stellarisJAY/goim/pkg/stringutil"
 	"log"
 	"time"
 )
@@ -31,17 +34,20 @@ type AuthServiceImpl struct {
 }
 
 func (as *AuthServiceImpl) Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	tx := db.DB.MySQL.Create(&model.User{
-		ID:        userIdGenerator.NextID(),
-		Account:   request.Account,
-		Password:  request.Password,
-		NickName:  request.NickName,
-		CreatedAt: time.Now(),
+	// 生成随机的Salt 和 密码的MD5
+	salt := stringutil.RandomString(16)
+	pwdMd5 := md5.Sum([]byte(request.Password + salt))
+	err := dao.InsertUser(&model.User{
+		ID:       userIdGenerator.NextID(),
+		Account:  request.Account,
+		Password: stringutil.HexString(pwdMd5[:]),
+		NickName: request.NickName,
+		Salt:     salt,
 	})
 	response := new(pb.RegisterResponse)
-	if tx.Error != nil {
+	if err != nil {
 		response.Code = pb.Error
-		response.Message = tx.Error.Error()
+		response.Message = err.Error()
 	} else {
 		response.Code = pb.Success
 	}
@@ -50,19 +56,26 @@ func (as *AuthServiceImpl) Register(ctx context.Context, request *pb.RegisterReq
 
 // AuthorizeDevice 为用户设备授权，检查请求的密码，最终生成一个与用户ID和设备ID绑定的Token
 func (as *AuthServiceImpl) AuthorizeDevice(ctx context.Context, request *pb.AuthRequest) (*pb.AuthResponse, error) {
-	// 检查用户ID 和 密码
-	if !verifyPassword(request.UserId, request.Password) {
-		return &pb.AuthResponse{
-			Code: pb.WrongPassword,
-		}, nil
+	user, exists, err := dao.FindUserByAccount(request.Account)
+	if err != nil {
+		return nil, err
 	}
-	log.Println("authorize: ", request)
+	if !exists {
+		return &pb.AuthResponse{Code: pb.NotFound, Message: "user not found"}, nil
+	}
+	if !verifyPassword(user.Password, request.Password, user.Salt) {
+		return &pb.AuthResponse{Code: pb.AccessDenied, Message: "wrong password"}, nil
+	}
+	// 保存授权记录
+	_ = dao.InsertUserLoginLog(&model.DeviceLogin{
+		UserID:    user.ID,
+		DeviceID:  request.DeviceID,
+		Timestamp: time.Now().UnixMilli(),
+		Ip:        request.Ip,
+	})
 	// 生成 Token
-	if token, err := generateToken(request.UserId, request.DeviceId); err != nil {
-		return &pb.AuthResponse{
-			Code:  pb.Error,
-			Token: "",
-		}, nil
+	if token, err := generateToken(user.ID, request.DeviceID); err != nil {
+		return nil, err
 	} else {
 		return &pb.AuthResponse{
 			Code:  pb.Success,
@@ -81,7 +94,6 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 			Code: pb.AccessDenied,
 		}, nil
 	}
-	log.Println(claims)
 	// 检查Token是否过期
 	if time.Now().After(time.UnixMilli(claims.ExpiresAt)) {
 		log.Println("token expired: ", claims.ExpiresAt)
@@ -89,7 +101,7 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 			Code: pb.AccessDenied,
 		}, nil
 	}
-	if claims.DeviceId != request.DeviceId || claims.UserId != request.UserId {
+	if claims.DeviceId != request.DeviceID || claims.UserId != fmt.Sprintf("%x", request.UserID) {
 		log.Println(claims.DeviceId, ", ", claims.UserId)
 		return &pb.LoginResponse{
 			Code: pb.AccessDenied,
@@ -108,13 +120,13 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 }
 
 // generateToken 通过用户ID 和 设备ID 生成Token
-func generateToken(userId, deviceId string) (string, error) {
+func generateToken(userId int64, deviceId string) (string, error) {
 	expireTime := time.Now().Add(TokenTimeout).UnixMilli()
 	claims := Claims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime,
 		},
-		UserId:   userId,
+		UserId:   fmt.Sprintf("%x", userId),
 		DeviceId: deviceId,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -136,8 +148,9 @@ func parseToken(signed string) (*Claims, error) {
 	return nil, errors.New("invalid token")
 }
 
-func verifyPassword(userId, password string) bool {
-	return true
+func verifyPassword(encoded, password, salt string) bool {
+	sum := md5.Sum([]byte(password + salt))
+	return stringutil.HexString(sum[:]) == encoded
 }
 
 // newSession 在 session管理器中记录 用户设备ID 与 网关服务器的绑定关系

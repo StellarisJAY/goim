@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/stellarisJAY/goim/internal/auth/service"
+	"github.com/stellarisJAY/goim/internal/rpc/auth/service"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/grpc"
