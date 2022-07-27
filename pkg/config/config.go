@@ -5,13 +5,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
-	"path/filepath"
 )
 
 var Config config
 
 type config struct {
+	MachineID int64 `yaml:"machineID"`
+	ApiServer struct {
+		Port string `yaml:"port"`
+	} `yaml:"apiServer"`
 	MySQL struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
@@ -29,8 +31,14 @@ type config struct {
 const ROOT = "./"
 
 func init() {
-	log.Println(getPath())
-	cfgName := ROOT + "config/config.yaml"
+	args := os.Args
+	var cfgName string
+	if len(args) > 1 {
+		cfgName = args[1]
+	} else {
+		cfgName = ROOT + "config/config.yaml"
+	}
+	log.Println(cfgName)
 	bytes, err := ioutil.ReadFile(cfgName)
 	if err != nil {
 		panic(err)
@@ -39,10 +47,4 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func getPath() string {
-	path, _ := exec.LookPath(os.Args[0])
-	abs, _ := filepath.Abs(path)
-	return abs
 }
