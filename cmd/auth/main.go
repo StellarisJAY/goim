@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/stellarisJAY/goim/internal/auth"
+	"github.com/stellarisJAY/goim/internal/rpc/auth"
 	"log"
 )
 
