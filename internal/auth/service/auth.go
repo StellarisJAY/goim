@@ -4,9 +4,11 @@ import (
 	context "context"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/snowflake"
 	"log"
 	"time"
 )
@@ -16,6 +18,7 @@ const (
 )
 
 var secretKey = []byte("secret key not defined yet")
+var userIdGenerator = snowflake.NewSnowflake(config.Config.MachineID)
 
 type Claims struct {
 	jwt.StandardClaims
@@ -29,6 +32,7 @@ type AuthServiceImpl struct {
 
 func (as *AuthServiceImpl) Register(ctx context.Context, request *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	tx := db.DB.MySQL.Create(&model.User{
+		ID:        userIdGenerator.NextID(),
 		Account:   request.Account,
 		Password:  request.Password,
 		NickName:  request.NickName,
