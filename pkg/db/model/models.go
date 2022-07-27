@@ -4,8 +4,8 @@ import "time"
 
 // User 用户表
 type User struct {
-	ID        int64     `gorm:"column:id;primary key;"`
-	Account   string    `gorm:"column:account"`
+	ID        int64     `gorm:"column:id;primary key"`
+	Account   string    `gorm:"column:account;unique"`
 	Password  string    `gorm:"column:password"`
 	NickName  string    `gorm:"column:nick_name"`
 	CreatedAt time.Time `gorm:"column:create_time"`
