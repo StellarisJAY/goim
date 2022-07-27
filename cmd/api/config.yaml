@@ -1,0 +1,9 @@
+mysql:
+  user: root
+  password: 991228
+  address: 127.0.0.1:3306
+consul:
+  address: 127.0.0.1:8500
+machineId: 1
+apiServer:
+  port: 8000
