@@ -20,8 +20,12 @@ type config struct {
 		Address  string `yaml:"address"`
 	} `yaml:"mysql"`
 	Redis struct {
-		Host string `yaml:"host"`
-		Port uint   `yaml:"port"`
+		Address      string `yaml:"address"`
+		User         string `yaml:"user"`
+		Password     string `yaml:"password"`
+		MaxRetry     int    `yaml:"maxRetry"`
+		MaxIdleConns int    `yaml:"maxIdleConns"`
+		IdleTimeout  int64  `yaml:"idleTimeout"`
 	} `yaml:"redis"`
 	Consul struct {
 		Address string `yaml:"address"`
