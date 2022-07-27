@@ -45,6 +45,9 @@ func InitMySQL() (*MysqlDB, error) {
 	if !db.Migrator().HasTable(&model.DeviceLogin{}) {
 		_ = db.Migrator().CreateTable(&model.DeviceLogin{})
 	}
+	if !db.Migrator().HasTable(&model.Message{}) {
+		_ = db.Migrator().CreateTable(&model.Message{})
+	}
 	return &MysqlDB{
 		RWMutex: sync.RWMutex{},
 		DB:      db,

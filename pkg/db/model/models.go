@@ -1,6 +1,10 @@
 package model
 
-import "time"
+const (
+	MessageFlagFrom  byte = 0
+	MessageFlagTo    byte = 1
+	MessageFlagGroup byte = 2
+)
 
 // User 用户表
 type User struct {
@@ -27,4 +31,7 @@ type Message struct {
 	Content   []byte `gorm:"column:content;type:varchar(255)"`
 	Timestamp int64  `gorm:"column:timestamp;type:int8;primaryKey"`
 	Flag      byte   `gorm:"column:flag;type:int1"`
+}
+
+type OfflineMessage struct {
 }
