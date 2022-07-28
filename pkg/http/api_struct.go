@@ -25,3 +25,15 @@ type AuthResponse struct {
 	BaseResponse
 	Token string `json:"token"`
 }
+
+type SendMessageRequest struct {
+	To      int64  `json:"to" validate:"required"`
+	Content string `json:"content" validate:"required"`
+	Flag    int32  `json:"flag" validate:"required"`
+}
+
+type SendMessageResponse struct {
+	BaseResponse
+	MessageID int64 `json:"messageID"`
+	Timestamp int64 `json:"timestamp"`
+}

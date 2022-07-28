@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/stellarisJAY/goim/internal/api/handler"
+	"github.com/stellarisJAY/goim/internal/api/middleware"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"log"
 )
@@ -21,6 +22,11 @@ func Init() {
 	{
 		authParty.Post("/login", handler.AuthHandler)
 		authParty.Post("/register", handler.RegisterHandler)
+	}
+	chatParty := application.Party("/chat")
+	{
+		chatParty.Use(middleware.TokenVerifier)
+		chatParty.Post("/send", handler.SendMessageHandler)
 	}
 }
 
