@@ -34,4 +34,8 @@ type Message struct {
 }
 
 type OfflineMessage struct {
+	From      int64  `json:"from"`
+	To        int64  `json:"to"`
+	Content   []byte `json:"content"`
+	Timestamp int64  `json:"timestamp"`
 }
