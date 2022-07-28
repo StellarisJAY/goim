@@ -13,21 +13,22 @@ type ConsumerGroup struct {
 	GroupID string
 }
 
-func NewConsumerGroup(groupID string, addr []string, topics []string) (*ConsumerGroup, error) {
+func NewConsumerGroup(groupID string, addr []string, topics []string) *ConsumerGroup {
 	config := sarama.NewConfig()
 	// 暂时配置从最新的offset消费
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 	config.Consumer.Return.Errors = true
 	cg, err := sarama.NewConsumerGroup(addr, groupID, config)
 	if err != nil {
-		return nil, err
+		panic(err.Error())
+		return nil
 	}
 	return &ConsumerGroup{
 		ConsumerGroup: cg,
 		Topics:        topics,
 		Addr:          addr,
 		GroupID:       groupID,
-	}, nil
+	}
 }
 
 func (cg *ConsumerGroup) Start(ctx context.Context, handle MessageHandleFunc) {
