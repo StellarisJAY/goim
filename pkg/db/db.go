@@ -1,12 +1,16 @@
 package db
 
-import "github.com/go-redis/redis/v8"
+import (
+	"github.com/go-redis/redis/v8"
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 var DB *Databases
 
 type Databases struct {
-	MySQL *MysqlDB
-	Redis *redis.Client
+	MySQL   *MysqlDB
+	Redis   *redis.Client
+	MongoDB *mongo.Client
 }
 
 func init() {
@@ -17,4 +21,8 @@ func init() {
 	}
 	DB.MySQL = sql
 	DB.Redis = newRedisDB()
+	DB.MongoDB, err = InitMongoDB()
+	if err != nil {
+		panic(err)
+	}
 }
