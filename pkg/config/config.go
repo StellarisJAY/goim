@@ -37,6 +37,9 @@ type config struct {
 	Kafka struct {
 		Addrs []string `yaml:"addrs"`
 	} `yaml:"kafka"`
+	RpcServer struct {
+		Address string `yaml:"address"`
+	} `yaml:"rpcServer"`
 }
 
 const ROOT = "./"
