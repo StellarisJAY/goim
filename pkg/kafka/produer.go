@@ -30,7 +30,7 @@ func NewProducer(addr []string, topic string) (*Producer, error) {
 	return p, nil
 }
 
-func (p *Producer) SendMessage(key string, value []byte) (partition int32, offset int64, err error) {
+func (p *Producer) PushMessage(key string, value []byte) (partition int32, offset int64, err error) {
 	if len(key) == 0 || value == nil || len(value) == 0 {
 		return -1, -1, errors.New("key or value can't be empty")
 	}
