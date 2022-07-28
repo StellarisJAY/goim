@@ -42,6 +42,7 @@ var AuthHandler context.Handler = func(ctx context.Context) {
 	response, err := service.AuthorizeDevice(_context.Background(), authReq)
 	if err != nil {
 		_, _ = ctx.Problem(iris.StatusInternalServerError)
+		return
 	}
 	_, _ = ctx.JSON(&http.AuthResponse{
 		BaseResponse: http.BaseResponse{
