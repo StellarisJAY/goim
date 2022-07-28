@@ -8,3 +8,9 @@ const (
 	AccessDenied  int32 = 403
 	WrongPassword int32 = 5001
 )
+
+const (
+	MessageTransferTopic = "goim_message_transfer"
+	MessageTransferGroup = "goim_group_transfer"
+	MessagePersistGroup  = "goim_group_persist"
+)
