@@ -3,6 +3,7 @@ package stringutil
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 )
 
@@ -24,4 +25,8 @@ func HexString(bytes []byte) string {
 		builder.WriteString(fmt.Sprintf("%x%x", b0, b1))
 	}
 	return builder.String()
+}
+
+func HexStringToInt64(str string) (int64, error) {
+	return strconv.ParseInt(str, 16, 64)
 }
