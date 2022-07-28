@@ -4,10 +4,12 @@ option go_package = "./pb";
 
 
 message BaseMsg {
-  string from = 1;
-  string to = 2;
+  int64 from = 1;
+  int64 to = 2;
   string content = 3;
   uint32 flag = 4;
+  int64 timestamp = 5;
+  int64 id = 6;
 }
 
 message SendMsgRequest{
@@ -15,9 +17,10 @@ message SendMsgRequest{
 }
 
 message SendMsgResponse{
-  string code = 1;
-  string messageId = 2;
-  int64 timestamp = 3;
+  int32 code = 1;
+  string message = 2;
+  int64 messageId = 3;
+  int64 timestamp = 4;
 }
 
 message SyncMsgRequest{
@@ -30,8 +33,12 @@ message SyncMsgResponse{
   repeated BaseMsg messages = 3;
 }
 
-// 消息相关的gRPC接口定义
-service msg {
+// 聊天相关的gRPC接口定义
+service chat {
   // SendMessage 发送消息
   rpc SendMessage(SendMsgRequest) returns (SendMsgResponse) {}
+}
+
+service message {
+  rpc SyncOfflineMessages(SyncMsgRequest) returns (SyncMsgResponse) {}
 }
