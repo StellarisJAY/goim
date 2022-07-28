@@ -7,3 +7,4 @@ consul:
 machineId: 1
 apiServer:
   port: 8000
+tokenSecretKey: xdedfaedcdafefadfaeadfdc

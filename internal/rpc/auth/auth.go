@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/stellarisJAY/goim/internal/rpc/auth/service"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/grpc"
@@ -15,7 +16,7 @@ func Init() {
 	// 注册授权服务
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ServiceName: "auth",
-		Address:     "127.0.0.1:9999",
+		Address:     config.Config.RpcServer.Address,
 	})
 	if err != nil {
 		panic(err)
@@ -24,7 +25,7 @@ func Init() {
 }
 
 func Start() error {
-	listen, err := net.Listen("tcp", ":9999")
+	listen, err := net.Listen("tcp", config.Config.RpcServer.Address)
 	if err != nil {
 		return err
 	}

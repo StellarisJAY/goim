@@ -96,13 +96,11 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 	}
 	// 检查Token是否过期
 	if time.Now().After(time.UnixMilli(claims.ExpiresAt)) {
-		log.Println("token expired: ", claims.ExpiresAt)
 		return &pb.LoginResponse{
 			Code: pb.AccessDenied,
 		}, nil
 	}
 	if claims.DeviceId != request.DeviceID || claims.UserId != fmt.Sprintf("%x", request.UserID) {
-		log.Println(claims.DeviceId, ", ", claims.UserId)
 		return &pb.LoginResponse{
 			Code: pb.AccessDenied,
 		}, nil
@@ -130,14 +128,14 @@ func generateToken(userId int64, deviceId string) (string, error) {
 		DeviceId: deviceId,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secretKey)
+	return token.SignedString([]byte(config.Config.TokenSecretKey))
 }
 
 // parseToken 解析Token
 func parseToken(signed string) (*Claims, error) {
 	claims := new(Claims)
 	c, err := jwt.ParseWithClaims(signed, claims, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+		return []byte(config.Config.TokenSecretKey), nil
 	})
 	if err != nil {
 		return nil, err
