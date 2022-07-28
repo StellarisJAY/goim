@@ -30,6 +30,12 @@ type config struct {
 	Consul struct {
 		Address string `yaml:"address"`
 	} `yaml:"consul"`
+	MongoDB struct {
+		Hosts []string `yaml:"hosts"`
+	} `yaml:"mongoDB"`
+	Kafka struct {
+		Addrs []string `yaml:"addrs"`
+	} `yaml:"kafka"`
 }
 
 const ROOT = "./"
