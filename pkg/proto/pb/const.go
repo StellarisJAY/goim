@@ -14,3 +14,9 @@ const (
 	MessageTransferGroup = "goim_group_transfer"
 	MessagePersistGroup  = "goim_group_persist"
 )
+
+const (
+	MessageFlagFrom byte = iota
+	MessageFlagTo
+	MessageFlagGroup
+)
