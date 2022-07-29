@@ -43,3 +43,8 @@ type OfflineMessage struct {
 	Seq       int64  `json:"seq" bson:"seq"`   // 序列号为接收用户的自增序列号，用户通过本地的序列号和消息序列号判断是否同步消息
 	Flag      byte   `json:"flag" bson:"flag"` // Flag 标记消息目标的类型
 }
+
+type Session struct {
+	Gateway string
+	Channel string
+}
