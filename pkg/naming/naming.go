@@ -35,6 +35,12 @@ func GetClientConn(serviceName string) (*grpc.ClientConn, error) {
 	return grpc.DialContext(context.Background(), consulScheme+"://"+consulAddress+"/"+serviceName, grpc.WithInsecure())
 }
 
+// DialConnection 获取指定地址的客户端连接
+func DialConnection(address string) (*grpc.ClientConn, error) {
+	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	return conn, err
+}
+
 // RegisterService 注册服务
 func RegisterService(registration ServiceRegistration) error {
 	err := client.Agent().ServiceRegister(&api.AgentServiceRegistration{

@@ -1,14 +1,20 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/naming"
+	"github.com/stellarisJAY/goim/pkg/pool"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/protobuf/proto"
 	"log"
+	"runtime"
 )
+
+var pushWorker = pool.NewWorkerPool(runtime.NumCPU() * 2)
 
 // MessageTransferHandler 消息中转处理器
 // 1. 从消息队列消费到一条消息后，
@@ -54,10 +60,40 @@ func handleSingleMessage(message *pb.BaseMsg) error {
 	if err != nil {
 		return fmt.Errorf("insert offline message error %w", err)
 	}
-	return nil
+	return pushMessage(message)
 }
 
 // handleGroupChat 群聊消息处理
 func handleGroupChat(message *pb.BaseMsg) {
 
+}
+
+func pushMessage(message *pb.BaseMsg) error {
+	// 查询目标用户所在的session
+	sessions, err := dao.GetSessions(message.To, message.DeviceId)
+	log.Println("user session: ", sessions)
+	if err != nil {
+		return fmt.Errorf("get session info error: %w", err)
+	}
+	for _, session := range sessions {
+		pushWorker.Submit(func() {
+			// 与gateway连接
+			conn, psErr := naming.DialConnection(session.Gateway)
+			if psErr != nil {
+				log.Println("connect gateway error: ", psErr)
+				return
+			}
+			// RPC push message
+			client := pb.NewRelayClient(conn)
+			response, psErr := client.PushMessage(context.Background(), &pb.PushMsgRequest{Message: message, Channel: session.Channel})
+			if psErr != nil {
+				log.Println("push message RPC error: ", psErr)
+				return
+			}
+			if response.Base.Code != pb.Success {
+				log.Println("push message result: ", response.Base.Message)
+			}
+		})
+	}
+	return nil
 }
