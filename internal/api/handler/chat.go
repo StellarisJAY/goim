@@ -18,6 +18,7 @@ func init() {
 
 var SendMessageHandler = func(ctx context.Context) {
 	userID := ctx.Params().Get("userID")
+	deviceID := ctx.Params().Get("deviceID")
 	req := new(http.SendMessageRequest)
 	if err := ctx.ReadJSON(req); err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -34,6 +35,7 @@ var SendMessageHandler = func(ctx context.Context) {
 	}
 	uid, _ := stringutil.HexStringToInt64(userID)
 	message.From = uid
+	message.DeviceId = deviceID
 	conn, err := naming.GetClientConn("chat")
 	if err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)

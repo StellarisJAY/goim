@@ -41,6 +41,7 @@ func handleSingleMessage(message *pb.BaseMsg) error {
 	if err != nil {
 		return fmt.Errorf("increment user sequence number error %w", err)
 	}
+	message.Seq = seq
 	offlineMessage := &model.OfflineMessage{
 		From:      message.From,
 		To:        message.To,

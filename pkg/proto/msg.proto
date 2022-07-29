@@ -10,6 +10,8 @@ message BaseMsg {
   uint32 flag = 4;
   int64 timestamp = 5;
   int64 id = 6;
+  int64 seq = 7;
+  string deviceId = 8;
 }
 
 message SendMsgRequest{
