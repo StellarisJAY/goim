@@ -1,8 +1,10 @@
 package dao
 
 import (
+	"context"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"log"
 )
 
 func InsertMessage(msg *model.Message) error {
@@ -20,4 +22,25 @@ func ListMessages(user1, user2 int64, startTime, endTime int64) ([]*model.Messag
 		return nil, tx.Error
 	}
 	return messages, nil
+}
+
+// InsertOfflineMessage 保存一条离线消息
+func InsertOfflineMessage(msg *model.OfflineMessage) error {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	collection := database.Collection(db.CollectionOfflineMessage)
+	id, err := collection.InsertOne(context.Background(), msg, nil)
+	log.Println("inserted id: ", id)
+	return err
+}
+
+// InsertOfflineMessages 批量保存离线消息
+func InsertOfflineMessages(messages []*model.OfflineMessage) error {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	collection := database.Collection(db.CollectionOfflineMessage)
+	temp := make([]interface{}, len(messages))
+	for i, msg := range messages {
+		temp[i] = msg
+	}
+	_, err := collection.InsertMany(context.Background(), temp, nil)
+	return err
 }
