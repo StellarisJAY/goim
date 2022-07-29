@@ -16,7 +16,7 @@ const (
 )
 
 const (
-	MessageFlagFrom byte = iota
-	MessageFlagTo
-	MessageFlagGroup
+	MessageFlagFrom  byte = 1
+	MessageFlagTo    byte = 2
+	MessageFlagGroup byte = 3
 )
