@@ -147,5 +147,11 @@ func verifyPassword(encoded, password, salt string) bool {
 
 // newSession 在 session管理器中记录 用户设备ID 与 网关服务器的绑定关系
 func newSession(gateway, channel, userId, deviceId string) error {
+	id, _ := stringutil.HexStringToInt64(userId)
+	_, _, err := dao.SaveSession(id, deviceId, gateway, channel)
+	if err != nil {
+		return fmt.Errorf("save session in redis error: %w", err)
+	}
+	// todo 清理网关的过期连接
 	return nil
 }
