@@ -26,10 +26,11 @@ type DeviceLogin struct {
 
 // Message 持久化消息表
 type Message struct {
-	User1     int64  `gorm:"column:user1;type:int8;primaryKey"`
-	User2     int64  `gorm:"column:user2;type:int8;primaryKey"`
+	ID        int64  `gorm:"column:id;type:int8;primaryKey"`
+	User1     int64  `gorm:"column:user1;type:int8;index:idx_user_timestamp"`
+	User2     int64  `gorm:"column:user2;type:int8;index:idx_user_timestamp"`
 	Content   []byte `gorm:"column:content;type:varchar(255)"`
-	Timestamp int64  `gorm:"column:timestamp;type:int8;primaryKey"`
+	Timestamp int64  `gorm:"column:timestamp;type:int8;index:idx_user_timestamp"`
 	Flag      byte   `gorm:"column:flag;type:int1"`
 }
 

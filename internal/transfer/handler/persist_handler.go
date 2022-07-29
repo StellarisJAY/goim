@@ -21,6 +21,7 @@ var PersistMessageHandler = func(message *sarama.ConsumerMessage) error {
 	}
 	persistWorkers.Submit(func() {
 		message := &model.Message{
+			ID:        msg.Id,
 			Content:   []byte(msg.Content),
 			Timestamp: msg.Timestamp,
 		}
