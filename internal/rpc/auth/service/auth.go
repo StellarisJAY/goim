@@ -89,7 +89,6 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 	// 解析Token
 	claims, err := parseToken(request.Token)
 	if err != nil {
-		log.Println(err)
 		return &pb.LoginResponse{
 			Code: pb.AccessDenied,
 		}, nil
@@ -100,16 +99,11 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 			Code: pb.AccessDenied,
 		}, nil
 	}
-	if claims.DeviceId != request.DeviceID || claims.UserId != fmt.Sprintf("%x", request.UserID) {
-		return &pb.LoginResponse{
-			Code: pb.AccessDenied,
-		}, nil
-	}
 	// 缓存设备的session信息，在 Redis中记录 userId: {deviceId: {gateway, channel}}
 	if err := newSession(request.Gateway, request.Channel, claims.UserId, claims.DeviceId); err != nil {
+		log.Println(err)
 		return &pb.LoginResponse{
-			Code:    pb.Error,
-			Message: err.Error(),
+			Code: pb.AccessDenied,
 		}, nil
 	}
 	return &pb.LoginResponse{
