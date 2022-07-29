@@ -5,8 +5,15 @@ import (
 	"github.com/stellarisJAY/goim/pkg/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
+	"time"
 )
+
+const (
+	MongoDBName              = "db_goim"
+	CollectionOfflineMessage = "offlineMessage"
+)
+
+var Day = int64(time.Hour) * 24
 
 func InitMongoDB() (*mongo.Client, error) {
 	client, err := mongo.NewClient(&options.ClientOptions{
@@ -15,11 +22,20 @@ func InitMongoDB() (*mongo.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	database := client.Database("goim")
-	err = database.CreateCollection(context.TODO(), "offline_messages")
+	ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancelFunc()
+	err = client.Connect(ctx)
 	if err != nil {
-		log.Println("create offline messages collection error: ", err)
+		panic(err)
 	}
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		panic(err)
+	}
+	offlineMessageExpire := Day * int64(config.Config.Message.OfflineExpireTime)
+	_ = client.
+		Database(MongoDBName).
+		CreateCollection(context.TODO(), CollectionOfflineMessage,
+			&options.CreateCollectionOptions{ExpireAfterSeconds: &offlineMessageExpire})
 	return client, nil
 }
