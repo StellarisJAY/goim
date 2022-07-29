@@ -9,6 +9,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
 	"google.golang.org/protobuf/proto"
+	"log"
 	"net"
 	"time"
 )
@@ -20,7 +21,6 @@ const (
 
 // GateAcceptor 网关握手服务，负责接收websocket连接 并检查权限
 type GateAcceptor struct {
-	nextId string
 }
 
 func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContext) (string, error) {
@@ -72,6 +72,9 @@ func login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel 
 	switch response.Code {
 	case pb.Success:
 		return nil
+	case pb.Error:
+		log.Println("login error: ", response.Message)
+		return errors.New("access denied")
 	default:
 		return errors.New("access denied")
 	}

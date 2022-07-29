@@ -4,7 +4,6 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/authutil"
-	"log"
 )
 
 var TokenVerifier = func(ctx context.Context) {
@@ -14,7 +13,6 @@ var TokenVerifier = func(ctx context.Context) {
 		ctx.EndRequest()
 		return
 	}
-	log.Println("token: ", token)
 	userID, deviceID, valid := authutil.ValidateToken(token)
 	if !valid {
 		ctx.StatusCode(iris.StatusUnauthorized)
