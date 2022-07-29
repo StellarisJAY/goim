@@ -34,13 +34,16 @@ func NewChannel(connection *Connection, id string) *Channel {
 }
 
 func (c *Channel) Start() error {
-	go func() {
-		err := c.ReadLoop()
-		if err != nil {
-			log.Println("read loop error: ", err)
-		}
-		c.Close()
-	}()
+	if !atomic.CompareAndSwapUint32(&c.status, StatusNew, StatusStarted) {
+		return errors.New("can't start channel from current state")
+	}
+	//go func() {
+	//	err := c.ReadLoop()
+	//	if err != nil {
+	//		log.Println("read loop error: ", err)
+	//	}
+	//	c.Close()
+	//}()
 	go func() {
 		err := c.writeLoop()
 		if err != nil {
