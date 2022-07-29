@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
@@ -18,17 +19,18 @@ func (s *Server) Init() {
 	// 注册网关服务，提供消息下行的RPC接口
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ServiceName: "gateway",
-		Address:     "127.0.0.1:9000",
+		Address:     config.Config.RpcServer.Address,
 	})
 	if err != nil {
 		panic(err)
 	}
 	pb.RegisterRelayServer(s.grpcServer, s)
-	s.wsServer = websocket.NewServer(":8000")
+	s.wsServer = websocket.NewServer(config.Config.WebsocketServer.Address)
+	s.wsServer.Acceptor = &GateAcceptor{}
 }
 
 func (s *Server) Start() error {
-	listener, err := net.Listen("tcp", ":9000")
+	listener, err := net.Listen("tcp", config.Config.RpcServer.Address)
 	if err != nil {
 		return err
 	}

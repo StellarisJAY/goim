@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"github.com/gobwas/ws"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"log"
 	"net"
 	"net/http"
@@ -38,7 +39,7 @@ func (s *Server) Start() error {
 			log.Printf("failed to upgrade HTTP to websocket for %s , error: %v", r.RemoteAddr, err)
 			return
 		}
-		channelID, err := s.Acceptor.Accept(conn, AcceptorContext{Gateway: s.Address})
+		channelID, err := s.Acceptor.Accept(conn, AcceptorContext{Gateway: config.Config.RpcServer.Address})
 		if err != nil {
 			_ = conn.Close()
 			log.Printf("connection refused: %v", err)

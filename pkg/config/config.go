@@ -40,6 +40,9 @@ type config struct {
 	RpcServer struct {
 		Address string `yaml:"address"`
 	} `yaml:"rpcServer"`
+	WebsocketServer struct {
+		Address string `yaml:"address"`
+	} `yaml:"websocketServer"`
 	Message struct {
 		OfflineExpireTime int `yaml:"offlineExpireDays"`
 	} `yaml:"message"`
