@@ -24,6 +24,7 @@ func (s *Server) PushMessage(ctx context.Context, request *pb.PushMsgRequest) (*
 		if err != nil {
 			return nil, err
 		}
+		resp.Base = new(pb.BaseResponse)
 		resp.Base.Code = pb.Success
 		return resp, nil
 	} else {
