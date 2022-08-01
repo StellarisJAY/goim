@@ -42,6 +42,15 @@ func Init() {
 		userParty.Get("/{id:int64}", handler.FindUserHandler)
 		userParty.Put("", handler.UpdateUserHandler)
 	}
+	groupParty := application.Party("/group")
+	{
+		groupParty.Use(middleware.TokenVerifier)
+		groupParty.Done(middleware.ErrorHandler)
+		groupParty.Post("", handler.CreateGroupHandler)
+		groupParty.Get("/{id:int64}", handler.GroupInfoHandler)
+		groupParty.Get("/member/{id:int64}", nil)
+		groupParty.Post("/invite/{uid:int64}", nil)
+	}
 }
 
 func Start() {
