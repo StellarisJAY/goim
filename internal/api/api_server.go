@@ -23,10 +23,17 @@ func Init() {
 		authParty.Post("/login", handler.AuthHandler)
 		authParty.Post("/register", handler.RegisterHandler)
 	}
+	// 聊天服务API
 	chatParty := application.Party("/chat")
 	{
 		chatParty.Use(middleware.TokenVerifier)
 		chatParty.Post("/send", handler.SendMessageHandler)
+	}
+	// 消息查询服务API
+	messageParty := application.Party("/message")
+	{
+		messageParty.Use(middleware.TokenVerifier)
+		messageParty.Get("/offline/{seq:int64}", handler.SyncOfflineMessageHandler)
 	}
 }
 
