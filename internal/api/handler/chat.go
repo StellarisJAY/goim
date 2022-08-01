@@ -30,7 +30,7 @@ var SendMessageHandler = func(ctx context.Context) {
 	}
 	message := new(pb.BaseMsg)
 	if err := copier.CopyStructFields(message, req); err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
+		handleError(ctx, err)
 		return
 	}
 	uid, _ := stringutil.HexStringToInt64(userID)
@@ -38,13 +38,13 @@ var SendMessageHandler = func(ctx context.Context) {
 	message.DeviceId = deviceID
 	conn, err := naming.GetClientConn("chat")
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
+		handleError(ctx, err)
 		return
 	}
 	client := pb.NewChatClient(conn)
 	response, err := client.SendMessage(_context.Background(), &pb.SendMsgRequest{Msg: message})
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
+		handleError(ctx, err)
 		return
 	}
 

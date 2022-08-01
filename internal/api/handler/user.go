@@ -20,14 +20,12 @@ var FindUserHandler = func(ctx context.Context) {
 	}
 	service, err := getUserService()
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		_, _ = ctx.WriteString(err.Error())
+		handleError(ctx, err)
 		return
 	}
 	findUserResponse, err := service.FindUserByID(_context.TODO(), &pb.FindUserByIdRequest{Id: id})
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		_, _ = ctx.WriteString(err.Error())
+		handleError(ctx, err)
 		return
 	}
 	response := &http.FindUserResponse{}
@@ -49,14 +47,12 @@ var UpdateUserHandler = func(ctx context.Context) {
 	}
 	service, err := getUserService()
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		_, _ = ctx.WriteString(err.Error())
+		handleError(ctx, err)
 		return
 	}
 	resp, err := service.UpdateUserInfo(_context.TODO(), &pb.UpdateUserInfoRequest{Id: uid, NickName: req.NickName})
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		_, _ = ctx.WriteString(err.Error())
+		handleError(ctx, err)
 		return
 	}
 	_, _ = ctx.JSON(&http.BaseResponse{

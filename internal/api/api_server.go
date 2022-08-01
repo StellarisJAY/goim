@@ -12,14 +12,11 @@ var application *iris.Application
 
 func Init() {
 	application = iris.New()
-	// 错误处理
-	application.OnErrorCode(iris.StatusInternalServerError, handler.InternalError)
-	application.OnErrorCode(iris.StatusNotFound, handler.NotFound)
-	application.OnErrorCode(iris.StatusBadRequest, handler.BadRequest)
 
 	// 授权服务API
 	authParty := application.Party("/auth")
 	{
+		authParty.Done(middleware.ErrorHandler)
 		authParty.Post("/login", handler.AuthHandler)
 		authParty.Post("/register", handler.RegisterHandler)
 	}
@@ -27,18 +24,21 @@ func Init() {
 	chatParty := application.Party("/chat")
 	{
 		chatParty.Use(middleware.TokenVerifier)
+		chatParty.Done(middleware.ErrorHandler)
 		chatParty.Post("/send", handler.SendMessageHandler)
 	}
 	// 消息查询服务API
 	messageParty := application.Party("/message")
 	{
 		messageParty.Use(middleware.TokenVerifier)
+		messageParty.Done(middleware.ErrorHandler)
 		messageParty.Get("/offline/{seq:int64}", handler.SyncOfflineMessageHandler)
 	}
 	// 用户信息API
 	userParty := application.Party("/user")
 	{
 		userParty.Use(middleware.TokenVerifier)
+		userParty.Done(middleware.ErrorHandler)
 		userParty.Get("/{id:int64}", handler.FindUserHandler)
 		userParty.Put("", handler.UpdateUserHandler)
 	}

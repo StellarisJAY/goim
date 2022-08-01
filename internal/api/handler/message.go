@@ -23,8 +23,7 @@ var SyncOfflineMessageHandler = func(ctx context.Context) {
 	}
 	service, err := getMessageService()
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		_, _ = ctx.WriteString(err.Error())
+		handleError(ctx, err)
 		return
 	}
 	// RPC 查询客户端最大序号之后的所有消息
@@ -33,8 +32,7 @@ var SyncOfflineMessageHandler = func(ctx context.Context) {
 		UserID:  uid,
 	})
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		_, _ = ctx.WriteString(err.Error())
+		handleError(ctx, err)
 		return
 	}
 	resp := new(http.SyncOfflineMessageResponse)

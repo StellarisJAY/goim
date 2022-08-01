@@ -1,15 +1,11 @@
 package handler
 
-import "github.com/kataras/iris/v12/context"
+import (
+	"github.com/kataras/iris/v12/context"
+	"github.com/stellarisJAY/goim/internal/api/middleware"
+)
 
-var NotFound = func(ctx context.Context) {
-	_, _ = ctx.WriteString("404 NOT FOUND")
-}
-
-var InternalError = func(ctx context.Context) {
-	_, _ = ctx.WriteString("500 Error Occurred")
-}
-
-var BadRequest = func(ctx context.Context) {
-	_, _ = ctx.WriteString("400 Bad Request")
+func handleError(ctx context.Context, err error) {
+	ctx.Values().Set(middleware.CtxKeyHandlerError, err)
+	ctx.Next()
 }

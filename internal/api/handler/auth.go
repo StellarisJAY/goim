@@ -36,12 +36,12 @@ var AuthHandler context.Handler = func(ctx context.Context) {
 	// 获取授权RPC服务，RPC调用获取Token
 	service, err := GetAuthService()
 	if err != nil {
-		_, _ = ctx.Problem(iris.StatusInternalServerError)
+		handleError(ctx, err)
 		return
 	}
 	response, err := service.AuthorizeDevice(_context.Background(), authReq)
 	if err != nil {
-		_, _ = ctx.Problem(iris.StatusInternalServerError)
+		handleError(ctx, err)
 		return
 	}
 	_, _ = ctx.JSON(&http.AuthResponse{
@@ -71,11 +71,11 @@ var RegisterHandler context.Handler = func(ctx context.Context) {
 	}
 	service, err := GetAuthService()
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
+		handleError(ctx, err)
 		return
 	}
 	if response, err := service.Register(_context.Background(), request); err != nil {
-		_, _ = ctx.Problem(iris.NewProblem().Status(iris.StatusInternalServerError))
+		handleError(ctx, err)
 		return
 	} else {
 		_, _ = ctx.JSON(&http.BaseResponse{
