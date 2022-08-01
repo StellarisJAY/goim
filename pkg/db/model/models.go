@@ -16,6 +16,13 @@ type User struct {
 	RegisterTime int64  `gorm:"column:register_time;type:int8"`
 }
 
+type UserInfo struct {
+	ID           int64  `json:"id"`
+	Account      string `json:"account"`
+	NickName     string `json:"nickName"`
+	RegisterTime int64  `json:"registerTime"`
+}
+
 // DeviceLogin 设备登录记录表
 type DeviceLogin struct {
 	UserID    int64  `gorm:"column:user_id;type:int8"`
@@ -44,7 +51,25 @@ type OfflineMessage struct {
 	Flag      byte   `json:"flag" bson:"flag"` // Flag 标记消息目标的类型
 }
 
+// Session 信息
 type Session struct {
-	Gateway string
-	Channel string
+	Gateway string // 网关地址
+	Channel string // 网关内部的channel
+}
+
+// Group 群组表
+type Group struct {
+	ID           int64  `gorm:"column:id;type:int8;primaryKey"`
+	Name         string `gorm:"column:name;type:varchar(64)"`
+	CreateTime   int64  `gorm:"column:create;type:int8"`
+	Description  string `gorm:"column:description;type:varchar(255)"`
+	OwnerID      int64  `gorm:"column:owner_id;type:int8"`
+	OwnerAccount string `gorm:"column:owner_account;type:varchar(255)"`
+}
+
+// GroupMember 群成员表
+type GroupMember struct {
+	GroupID  int64 `gorm:"column:group_id;type:int8;primaryKey"`
+	UserID   int64 `gorm:"column:user_id;type:int8;primaryKey"`
+	JoinTime int64 `gorm:"column:joinTime;type:int8"`
 }
