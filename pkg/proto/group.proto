@@ -1,0 +1,89 @@
+syntax = "proto3";
+package group;
+option go_package = "./pb";
+
+enum GroupMemberStatus {
+  normal = 0;
+  invited = 1;
+  banned = 2;
+}
+
+message GroupInfo {
+  int64 groupID = 1;
+  string name = 2;
+  string description = 3;
+  int64 ownerID = 4;
+  string ownerAccount = 5;
+  int64 createTime = 6;
+}
+
+message GroupMember{
+  int64 userID = 1;
+  string Account = 2;
+  string NickName = 3;
+  int64 joinTime = 4;
+  GroupMemberStatus status = 5;
+}
+
+message CreateGroupRequest{
+  string name = 1;
+  int64 ownerID = 2;
+  string description = 3;
+}
+
+message CreateGroupResponse{
+  int32 code = 1;
+  string message = 2;
+  int64 groupID = 3;
+}
+
+message ListMembersRequest{
+  int64 groupID = 1;
+  int32 pageSize = 2;
+  int32 page = 3;
+}
+
+message ListMembersResponse{
+  int32 code = 1;
+  string message = 2;
+  int32 total = 3;
+  repeated GroupMember members = 4;
+}
+
+message InviteUserRequest {
+  int64 userID = 1;
+  int64 groupID = 2;
+}
+
+message InviteUserResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message AcceptInvitationRequest {
+  int64 userID = 1;
+  int64 groupID = 2;
+}
+
+message AcceptInvitationResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+message GetGroupInfoRequest {
+  int64 groupID = 1;
+}
+
+message GetGroupInfoResponse {
+  int32 code = 1;
+  string message = 2;
+  GroupInfo group = 3;
+}
+
+service Group {
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
+  rpc ListGroupMembers(ListMembersRequest) returns (ListMembersResponse) {}
+  rpc InviteUser(InviteUserRequest) returns (InviteUserResponse) {}
+  rpc AcceptInvitation(AcceptInvitationRequest) returns (AcceptInvitationResponse) {}
+  rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse) {}
+}
