@@ -35,6 +35,13 @@ func Init() {
 		messageParty.Use(middleware.TokenVerifier)
 		messageParty.Get("/offline/{seq:int64}", handler.SyncOfflineMessageHandler)
 	}
+	// 用户信息API
+	userParty := application.Party("/user")
+	{
+		userParty.Use(middleware.TokenVerifier)
+		userParty.Get("/{id:int64}", handler.FindUserHandler)
+		userParty.Put("", handler.UpdateUserHandler)
+	}
 }
 
 func Start() {
