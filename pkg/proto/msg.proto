@@ -25,14 +25,22 @@ message SendMsgResponse{
   int64 timestamp = 4;
 }
 
+// 同步离线消息请求
 message SyncMsgRequest{
   int64 lastSeq = 1;
+  int64 userID = 2;
+  // 可选参数，指定消息来源
+  optional int64 from = 3;
+  // 可选参数，执行来源类型
+  optional int32 flag = 4;
 }
 
 message SyncMsgResponse{
-  int64 initSeq = 1;
-  int64 lastSeq = 2;
-  repeated BaseMsg messages = 3;
+  int32 Code = 1;
+  string message = 2;
+  int64 initSeq = 3;
+  int64 lastSeq = 4;
+  repeated BaseMsg messages = 5;
 }
 
 // 聊天相关的gRPC接口定义

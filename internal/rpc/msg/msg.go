@@ -14,10 +14,19 @@ var server *grpc.Server
 
 func Init() {
 	server = grpc.NewServer()
-	chatService := service.NewChatServiceImpl()
-	pb.RegisterChatServer(server, chatService)
+	pb.RegisterChatServer(server, service.NewChatServiceImpl())
+	pb.RegisterMessageServer(server, service.NewMessageServiceImpl())
+	// 注册聊天服务
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ServiceName: "chat",
+		Address:     config.Config.RpcServer.Address,
+	})
+	// 注册消息查询服务
+	if err != nil {
+		panic(err)
+	}
+	err = naming.RegisterService(naming.ServiceRegistration{
+		ServiceName: "message",
 		Address:     config.Config.RpcServer.Address,
 	})
 	if err != nil {
