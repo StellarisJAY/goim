@@ -4,6 +4,10 @@ const (
 	MessageFlagFrom  byte = 0
 	MessageFlagTo    byte = 1
 	MessageFlagGroup byte = 2
+
+	MemberStatusNormal  byte = 0
+	MemberStatusInvited byte = 1
+	MemberStatusBanned  byte = 2
 )
 
 // User 用户表
@@ -59,12 +63,12 @@ type Session struct {
 
 // Group 群组表
 type Group struct {
-	ID           int64  `gorm:"column:id;type:int8;primaryKey"`
-	Name         string `gorm:"column:name;type:varchar(64)"`
-	CreateTime   int64  `gorm:"column:create;type:int8"`
-	Description  string `gorm:"column:description;type:varchar(255)"`
-	OwnerID      int64  `gorm:"column:owner_id;type:int8"`
-	OwnerAccount string `gorm:"column:owner_account;type:varchar(255)"`
+	ID           int64  `gorm:"column:id;type:int8;primaryKey" json:"id"`
+	Name         string `gorm:"column:name;type:varchar(64);unique" json:"name"`
+	CreateTime   int64  `gorm:"column:create;type:int8" json:"createTime"`
+	Description  string `gorm:"column:description;type:varchar(255)" json:"description"`
+	OwnerID      int64  `gorm:"column:owner_id;type:int8;unique" json:"ownerID"`
+	OwnerAccount string `gorm:"column:owner_account;type:varchar(255)" json:"ownerAccount"`
 }
 
 // GroupMember 群成员表
@@ -72,4 +76,12 @@ type GroupMember struct {
 	GroupID  int64 `gorm:"column:group_id;type:int8;primaryKey"`
 	UserID   int64 `gorm:"column:user_id;type:int8;primaryKey"`
 	JoinTime int64 `gorm:"column:joinTime;type:int8"`
+	Status   byte  `gorm:"column:status;type:tinyint"` // 群成员状态：正常、已邀请未加入、禁言
+}
+
+// GroupInvitation 进群邀请
+type GroupInvitation struct {
+	UserID    int64 `bson:"userID" json:"userID"`
+	GroupID   int64 `bson:"groupID" json:"groupID"`
+	Timestamp int64 `bson:"timestamp" json:"timestamp"`
 }

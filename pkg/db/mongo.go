@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	MongoDBName              = "db_goim"
-	CollectionOfflineMessage = "offlineMessage"
+	MongoDBName               = "db_goim"
+	CollectionOfflineMessage  = "offlineMessage"
+	CollectionGroupInvitation = "groupInvitation"
 )
 
 var Day = int64(time.Hour) * 24
@@ -37,5 +38,8 @@ func InitMongoDB() (*mongo.Client, error) {
 		Database(MongoDBName).
 		CreateCollection(context.TODO(), CollectionOfflineMessage,
 			&options.CreateCollectionOptions{ExpireAfterSeconds: &offlineMessageExpire})
+	groupInvitationExpire := Day * 3
+	_ = client.Database(MongoDBName).
+		CreateCollection(context.TODO(), CollectionGroupInvitation, &options.CreateCollectionOptions{ExpireAfterSeconds: &groupInvitationExpire})
 	return client, nil
 }

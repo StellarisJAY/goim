@@ -48,6 +48,12 @@ func InitMySQL() (*MysqlDB, error) {
 	if !db.Migrator().HasTable(&model.Message{}) {
 		_ = db.Migrator().CreateTable(&model.Message{})
 	}
+	if !db.Migrator().HasTable(&model.Group{}) {
+		_ = db.Migrator().CreateTable(&model.Group{})
+	}
+	if !db.Migrator().HasTable(&model.GroupMember{}) {
+		_ = db.Migrator().CreateTable(&model.GroupMember{})
+	}
 	return &MysqlDB{
 		RWMutex: sync.RWMutex{},
 		DB:      db,
