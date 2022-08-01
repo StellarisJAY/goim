@@ -1,0 +1,35 @@
+syntax = "proto3";
+package user;
+option go_package = "./pb";
+
+message UserInfo{
+  int64 id = 1;
+  string account = 2;
+  string nickName = 3;
+  int64 registerTime = 4;
+}
+
+message FindUserByIdRequest{
+  int64 id = 1;
+}
+
+message FindUserByIdResponse{
+  int32 code = 1;
+  string message = 2;
+  UserInfo user = 3;
+}
+
+message UpdateUserInfoRequest{
+  int64 id = 1;
+  string nickName = 2;
+}
+
+message UpdateUserInfoResponse{
+  int32 code = 1;
+  string message = 2;
+}
+
+service User {
+  rpc FindUserByID(FindUserByIdRequest) returns (FindUserByIdResponse) {}
+  rpc UpdateUserInfo(UpdateUserInfoRequest) returns (UpdateUserInfoResponse) {}
+}
