@@ -37,14 +37,16 @@ func SaveSession(userId int64, deviceId, gateway, channel string) (string, strin
 }
 
 // GetSessions 获取除了 fromDevice 以外 用户的所有登录设备 session 信息
-func GetSessions(userId int64, fromDevice string) ([]model.Session, error) {
+func GetSessions(userId int64, fromDevice string, fromUser int64) ([]model.Session, error) {
 	key := fmt.Sprintf("%s%d", sessionPrefix, userId)
 	all := db.DB.Redis.HGetAll(context.Background(), key)
 	if encodeds, err := all.Result(); err != nil {
 		return nil, err
 	} else {
-		// 排除来源设备
-		//delete(encodeds, fromDevice)
+		if fromUser == userId {
+			// 排除来源设备
+			delete(encodeds, fromDevice)
+		}
 		sessions := make([]model.Session, 0, len(encodeds))
 		for _, encoded := range encodeds {
 			gateway, channel := decodeSession([]byte(encoded))

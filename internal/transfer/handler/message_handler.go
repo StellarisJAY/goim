@@ -70,7 +70,7 @@ func handleGroupChat(message *pb.BaseMsg) {
 
 func pushMessage(message *pb.BaseMsg) error {
 	// 查询目标用户所在的session
-	sessions, err := dao.GetSessions(message.To, message.DeviceId)
+	sessions, err := dao.GetSessions(message.To, message.DeviceId, message.From)
 	log.Println("user session: ", sessions)
 	if err != nil {
 		return fmt.Errorf("get session info error: %w", err)
