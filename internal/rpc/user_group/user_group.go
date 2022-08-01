@@ -14,6 +14,7 @@ var server *grpc.Server
 func Init() {
 	server = grpc.NewServer()
 	pb.RegisterUserServer(server, &service.UserServiceImpl{})
+	pb.RegisterGroupServer(server, service.NewGroupServiceImpl())
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ID:          "",
 		ServiceName: "user_group",
