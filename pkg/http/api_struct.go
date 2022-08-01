@@ -50,3 +50,17 @@ type SyncOfflineMessageResponse struct {
 	// 消息列表
 	Messages []*pb.BaseMsg `json:"messages"`
 }
+
+type CreateGroupRequest struct {
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
+}
+
+type FindUserResponse struct {
+	BaseResponse
+	UserInfo *pb.UserInfo `json:"userInfo"`
+}
+
+type UpdateUserRequest struct {
+	NickName string `json:"nickName"`
+}
