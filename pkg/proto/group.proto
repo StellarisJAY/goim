@@ -8,6 +8,7 @@ enum GroupMemberStatus {
   banned = 2;
 }
 
+// GroupInfo 群聊基本信息 proto
 message GroupInfo {
   int64 groupID = 1;
   string name = 2;
@@ -17,12 +18,23 @@ message GroupInfo {
   int64 createTime = 6;
 }
 
+// GroupMember 群成员详细信息 proto
 message GroupMember{
   int64 userID = 1;
   string Account = 2;
   string NickName = 3;
   int64 joinTime = 4;
   GroupMemberStatus status = 5;
+}
+
+// GroupInvitation 进群邀请详细记录 proto
+message GroupInvitation{
+  int64 groupID = 1;
+  string groupName = 2;
+  int64 inviterID = 3;
+  string inviterAccount = 4;
+  int64 timestamp = 5;
+  int64 ID = 6;
 }
 
 message CreateGroupRequest{
@@ -53,6 +65,7 @@ message ListMembersResponse{
 message InviteUserRequest {
   int64 userID = 1;
   int64 groupID = 2;
+  int64 inviter = 3;
 }
 
 message InviteUserResponse {
@@ -61,8 +74,8 @@ message InviteUserResponse {
 }
 
 message AcceptInvitationRequest {
-  int64 userID = 1;
-  int64 groupID = 2;
+  int64 invitationID = 1;
+  int64 userID = 2;
 }
 
 message AcceptInvitationResponse {
@@ -80,10 +93,28 @@ message GetGroupInfoResponse {
   GroupInfo group = 3;
 }
 
+message ListInvitationRequest {
+  int64 userID = 1;
+}
+
+message ListInvitationResponse{
+  int32 code = 1;
+  string message = 2;
+  repeated GroupInvitation invitations = 3;
+}
+
+// Group 群聊相关RPC服务
 service Group {
+  // CreateGroup 创建群聊
   rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
+  // ListGroupMembers 列出群成员信息
   rpc ListGroupMembers(ListMembersRequest) returns (ListMembersResponse) {}
+  // InviteUser 邀请用户进群
   rpc InviteUser(InviteUserRequest) returns (InviteUserResponse) {}
+  // AcceptInvitation 接收进群邀请
   rpc AcceptInvitation(AcceptInvitationRequest) returns (AcceptInvitationResponse) {}
+  // GetGroupInfo 获取群聊信息
   rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse) {}
+  // ListGroupInvitations 列出进群邀请记录
+  rpc ListGroupInvitations(ListInvitationRequest) returns (ListInvitationResponse) {}
 }
