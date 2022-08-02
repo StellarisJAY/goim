@@ -8,6 +8,10 @@ const (
 	MemberStatusNormal  byte = 0
 	MemberStatusInvited byte = 1
 	MemberStatusBanned  byte = 2
+
+	MemberRoleOwner byte = iota
+	MemberRoleAdmin
+	MemberRoleNormal
 )
 
 // User 用户表
@@ -64,10 +68,10 @@ type Session struct {
 // Group 群组表
 type Group struct {
 	ID           int64  `gorm:"column:id;type:int8;primaryKey" json:"id"`
-	Name         string `gorm:"column:name;type:varchar(64);unique" json:"name"`
+	Name         string `gorm:"column:name;type:varchar(64);" json:"name"`
 	CreateTime   int64  `gorm:"column:create;type:int8" json:"createTime"`
 	Description  string `gorm:"column:description;type:varchar(255)" json:"description"`
-	OwnerID      int64  `gorm:"column:owner_id;type:int8;unique" json:"ownerID"`
+	OwnerID      int64  `gorm:"column:owner_id;type:int8;" json:"ownerID"`
 	OwnerAccount string `gorm:"column:owner_account;type:varchar(255)" json:"ownerAccount"`
 }
 
@@ -75,13 +79,25 @@ type Group struct {
 type GroupMember struct {
 	GroupID  int64 `gorm:"column:group_id;type:int8;primaryKey"`
 	UserID   int64 `gorm:"column:user_id;type:int8;primaryKey"`
-	JoinTime int64 `gorm:"column:joinTime;type:int8"`
+	JoinTime int64 `gorm:"column:join_time;type:int8"`
 	Status   byte  `gorm:"column:status;type:tinyint"` // 群成员状态：正常、已邀请未加入、禁言
+	Role     byte  `gorm:"column:role;type:tinyint"`   // 群成员角色：群主、管理员、普通成员
 }
 
-// GroupInvitation 进群邀请
+// GroupMemberFull 群成员详细信息model
+type GroupMemberFull struct {
+	*GroupMember
+	Account  string `gorm:"column:account"`
+	NickName string `gorm:"column:nick_name"`
+}
+
+// GroupInvitation 进群邀请记录，仅在MongoDB保存三天
 type GroupInvitation struct {
-	UserID    int64 `bson:"userID" json:"userID"`
-	GroupID   int64 `bson:"groupID" json:"groupID"`
-	Timestamp int64 `bson:"timestamp" json:"timestamp"`
+	ID             int64  `bson:"id" json:"id""`
+	UserID         int64  `bson:"userID" json:"userID"`
+	GroupID        int64  `bson:"groupID" json:"groupID"`
+	Timestamp      int64  `bson:"timestamp" json:"timestamp"`
+	Inviter        int64  `bson:"inviter" json:"inviter"`
+	InviterAccount string `json:"inviterAccount"`
+	GroupName      string `json:"groupName" gorm:"column:name"` // 不在MongoDB保存
 }
