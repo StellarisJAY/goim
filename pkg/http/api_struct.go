@@ -62,16 +62,31 @@ type CreateGroupResponse struct {
 	GroupID int64 `json:"groupID"`
 }
 
+// GroupInfoResponse 查询群聊信息返回
 type GroupInfoResponse struct {
 	BaseResponse
 	Group *pb.GroupInfo `json:"group"`
 }
 
+// FindUserResponse 查询用户信息返回
 type FindUserResponse struct {
 	BaseResponse
 	UserInfo *pb.UserInfo `json:"userInfo"`
 }
 
+// UpdateUserRequest 更新用户信息请求
 type UpdateUserRequest struct {
 	NickName string `json:"nickName"`
+}
+
+// ListGroupMemberResponse 列出群成员返回
+type ListGroupMemberResponse struct {
+	BaseResponse
+	Members []*pb.GroupMember `json:"members"`
+}
+
+// ListInvitationsResponse 列出邀请记录返回
+type ListInvitationsResponse struct {
+	BaseResponse
+	Invitations []*pb.GroupInvitation `json:"invitations"`
 }
