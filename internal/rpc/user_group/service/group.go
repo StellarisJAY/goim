@@ -57,6 +57,12 @@ func (g *GroupServiceImpl) CreateGroup(ctx context.Context, request *pb.CreateGr
 	if err != nil {
 		resp.Code, resp.Message = pb.Error, err.Error()
 		return resp, nil
+	}
+	// 在Redis记录群成员ID
+	err = dao.AddGroupMemberSession(request.OwnerID, groupId)
+	if err != nil {
+		resp.Code, resp.Message = pb.Error, err.Error()
+		return resp, nil
 	} else {
 		resp.GroupID = groupId
 	}
@@ -159,7 +165,13 @@ func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.Acc
 			Message: err.Error(),
 		}, nil
 	}
-
+	err = dao.AddGroupMemberSession(userID, groupID)
+	if err != nil {
+		return &pb.AcceptInvitationResponse{
+			Code:    pb.Error,
+			Message: err.Error(),
+		}, nil
+	}
 	return &pb.AcceptInvitationResponse{
 		Code: pb.Success,
 	}, nil

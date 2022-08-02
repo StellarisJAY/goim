@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/stringutil"
 )
 
 const sessionPrefix = "goim_session_"
+const keyGroupMemberSession = "goim_group_members_"
 
 // 保存session的脚本
 // 因为保存session需要检查该设备是否已经登录在某个网关，使用单个Redis命令无法做到。
@@ -36,6 +38,13 @@ func SaveSession(userId int64, deviceId, gateway, channel string) (string, strin
 	return "", "", nil
 }
 
+// AddGroupMemberSession 将用户添加到Redis的群成员列表
+func AddGroupMemberSession(userID int64, groupID int64) error {
+	key := fmt.Sprintf("%s%d", keyGroupMemberSession, groupID)
+	cmd := db.DB.Redis.SAdd(context.TODO(), key, fmt.Sprintf("%x", userID))
+	return cmd.Err()
+}
+
 // GetSessions 获取除了 fromDevice 以外 用户的所有登录设备 session 信息
 func GetSessions(userId int64, fromDevice string, fromUser int64) ([]model.Session, error) {
 	key := fmt.Sprintf("%s%d", sessionPrefix, userId)
@@ -54,6 +63,36 @@ func GetSessions(userId int64, fromDevice string, fromUser int64) ([]model.Sessi
 		}
 		return sessions, nil
 	}
+}
+
+func GetGroupSessions(groupId int64, fromDevice string, fromUser int64) (map[int64][]model.Session, error) {
+	// 获取群成员IDs
+	cmd := db.DB.Redis.SMembers(context.TODO(), fmt.Sprintf("%s%d", keyGroupMemberSession, groupId))
+	result, err := cmd.Result()
+	if err != nil {
+		return nil, err
+	}
+	sessions := make(map[int64][]model.Session)
+	for _, member := range result {
+		userID, err := stringutil.HexStringToInt64(member)
+		if err != nil {
+			continue
+		}
+		session, err := GetSessions(userID, fromDevice, fromUser)
+		if err != nil {
+			continue
+		}
+		sessions[userID] = session
+	}
+	return sessions, nil
+}
+
+func GroupMemberExists(groupID int64, userID int64) bool {
+	cmd := db.DB.Redis.SIsMember(context.TODO(), fmt.Sprintf("%s%d", keyGroupMemberSession, groupID), fmt.Sprintf("%x", userID))
+	if result, err := cmd.Result(); err != nil || !result {
+		return false
+	}
+	return true
 }
 
 // session 编码格式：4字节gateLen + 4字节chanLen + gateway + channel
