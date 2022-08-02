@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
-	"log"
 )
 
 func InsertMessage(msg *model.Message) error {
@@ -28,8 +27,7 @@ func ListMessages(user1, user2 int64, startTime, endTime int64) ([]*model.Messag
 func InsertOfflineMessage(msg *model.OfflineMessage) error {
 	database := db.DB.MongoDB.Database(db.MongoDBName)
 	collection := database.Collection(db.CollectionOfflineMessage)
-	id, err := collection.InsertOne(context.Background(), msg, nil)
-	log.Println("inserted id: ", id)
+	_, err := collection.InsertOne(context.Background(), msg, nil)
 	return err
 }
 

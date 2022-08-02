@@ -29,7 +29,7 @@ var MessageTransferHandler = func(message *sarama.ConsumerMessage) error {
 	case pb.MessageFlagFrom:
 		err = handleSingleMessage(msg)
 	case pb.MessageFlagGroup:
-		handleGroupChat(msg)
+		err = handleGroupChat(msg)
 	default:
 	}
 	if err != nil {
@@ -64,8 +64,20 @@ func handleSingleMessage(message *pb.BaseMsg) error {
 }
 
 // handleGroupChat 群聊消息处理
-func handleGroupChat(message *pb.BaseMsg) {
-
+func handleGroupChat(message *pb.BaseMsg) error {
+	offlineMessage := &model.OfflineMessage{
+		From:      message.From,
+		To:        message.To,
+		Content:   []byte(message.Content),
+		Timestamp: message.Timestamp,
+		Seq:       0,
+		Flag:      pb.MessageFlagGroup,
+	}
+	err := dao.InsertOfflineMessage(offlineMessage)
+	if err != nil {
+		return fmt.Errorf("insert offline message error %w", err)
+	}
+	return pushGroupMessage(message)
 }
 
 func pushMessage(message *pb.BaseMsg) error {
@@ -92,6 +104,46 @@ func pushMessage(message *pb.BaseMsg) error {
 			}
 			if response.Base.Code != pb.Success {
 				log.Println("push message result: ", response.Base.Message)
+			}
+		})
+	}
+	return nil
+}
+
+// pushGroupMessage 推送群聊消息，尝试向群聊中的每个用户推送消息
+func pushGroupMessage(message *pb.BaseMsg) error {
+	sessions, err := dao.GetGroupSessions(message.To, message.DeviceId, message.From)
+	if err != nil {
+		return fmt.Errorf("get group session error: %w", err)
+	}
+	// 通过每个用户的sessions，整理出每个Gateway需要推送消息的channels
+	gates := make(map[string][]string)
+	for _, v := range sessions {
+		for _, session := range v {
+			channels, ok := gates[session.Gateway]
+			if !ok {
+				channels = make([]string, 0)
+			}
+			channels = append(channels, session.Channel)
+			gates[session.Gateway] = channels
+		}
+	}
+	// 向每个网关推送消息
+	for gateway, channels := range gates {
+		pushWorker.Submit(func() {
+			conn, err := naming.DialConnection(gateway)
+			if err != nil {
+				log.Println("Connect to gateway failed, gateway: ", gateway)
+				return
+			}
+			client := pb.NewRelayClient(conn)
+			// 向网关服务发送广播消息请求
+			_, err = client.Broadcast(context.TODO(), &pb.BroadcastRequest{
+				Message:  message,
+				Channels: channels,
+			})
+			if err != nil {
+				log.Printf("RPC Broadcast message failed, gateway: %s, error: %v", gateway, err)
 			}
 		})
 	}
