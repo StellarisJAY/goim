@@ -101,3 +101,18 @@ type GroupInvitation struct {
 	InviterAccount string `json:"inviterAccount"`
 	GroupName      string `json:"groupName" gorm:"column:name"` // 不在MongoDB保存
 }
+
+// Friend 好友关系表
+type Friend struct {
+	User1      int64 `gorm:"column:user1;type:int8;primaryKey"`
+	User2      int64 `gorm:"column:user2;type:int8;primaryKey"`
+	AcceptTime int64 `gorm:"column:accept_time;type:int8;"`
+}
+
+// AddFriendRequest 好友请求
+type AddFriendRequest struct {
+	Requester int64  `bson:"requester"`
+	Target    int64  `bson:"target"`
+	Timestamp int64  `bson:"timestamp"`
+	Message   string `bson:"message"` // 验证信息
+}

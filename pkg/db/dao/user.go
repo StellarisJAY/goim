@@ -8,6 +8,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/copier"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"go.mongodb.org/mongo-driver/bson"
 	"gorm.io/gorm"
 )
 
@@ -74,4 +75,43 @@ func InsertUser(user *model.User) error {
 func InsertUserLoginLog(login *model.DeviceLogin) error {
 	tx := db.DB.MySQL.Create(login)
 	return tx.Error
+}
+
+// AddFriendRequest 添加好友请求
+func AddFriendRequest(request *model.AddFriendRequest) error {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	// 写入到MongoDB, 返回错误可能是重复添加
+	_, err := database.Collection(db.CollectionFriendRequest).InsertOne(context.TODO(), request)
+	return err
+}
+
+// GetAndDeleteFriendRequest 获取并删除好友请求，删除成功表示接收添加好友请求
+func GetAndDeleteFriendRequest(requester, target int64) (*model.AddFriendRequest, error) {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	request := new(model.AddFriendRequest)
+	err := database.Collection(db.CollectionFriendRequest).FindOne(context.TODO(), bson.D{
+		{"target", target},
+		{"requester", requester},
+	}).Decode(request)
+	if err != nil {
+		return nil, err
+	}
+	return request, nil
+}
+
+// ListAddFriendRequests 列出添加当前用户为好友的所有请求
+func ListAddFriendRequests(target int64) ([]*model.AddFriendRequest, error) {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	cursor, err := database.Collection(db.CollectionFriendRequest).Find(context.TODO(), bson.D{
+		{"target", target},
+	})
+	if err != nil {
+		return nil, err
+	}
+	requests := make([]*model.AddFriendRequest, 0)
+	err = cursor.All(context.TODO(), requests)
+	if err != nil {
+		return nil, err
+	}
+	return requests, nil
 }
