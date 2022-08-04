@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.28.0
 // 	protoc        v3.21.2
-// source: user_group.proto
+// source: user.proto
 
 package pb
 
@@ -149,7 +149,7 @@ type FindUserByIdResponse struct {
 
 	Code    int32     `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 	Message string    `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	User    *UserInfo `protobuf:"bytes,3,opt,name=user_group,proto3" json:"user_group,omitempty"`
+	User    *UserInfo `protobuf:"bytes,3,opt,name=user,proto3" json:"user,omitempty"`
 }
 
 func (x *FindUserByIdResponse) Reset() {
@@ -372,18 +372,18 @@ func file_user_proto_rawDescGZIP() []byte {
 
 var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_user_proto_goTypes = []interface{}{
-	(*UserInfo)(nil),               // 0: user_group.UserInfo
-	(*FindUserByIdRequest)(nil),    // 1: user_group.FindUserByIdRequest
-	(*FindUserByIdResponse)(nil),   // 2: user_group.FindUserByIdResponse
-	(*UpdateUserInfoRequest)(nil),  // 3: user_group.UpdateUserInfoRequest
-	(*UpdateUserInfoResponse)(nil), // 4: user_group.UpdateUserInfoResponse
+	(*UserInfo)(nil),               // 0: user.UserInfo
+	(*FindUserByIdRequest)(nil),    // 1: user.FindUserByIdRequest
+	(*FindUserByIdResponse)(nil),   // 2: user.FindUserByIdResponse
+	(*UpdateUserInfoRequest)(nil),  // 3: user.UpdateUserInfoRequest
+	(*UpdateUserInfoResponse)(nil), // 4: user.UpdateUserInfoResponse
 }
 var file_user_proto_depIdxs = []int32{
-	0, // 0: user_group.FindUserByIdResponse.user_group:type_name -> user_group.UserInfo
-	1, // 1: user_group.User.FindUserByID:input_type -> user_group.FindUserByIdRequest
-	3, // 2: user_group.User.UpdateUserInfo:input_type -> user_group.UpdateUserInfoRequest
-	2, // 3: user_group.User.FindUserByID:output_type -> user_group.FindUserByIdResponse
-	4, // 4: user_group.User.UpdateUserInfo:output_type -> user_group.UpdateUserInfoResponse
+	0, // 0: user.FindUserByIdResponse.user:type_name -> user.UserInfo
+	1, // 1: user.User.FindUserByID:input_type -> user.FindUserByIdRequest
+	3, // 2: user.User.UpdateUserInfo:input_type -> user.UpdateUserInfoRequest
+	2, // 3: user.User.FindUserByID:output_type -> user.FindUserByIdResponse
+	4, // 4: user.User.UpdateUserInfo:output_type -> user.UpdateUserInfoResponse
 	3, // [3:5] is the sub-list for method output_type
 	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -490,7 +490,9 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type UserClient interface {
+	// FindUserByID  通过用户ID 查询用户信息
 	FindUserByID(ctx context.Context, in *FindUserByIdRequest, opts ...grpc.CallOption) (*FindUserByIdResponse, error)
+	// UpdateUserInfo  更新用户信息
 	UpdateUserInfo(ctx context.Context, in *UpdateUserInfoRequest, opts ...grpc.CallOption) (*UpdateUserInfoResponse, error)
 }
 
@@ -504,7 +506,7 @@ func NewUserClient(cc grpc.ClientConnInterface) UserClient {
 
 func (c *userClient) FindUserByID(ctx context.Context, in *FindUserByIdRequest, opts ...grpc.CallOption) (*FindUserByIdResponse, error) {
 	out := new(FindUserByIdResponse)
-	err := c.cc.Invoke(ctx, "/user_group.User/FindUserByID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user.User/FindUserByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -513,7 +515,7 @@ func (c *userClient) FindUserByID(ctx context.Context, in *FindUserByIdRequest, 
 
 func (c *userClient) UpdateUserInfo(ctx context.Context, in *UpdateUserInfoRequest, opts ...grpc.CallOption) (*UpdateUserInfoResponse, error) {
 	out := new(UpdateUserInfoResponse)
-	err := c.cc.Invoke(ctx, "/user_group.User/UpdateUserInfo", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user.User/UpdateUserInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -522,7 +524,9 @@ func (c *userClient) UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReque
 
 // UserServer is the server API for User service.
 type UserServer interface {
+	// FindUserByID  通过用户ID 查询用户信息
 	FindUserByID(context.Context, *FindUserByIdRequest) (*FindUserByIdResponse, error)
+	// UpdateUserInfo  更新用户信息
 	UpdateUserInfo(context.Context, *UpdateUserInfoRequest) (*UpdateUserInfoResponse, error)
 }
 
@@ -551,7 +555,7 @@ func _User_FindUserByID_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user_group.User/FindUserByID",
+		FullMethod: "/user.User/FindUserByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServer).FindUserByID(ctx, req.(*FindUserByIdRequest))
@@ -569,7 +573,7 @@ func _User_UpdateUserInfo_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user_group.User/UpdateUserInfo",
+		FullMethod: "/user.User/UpdateUserInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServer).UpdateUserInfo(ctx, req.(*UpdateUserInfoRequest))
@@ -578,7 +582,7 @@ func _User_UpdateUserInfo_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 var _User_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "user_group.User",
+	ServiceName: "user.User",
 	HandlerType: (*UserServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -591,5 +595,5 @@ var _User_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "user_group.proto",
+	Metadata: "user.proto",
 }
