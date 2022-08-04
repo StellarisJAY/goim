@@ -90,3 +90,29 @@ type ListInvitationsResponse struct {
 	BaseResponse
 	Invitations []*pb.GroupInvitation `json:"invitations"`
 }
+
+// AddFriendRequest 添加好友请求
+type AddFriendRequest struct {
+	TargetID        int64  `json:"targetID" validate:"required"`
+	ValidateMessage string `json:"validateMessage" validate:"required"`
+}
+
+// AcceptFriendRequest 接受好友申请请求
+type AcceptFriendRequest struct {
+	TargetID int64 `json:"targetID" validate:"required"`
+}
+
+type ListFriendApplicationsResponse struct {
+	BaseResponse
+	Applications []*pb.FriendApplication `json:"applications"`
+}
+
+type ListFriendsResponse struct {
+	BaseResponse
+	Friends []*pb.FriendInfo `json:"friends"`
+}
+
+type GetFriendInfoResponse struct {
+	BaseResponse
+	Info *pb.FriendInfo `json:"info"`
+}

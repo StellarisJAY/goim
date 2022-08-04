@@ -54,6 +54,22 @@ func Init() {
 		groupParty.Get("/invitations", handler.ListInvitationsHandler)
 		groupParty.Post("/invitation/{invID:int64}", handler.AcceptInvitationHandler)
 	}
+	// 好友相关API
+	friendParty := application.Party("/friend")
+	{
+		friendParty.Use(middleware.TokenVerifier)
+		friendParty.Done(middleware.ErrorHandler)
+		// 添加好友申请
+		friendParty.Post("/application", handler.InsertFriendApplicationHandler)
+		// 列出好友申请
+		friendParty.Get("/application", handler.ListFriendApplications)
+		// 接受好友申请
+		friendParty.Put("/application", handler.AcceptFriendHandler)
+		// 获取好友信息
+		friendParty.Get("/{friendID:int64}", handler.FriendInfoHandler)
+		// 获取好友列表
+		friendParty.Get("/list", handler.FriendListHandler)
+	}
 }
 
 func Start() {
