@@ -25,10 +25,10 @@ var MessageTransferHandler = func(message *sarama.ConsumerMessage) error {
 		return err
 	}
 	var err error
-	switch byte(msg.Flag) {
-	case pb.MessageFlagFrom:
+	switch msg.Flag {
+	case pb.MessageFlag_From:
 		err = handleSingleMessage(msg)
-	case pb.MessageFlagGroup:
+	case pb.MessageFlag_Group:
 		err = handleGroupChat(msg)
 	default:
 	}
@@ -54,7 +54,7 @@ func handleSingleMessage(message *pb.BaseMsg) error {
 		Content:   []byte(message.Content),
 		Timestamp: message.Timestamp,
 		Seq:       seq,
-		Flag:      pb.MessageFlagFrom,
+		Flag:      byte(message.Flag),
 	}
 	err = dao.InsertOfflineMessage(offlineMessage)
 	if err != nil {
@@ -71,7 +71,7 @@ func handleGroupChat(message *pb.BaseMsg) error {
 		Content:   []byte(message.Content),
 		Timestamp: message.Timestamp,
 		Seq:       0,
-		Flag:      pb.MessageFlagGroup,
+		Flag:      byte(pb.MessageFlag_Group),
 	}
 	err := dao.InsertOfflineMessage(offlineMessage)
 	if err != nil {
@@ -83,7 +83,6 @@ func handleGroupChat(message *pb.BaseMsg) error {
 func pushMessage(message *pb.BaseMsg) error {
 	// 查询目标用户所在的session
 	sessions, err := dao.GetSessions(message.To, message.DeviceId, message.From)
-	log.Println("user session: ", sessions)
 	if err != nil {
 		return fmt.Errorf("get session info error: %w", err)
 	}

@@ -33,15 +33,17 @@ var SendMessageHandler = func(ctx context.Context) {
 		handleError(ctx, err)
 		return
 	}
+	// 设置消息类型
+	message.Flag = pb.MessageFlag(req.Flag)
 	uid, _ := stringutil.HexStringToInt64(userID)
 	message.From = uid
 	message.DeviceId = deviceID
-	conn, err := naming.GetClientConn("chat")
+	conn, err := naming.GetClientConn("message")
 	if err != nil {
 		handleError(ctx, err)
 		return
 	}
-	client := pb.NewChatClient(conn)
+	client := pb.NewMessageClient(conn)
 	response, err := client.SendMessage(_context.Background(), &pb.SendMsgRequest{Msg: message})
 	if err != nil {
 		handleError(ctx, err)

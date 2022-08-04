@@ -14,7 +14,6 @@ var server *grpc.Server
 
 func Init() {
 	server = grpc.NewServer()
-	pb.RegisterChatServer(server, service.NewChatServiceImpl())
 	pb.RegisterMessageServer(server, service.NewMessageServiceImpl())
 	// 注册聊天服务
 	err := naming.RegisterService(naming.ServiceRegistration{

@@ -25,7 +25,7 @@ var PersistMessageHandler = func(message *sarama.ConsumerMessage) error {
 			Content:   []byte(msg.Content),
 			Timestamp: msg.Timestamp,
 		}
-		if byte(msg.Flag) == pb.MessageFlagGroup {
+		if msg.Flag == pb.MessageFlag_Group {
 			message.Flag = byte(msg.Flag)
 			message.User1 = msg.From
 			message.User2 = msg.To
@@ -33,11 +33,11 @@ var PersistMessageHandler = func(message *sarama.ConsumerMessage) error {
 			if msg.From > msg.To {
 				message.User1 = msg.From
 				message.User2 = msg.To
-				message.Flag = pb.MessageFlagFrom
+				message.Flag = byte(pb.MessageFlag_From)
 			} else {
 				message.User1 = msg.To
 				message.User2 = msg.From
-				message.Flag = pb.MessageFlagTo
+				message.Flag = byte(pb.MessageFlag_To)
 			}
 		}
 		err := dao.InsertMessage(message)

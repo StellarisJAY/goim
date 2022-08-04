@@ -2,17 +2,29 @@ package service
 
 import (
 	"context"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db"
+	"github.com/stellarisJAY/goim/pkg/kafka"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/snowflake"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MessageServiceImpl struct {
+	transferProducer *kafka.Producer
+	idGenerator      *snowflake.Snowflake
 }
 
 func NewMessageServiceImpl() *MessageServiceImpl {
-	return &MessageServiceImpl{}
+	transProducer, err := kafka.NewProducer(config.Config.Kafka.Addrs, pb.MessageTransferTopic)
+	if err != nil {
+		panic(err)
+	}
+	return &MessageServiceImpl{
+		transferProducer: transProducer,
+		idGenerator:      snowflake.NewSnowflake(config.Config.MachineID),
+	}
 }
 
 // SyncOfflineMessages 同步离线消息
