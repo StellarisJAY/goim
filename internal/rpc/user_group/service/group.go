@@ -7,6 +7,8 @@ import (
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
+	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -72,6 +74,9 @@ func (g *GroupServiceImpl) CreateGroup(ctx context.Context, request *pb.CreateGr
 func (g *GroupServiceImpl) GetGroupInfo(ctx context.Context, request *pb.GetGroupInfoRequest) (*pb.GetGroupInfoResponse, error) {
 	groupInfo, err := dao.FindGroupInfo(request.GroupID)
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &pb.GetGroupInfoResponse{Code: pb.NotFound, Message: "group not exists"}, nil
+		}
 		return &pb.GetGroupInfoResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	return &pb.GetGroupInfoResponse{
@@ -88,6 +93,15 @@ func (g *GroupServiceImpl) GetGroupInfo(ctx context.Context, request *pb.GetGrou
 }
 
 func (g *GroupServiceImpl) ListGroupMembers(ctx context.Context, request *pb.ListMembersRequest) (*pb.ListMembersResponse, error) {
+	// 先查看group是否存在
+	_, err := dao.FindGroupInfo(request.GroupID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &pb.ListMembersResponse{Code: pb.NotFound, Message: "group doesn't exist"}, nil
+		}
+		return &pb.ListMembersResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	// 查询群成员信息
 	members, err := dao.ListGroupMembers(request.GroupID)
 	if err != nil {
 		return &pb.ListMembersResponse{Code: pb.Error, Message: err.Error()}, nil
@@ -134,6 +148,9 @@ func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUse
 		InviterAccount: inviter.Account,
 	})
 	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return &pb.InviteUserResponse{Code: pb.InvalidOperation, Message: "user already invited"}, nil
+		}
 		return &pb.InviteUserResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	return &pb.InviteUserResponse{Code: pb.Success}, nil
@@ -144,12 +161,15 @@ func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.Acc
 	// 获取并删除邀请信息
 	invitation, err := dao.GetAndDeleteInvitation(request.InvitationID)
 	if err != nil {
-		return &pb.AcceptInvitationResponse{Code: pb.Error, Message: "invitation not found"}, nil
+		if err == mongo.ErrNoDocuments {
+			return &pb.AcceptInvitationResponse{Code: pb.NotFound, Message: "invitation not found"}, nil
+		}
+		return &pb.AcceptInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	groupID := invitation.GroupID
 	userID := invitation.UserID
 	if userID != request.UserID {
-		return &pb.AcceptInvitationResponse{Code: pb.Error, Message: "invitation was for another user"}, nil
+		return &pb.AcceptInvitationResponse{Code: pb.InvalidOperation, Message: "invitation was for another user"}, nil
 	}
 	// 添加到群成员列表
 	err = dao.AddGroupMember(&model.GroupMember{
@@ -165,6 +185,7 @@ func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.Acc
 			Message: err.Error(),
 		}, nil
 	}
+	// 在Redis记录群成员ID
 	err = dao.AddGroupMemberSession(userID, groupID)
 	if err != nil {
 		return &pb.AcceptInvitationResponse{
@@ -185,6 +206,9 @@ func (g *GroupServiceImpl) ListGroupInvitations(ctx context.Context, request *pb
 	invitations, err := dao.ListInvitations(request.UserID)
 	if err != nil {
 		return &pb.ListInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if len(invitations) == 0 {
+		return &pb.ListInvitationResponse{Code: pb.NotFound, Message: "no invitations found"}, nil
 	}
 	groupIDs := make([]int64, len(invitations))
 	for i, inv := range invitations {
