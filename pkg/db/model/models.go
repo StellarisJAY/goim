@@ -104,9 +104,9 @@ type GroupInvitation struct {
 
 // Friend 好友关系表
 type Friend struct {
-	User1      int64 `gorm:"column:user1;type:int8;primaryKey"`
-	User2      int64 `gorm:"column:user2;type:int8;primaryKey"`
-	AcceptTime int64 `gorm:"column:accept_time;type:int8;"`
+	OwnerID    int64 `gorm:"column:owner_id;type:int8;primaryKey"`
+	FriendID   int64 `gorm:"column:friend_id;type:int8;primaryKey"`
+	AcceptTime int64 `gorm:"column:accept_time;type:int8"`
 }
 
 // AddFriendRequest 好友请求
