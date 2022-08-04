@@ -27,7 +27,7 @@ func FindGroupInfo(groupID int64) (*model.Group, error) {
 	if err != nil {
 		if err == redis.Nil {
 			// 从MySQL获取
-			tx := db.DB.MySQL.Where("id=?", groupID).Find(group)
+			tx := db.DB.MySQL.Table("groups").Where("id=?", groupID).Take(group)
 			if tx.Error != nil {
 				return nil, tx.Error
 			}
@@ -36,6 +36,7 @@ func FindGroupInfo(groupID int64) (*model.Group, error) {
 			_ = db.DB.Redis.Set(context.TODO(), fmt.Sprintf("%s%d", KeyGroupInfo, groupID), marshal, 0)
 			return group, nil
 		}
+		return nil, err
 	}
 	err = json.Unmarshal(marshal, group)
 	return group, err
