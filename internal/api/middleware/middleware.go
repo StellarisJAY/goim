@@ -18,9 +18,16 @@ var TokenVerifier = func(ctx context.Context) {
 		ctx.EndRequest()
 		return
 	}
-	userID, deviceID, valid := authutil.ValidateToken(token)
+	userID, deviceID, valid, expired := authutil.ValidateToken(token)
 	if !valid {
 		ctx.StatusCode(iris.StatusUnauthorized)
+		_, _ = ctx.WriteString("invalid token")
+		ctx.EndRequest()
+		return
+	}
+	if expired {
+		ctx.StatusCode(iris.StatusUnauthorized)
+		_, _ = ctx.WriteString("token expired")
 		ctx.EndRequest()
 		return
 	}

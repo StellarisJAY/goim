@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stellarisJAY/goim/pkg/config"
+	"time"
 )
 
 type Claims struct {
@@ -12,10 +13,14 @@ type Claims struct {
 	DeviceId string `json:"deviceId"`
 }
 
-func ValidateToken(token string) (userID, deviceID string, valid bool) {
+func ValidateToken(token string) (userID, deviceID string, valid, expired bool) {
 	claims, err := parseToken(token)
 	if err != nil {
 		valid = false
+		return
+	}
+	if claims.ExpiresAt <= time.Now().UnixMilli() {
+		expired = true
 		return
 	}
 	userID = claims.UserId
