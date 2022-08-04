@@ -89,7 +89,7 @@ func AddFriendRequest(request *model.AddFriendRequest) error {
 func GetAndDeleteFriendRequest(requester, target int64) (*model.AddFriendRequest, error) {
 	database := db.DB.MongoDB.Database(db.MongoDBName)
 	request := new(model.AddFriendRequest)
-	err := database.Collection(db.CollectionFriendRequest).FindOne(context.TODO(), bson.D{
+	err := database.Collection(db.CollectionFriendRequest).FindOneAndDelete(context.TODO(), bson.D{
 		{"target", target},
 		{"requester", requester},
 	}).Decode(request)
@@ -109,7 +109,7 @@ func ListAddFriendRequests(target int64) ([]*model.AddFriendRequest, error) {
 		return nil, err
 	}
 	requests := make([]*model.AddFriendRequest, 0)
-	err = cursor.All(context.TODO(), requests)
+	err = cursor.All(context.TODO(), &requests)
 	if err != nil {
 		return nil, err
 	}

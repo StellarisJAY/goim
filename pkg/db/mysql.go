@@ -55,7 +55,7 @@ func InitMySQL() (*MysqlDB, error) {
 		_ = db.Migrator().CreateTable(&model.GroupMember{})
 	}
 	if !db.Migrator().HasTable(&model.Friend{}) {
-		_ = db.Migrator().CreateTable(&model.GroupMember{})
+		_ = db.Migrator().CreateTable(&model.Friend{})
 	}
 	return &MysqlDB{
 		RWMutex: sync.RWMutex{},
