@@ -73,6 +73,7 @@ func (GroupMemberStatus) EnumDescriptor() ([]byte, []int) {
 	return file_group_proto_rawDescGZIP(), []int{0}
 }
 
+// GroupInfo 群聊基本信息 proto
 type GroupInfo struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -160,6 +161,7 @@ func (x *GroupInfo) GetCreateTime() int64 {
 	return 0
 }
 
+// GroupMember 群成员详细信息 proto
 type GroupMember struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -239,6 +241,7 @@ func (x *GroupMember) GetStatus() GroupMemberStatus {
 	return GroupMemberStatus_normal
 }
 
+// GroupInvitation 进群邀请详细记录 proto
 type GroupInvitation struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1454,11 +1457,17 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type GroupClient interface {
+	// CreateGroup 创建群聊
 	CreateGroup(ctx context.Context, in *CreateGroupRequest, opts ...grpc.CallOption) (*CreateGroupResponse, error)
+	// ListGroupMembers 列出群成员信息
 	ListGroupMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersResponse, error)
+	// InviteUser 邀请用户进群
 	InviteUser(ctx context.Context, in *InviteUserRequest, opts ...grpc.CallOption) (*InviteUserResponse, error)
+	// AcceptInvitation 接收进群邀请
 	AcceptInvitation(ctx context.Context, in *AcceptInvitationRequest, opts ...grpc.CallOption) (*AcceptInvitationResponse, error)
+	// GetGroupInfo 获取群聊信息
 	GetGroupInfo(ctx context.Context, in *GetGroupInfoRequest, opts ...grpc.CallOption) (*GetGroupInfoResponse, error)
+	// ListGroupInvitations 列出进群邀请记录
 	ListGroupInvitations(ctx context.Context, in *ListInvitationRequest, opts ...grpc.CallOption) (*ListInvitationResponse, error)
 }
 
@@ -1526,11 +1535,17 @@ func (c *groupClient) ListGroupInvitations(ctx context.Context, in *ListInvitati
 
 // GroupServer is the server API for Group service.
 type GroupServer interface {
+	// CreateGroup 创建群聊
 	CreateGroup(context.Context, *CreateGroupRequest) (*CreateGroupResponse, error)
+	// ListGroupMembers 列出群成员信息
 	ListGroupMembers(context.Context, *ListMembersRequest) (*ListMembersResponse, error)
+	// InviteUser 邀请用户进群
 	InviteUser(context.Context, *InviteUserRequest) (*InviteUserResponse, error)
+	// AcceptInvitation 接收进群邀请
 	AcceptInvitation(context.Context, *AcceptInvitationRequest) (*AcceptInvitationResponse, error)
+	// GetGroupInfo 获取群聊信息
 	GetGroupInfo(context.Context, *GetGroupInfoRequest) (*GetGroupInfoResponse, error)
+	// ListGroupInvitations 列出进群邀请记录
 	ListGroupInvitations(context.Context, *ListInvitationRequest) (*ListInvitationResponse, error)
 }
 
