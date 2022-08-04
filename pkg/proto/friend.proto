@@ -10,6 +10,14 @@ message FriendApplication {
   string message = 5;
 }
 
+message FriendInfo {
+  int64 userID = 1;
+  string account = 2;
+  string nickName = 3;
+  int64 acceptTime = 4;
+  int64 registerTime = 5;
+}
+
 message AddFriendRequest{
   int64 userID = 1;
   int64 targetUser = 2;
@@ -41,6 +49,27 @@ message AcceptFriendResponse {
   string message = 2;
 }
 
+message FriendListRequest {
+  int64 userID = 1;
+}
+
+message FriendListResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated FriendInfo friends = 3;
+}
+
+message FriendInfoRequest {
+  int64 userID = 1;
+  int64 friendID = 2;
+}
+
+message FriendInfoResponse{
+  int32  code = 1;
+  string message = 2;
+  FriendInfo info = 3;
+}
+
 // Friend 好友相关的RPC服务
 service Friend {
   // AddFriend  添加好友
@@ -49,4 +78,8 @@ service Friend {
   rpc ListAddFriendRequests(ListAddFriendRequest) returns (ListAddFriendResponse) {}
   // AcceptFriend  接收添加好友请求
   rpc AcceptFriend(AcceptFriendRequest) returns (AcceptFriendResponse) {}
+  // ListFriends 获取好友列表
+  rpc ListFriends(FriendListRequest) returns (FriendListResponse) {}
+  // GetFriendInfo 获取好友信息
+  rpc GetFriendInfo(FriendInfoRequest) returns (FriendInfoResponse) {}
 }
