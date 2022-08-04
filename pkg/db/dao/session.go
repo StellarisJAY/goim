@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
@@ -28,6 +29,9 @@ func SaveSession(userId int64, deviceId, gateway, channel string) (string, strin
 	encodedSession := encodeSession(gateway, channel)
 	eval := db.DB.Redis.Eval(context.Background(), saveSessionScript, []string{key}, deviceId, encodedSession)
 	if res, err := eval.Result(); err != nil {
+		if err == redis.Nil {
+			return "", "", nil
+		}
 		return "", "", err
 	} else if res != nil {
 		if oldSession, ok := res.([]byte); ok {
