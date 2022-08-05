@@ -87,15 +87,31 @@ func ListGroupMembers(groupID int64) ([]*model.GroupMemberFull, error) {
 }
 
 // FindGroupMember 查询群成员信息
-func FindGroupMember(groupID, userID int64) *model.GroupMember {
-	member := &model.GroupMember{}
-	tx := db.DB.MySQL.
-		Where("group_id=? AND user_id=?", groupID, userID).
-		Find(member)
-	if tx.Error != nil || member.GroupID != groupID {
-		return nil
+func FindGroupMember(groupID, userID int64) (*model.GroupMember, error) {
+	marshal, err := db.DB.Redis.HGet(context.TODO(), fmt.Sprintf("%s%d", keyGroupMemberSession, groupID), fmt.Sprintf("%x", userID)).Bytes()
+	if err != nil {
+		if err == redis.Nil {
+			member := &model.GroupMember{}
+			tx := db.DB.MySQL.
+				Where("group_id=? AND user_id=?", groupID, userID).
+				Find(member)
+			if tx.Error != nil {
+				return nil, err
+			}
+			marshal, err = json.Marshal(member)
+			if err == nil {
+				_ = AddGroupMemberSession(member)
+			}
+			return member, nil
+		}
+		return nil, err
 	}
-	return member
+	member := &model.GroupMember{}
+	err = json.Unmarshal(marshal, member)
+	if err != nil {
+		return nil, err
+	}
+	return member, nil
 }
 
 // FindGroupMemberFull 查询群成员详细信息

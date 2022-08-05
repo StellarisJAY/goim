@@ -48,20 +48,21 @@ func (g *GroupServiceImpl) CreateGroup(ctx context.Context, request *pb.CreateGr
 		resp.Code, resp.Message = pb.Error, err.Error()
 		return resp, nil
 	}
-	// 添加群成员记录
-	err = dao.AddGroupMember(&model.GroupMember{
+	member := &model.GroupMember{
 		GroupID:  groupId,
 		UserID:   request.OwnerID,
 		JoinTime: time.Now().UnixMilli(),
 		Status:   model.MemberStatusNormal,
 		Role:     model.MemberRoleOwner,
-	})
+	}
+	// 添加群成员记录
+	err = dao.AddGroupMember(member)
 	if err != nil {
 		resp.Code, resp.Message = pb.Error, err.Error()
 		return resp, nil
 	}
 	// 在Redis记录群成员ID
-	err = dao.AddGroupMemberSession(request.OwnerID, groupId)
+	err = dao.AddGroupMemberSession(member)
 	if err != nil {
 		resp.Code, resp.Message = pb.Error, err.Error()
 		return resp, nil
@@ -129,9 +130,14 @@ func (g *GroupServiceImpl) ListGroupMembers(ctx context.Context, request *pb.Lis
 // 最后在MongoDB中保留邀请记录
 func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUserRequest) (*pb.InviteUserResponse, error) {
 	// 查看用户是否已经进群
-	member := dao.FindGroupMember(request.GroupID, request.UserID)
-	if member != nil {
-		return &pb.InviteUserResponse{Code: pb.Error, Message: "member already in group chat"}, nil
+	member, err := dao.FindGroupMember(request.GroupID, request.UserID)
+	if err == nil && member != nil {
+		return &pb.InviteUserResponse{Code: pb.InvalidOperation, Message: "member already in group chat"}, nil
+	}
+	if err != nil {
+		if err != gorm.ErrRecordNotFound {
+			return &pb.InviteUserResponse{Code: pb.Error, Message: err.Error()}, nil
+		}
 	}
 	// 检查邀请者权限
 	inviter := dao.FindGroupMemberFull(request.GroupID, request.Inviter)
@@ -139,7 +145,7 @@ func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUse
 		return &pb.InviteUserResponse{Code: pb.Error, Message: "operation not allowed"}, nil
 	}
 	// 添加邀请记录
-	err := dao.InsertGroupInvitation(&model.GroupInvitation{
+	err = dao.InsertGroupInvitation(&model.GroupInvitation{
 		ID:             g.idGenerator.NextID(),
 		UserID:         request.UserID,
 		GroupID:        request.GroupID,
@@ -171,14 +177,15 @@ func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.Acc
 	if userID != request.UserID {
 		return &pb.AcceptInvitationResponse{Code: pb.InvalidOperation, Message: "invitation was for another user"}, nil
 	}
-	// 添加到群成员列表
-	err = dao.AddGroupMember(&model.GroupMember{
+	member := &model.GroupMember{
 		GroupID:  groupID,
 		UserID:   userID,
 		JoinTime: time.Now().UnixMilli(),
 		Status:   model.MemberStatusNormal,
 		Role:     model.MemberRoleNormal,
-	})
+	}
+	// 添加到群成员列表
+	err = dao.AddGroupMember(member)
 	if err != nil {
 		return &pb.AcceptInvitationResponse{
 			Code:    pb.Error,
@@ -186,7 +193,7 @@ func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.Acc
 		}, nil
 	}
 	// 在Redis记录群成员ID
-	err = dao.AddGroupMemberSession(userID, groupID)
+	err = dao.AddGroupMemberSession(member)
 	if err != nil {
 		return &pb.AcceptInvitationResponse{
 			Code:    pb.Error,

@@ -77,11 +77,11 @@ type Group struct {
 
 // GroupMember 群成员表
 type GroupMember struct {
-	GroupID  int64 `gorm:"column:group_id;type:int8;primaryKey"`
-	UserID   int64 `gorm:"column:user_id;type:int8;primaryKey"`
-	JoinTime int64 `gorm:"column:join_time;type:int8"`
-	Status   byte  `gorm:"column:status;type:tinyint"` // 群成员状态：正常、已邀请未加入、禁言
-	Role     byte  `gorm:"column:role;type:tinyint"`   // 群成员角色：群主、管理员、普通成员
+	GroupID  int64 `gorm:"column:group_id;type:int8;primaryKey" json:"groupID"`
+	UserID   int64 `gorm:"column:user_id;type:int8;primaryKey" json:"userID"`
+	JoinTime int64 `gorm:"column:join_time;type:int8" json:"joinTime"`
+	Status   byte  `gorm:"column:status;type:tinyint" json:"status"` // 群成员状态：正常、已邀请未加入、禁言
+	Role     byte  `gorm:"column:role;type:tinyint" json:"role"`     // 群成员角色：群主、管理员、普通成员
 }
 
 // GroupMemberFull 群成员详细信息model
