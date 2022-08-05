@@ -35,7 +35,9 @@ func (m *MessageServiceImpl) SendMessage(ctx context.Context, request *pb.SendMs
 	default:
 		return &pb.SendMsgResponse{Code: pb.Error, Message: "unknown message flag"}, nil
 	}
-
+	// 过滤敏感词
+	_, replaced := m.wordFilter.DoFilter(message.Content)
+	message.Content = replaced
 	// 序列化
 	marshal, err := proto.Marshal(message)
 	if err != nil {
@@ -47,7 +49,13 @@ func (m *MessageServiceImpl) SendMessage(ctx context.Context, request *pb.SendMs
 	if err != nil {
 		return &pb.SendMsgResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
-	return &pb.SendMsgResponse{Code: pb.Success, MessageId: message.Id, Timestamp: message.Timestamp}, nil
+	// 回复时带上替换后的消息内容
+	return &pb.SendMsgResponse{
+		Code:      pb.Success,
+		MessageId: message.Id,
+		Timestamp: message.Timestamp,
+		Content:   replaced,
+	}, nil
 }
 
 // isFriends 检查消息双方是否是好友关系

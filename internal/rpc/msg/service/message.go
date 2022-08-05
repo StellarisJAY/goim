@@ -7,6 +7,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/kafka"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
+	"github.com/stellarisJAY/goim/pkg/wordfilter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -14,6 +15,7 @@ import (
 type MessageServiceImpl struct {
 	transferProducer *kafka.Producer
 	idGenerator      *snowflake.Snowflake
+	wordFilter       wordfilter.Filter
 }
 
 func NewMessageServiceImpl() *MessageServiceImpl {
@@ -21,9 +23,13 @@ func NewMessageServiceImpl() *MessageServiceImpl {
 	if err != nil {
 		panic(err)
 	}
+	// 从配置文件读取敏感词
+	filter := wordfilter.NewTrieTreeFilter()
+	filter.Build(config.Config.SensitiveWords)
 	return &MessageServiceImpl{
 		transferProducer: transProducer,
 		idGenerator:      snowflake.NewSnowflake(config.Config.MachineID),
+		wordFilter:       filter,
 	}
 }
 
