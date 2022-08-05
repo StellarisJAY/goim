@@ -94,15 +94,21 @@ func (f *FriendServiceImpl) AcceptFriend(ctx context.Context, request *pb.Accept
 		return &pb.AcceptFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	acceptTime := time.Now().UnixMilli()
-	err = dao.InsertFriendship(&model.Friend{
+	fs1 := &model.Friend{
 		OwnerID:    application.Requester,
 		FriendID:   application.Target,
 		AcceptTime: acceptTime,
-	}, &model.Friend{
+	}
+	fs2 := &model.Friend{
 		OwnerID:    application.Target,
 		FriendID:   application.Requester,
 		AcceptTime: acceptTime,
-	})
+	}
+	// MySQL记录好友关系
+	err = dao.InsertFriendship(fs1, fs2)
+	// Redis缓存好友关系
+	_ = dao.CacheFriendship(fs1)
+	_ = dao.CacheFriendship(fs2)
 	if err != nil {
 		return &pb.AcceptFriendResponse{
 			Code:    pb.Error,
