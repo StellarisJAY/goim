@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/stellarisJAY/goim/pkg/db"
@@ -43,9 +44,13 @@ func SaveSession(userId int64, deviceId, gateway, channel string) (string, strin
 }
 
 // AddGroupMemberSession 将用户添加到Redis的群成员列表
-func AddGroupMemberSession(userID int64, groupID int64) error {
-	key := fmt.Sprintf("%s%d", keyGroupMemberSession, groupID)
-	cmd := db.DB.Redis.SAdd(context.TODO(), key, fmt.Sprintf("%x", userID))
+func AddGroupMemberSession(member *model.GroupMember) error {
+	key := fmt.Sprintf("%s%d", keyGroupMemberSession, member.GroupID)
+	marshal, err := json.Marshal(member)
+	if err != nil {
+		return err
+	}
+	cmd := db.DB.Redis.HSet(context.TODO(), key, fmt.Sprintf("%x", member.UserID), marshal)
 	return cmd.Err()
 }
 
