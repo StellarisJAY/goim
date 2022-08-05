@@ -31,6 +31,7 @@ message SendMsgResponse{
   string message = 2;
   int64 messageId = 3;
   int64 timestamp = 4;
+  string content = 5;
 }
 
 // 同步离线消息请求
