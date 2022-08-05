@@ -10,8 +10,9 @@ import (
 var Config config
 
 type config struct {
-	MachineID      int64  `yaml:"machineID"`
-	TokenSecretKey string `yaml:"tokenSecretKey"`
+	SensitiveWords []string `yaml:"sensitiveWords"`
+	MachineID      int64    `yaml:"machineID"`
+	TokenSecretKey string   `yaml:"tokenSecretKey"`
 	ApiServer      struct {
 		Port string `yaml:"port"`
 	} `yaml:"apiServer"`
