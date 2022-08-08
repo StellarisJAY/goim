@@ -9,6 +9,15 @@ enum MessageFlag {
   Group = 2;
   FriendAccepted = 11;
   GroupInvitationAccepted = 21;
+
+  // 加密消息，服务端只负责转发，不进行持久化和分析
+  EncryptedMessage = 501;
+  // 加密通信第一次握手：发起者向接收者请求开启加密通信，该消息用于验证好友关系以及让对方确认
+  EncryptMessageHandshake1 = 502;
+  // 加密通信第二次握手：接收方生成非对称钥匙对，将公钥发送给发起者
+  EncryptMessageHandshake2 = 503;
+  // 加密通信第三次握手：发起者收到后用公钥加密一个随机数回复给接收者
+  EncryptMessageHandshake3 = 504;
 }
 
 message BaseMsg {
