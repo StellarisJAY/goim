@@ -116,3 +116,8 @@ type AddFriendRequest struct {
 	Timestamp int64  `bson:"timestamp"`
 	Message   string `bson:"message"` // 验证信息
 }
+
+type SensitiveWord struct {
+	Word     string `gorm:"column:word;type:varchar(64)"`
+	Category byte   `gorm:"column:type;type:tinyint""` // 敏感词分类：不文明用语、暴恐色情赌博、广告、欺诈诱骗、政治
+}

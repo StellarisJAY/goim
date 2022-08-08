@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/gobwas/ws"
+	"github.com/stellarisJAY/goim/pkg/naming"
+	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"log"
 	"sync/atomic"
 )
@@ -120,8 +122,27 @@ func (c *Channel) Close() {
 }
 
 func (c *Channel) gracefulShutdown() {
-	_ = c.connection.Close()
-	close(c.writeChan)
+	// close channel and connection
+	defer c.connection.Close()
+	defer close(c.writeChan)
+	// RPC call kick session
+	conn, err := naming.GetClientConn("auth")
+	if err != nil {
+		return
+	}
+	client := pb.NewAuthClient(conn)
+	resp, err := client.KickSession(context.TODO(), &pb.KickSessionRequest{
+		UserID:   c.userID,
+		DeviceID: c.deviceID,
+	})
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if resp.Code != pb.Success {
+		log.Println("graceful shutdown kick session error: ", resp.Message)
+		return
+	}
 }
 
 func (c *Channel) Available() bool {

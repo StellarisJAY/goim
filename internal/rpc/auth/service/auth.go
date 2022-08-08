@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-redis/redis/v8"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
@@ -112,6 +113,19 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 		UserID:   uid,
 		DeviceID: claims.DeviceId,
 	}, nil
+}
+
+func (as *AuthServiceImpl) KickSession(ctx context.Context, request *pb.KickSessionRequest) (*pb.KickSessionResponse, error) {
+	err := dao.KickSession(request.UserID, request.DeviceID)
+	if err != nil {
+		if err != redis.Nil {
+			return &pb.KickSessionResponse{
+				Code:    pb.Error,
+				Message: err.Error(),
+			}, nil
+		}
+	}
+	return &pb.KickSessionResponse{Code: pb.Success}, nil
 }
 
 // generateToken 通过用户ID 和 设备ID 生成Token

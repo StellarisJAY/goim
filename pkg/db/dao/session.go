@@ -96,6 +96,12 @@ func GetGroupSessions(groupId int64, fromDevice string, fromUser int64) (map[int
 	return sessions, nil
 }
 
+func KickSession(userID int64, deviceID string) error {
+	key := fmt.Sprintf("%s%d", sessionPrefix, userID)
+	del := db.DB.Redis.HDel(context.TODO(), key, deviceID)
+	return del.Err()
+}
+
 func GroupMemberExists(groupID int64, userID int64) bool {
 	cmd := db.DB.Redis.SIsMember(context.TODO(), fmt.Sprintf("%s%d", keyGroupMemberSession, groupID), fmt.Sprintf("%x", userID))
 	if result, err := cmd.Result(); err != nil || !result {
