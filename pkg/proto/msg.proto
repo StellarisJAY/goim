@@ -4,9 +4,10 @@ option go_package = "./pb";
 
 // MessageFlag 消息类型定义
 enum MessageFlag {
-  From = 0;
-  To = 1;
-  Group = 2;
+  None = 0;
+  From = 1;
+  To = 2;
+  Group = 3;
   FriendAccepted = 11;
   GroupInvitationAccepted = 21;
 
