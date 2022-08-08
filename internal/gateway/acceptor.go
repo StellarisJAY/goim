@@ -24,14 +24,14 @@ const (
 type GateAcceptor struct {
 }
 
-func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContext) (string, error) {
+func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContext) websocket.AcceptorResult {
 	_ = conn.SetReadDeadline(time.Now().Add(HandshakeReadTimeout))
 	frame, err := websocket.ReadFrame(conn)
 	if err != nil {
-		return "", fmt.Errorf("read handshake frame error: %w", err)
+		return websocket.AcceptorResult{Error: fmt.Errorf("read handshake frame error: %w", err)}
 	}
 	if frame.Header.OpCode != ws.OpBinary {
-		return "", errors.New("wrong type of op code for handshake")
+		return websocket.AcceptorResult{Error: errors.New("wrong type of op code for handshake")}
 	}
 	if frame.Header.Masked {
 		ws.Cipher(frame.Payload, frame.Header.Mask, 0)
@@ -41,32 +41,39 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	request := new(pb.HandshakeRequest)
 	err = proto.Unmarshal(frame.Payload, request)
 	if err != nil {
-		return "", errors.New("wrong binary content for handshake")
+		return websocket.AcceptorResult{Error: errors.New("wrong binary content for handshake")}
 	}
 	// 生成ChannelID
 	channel := generateChannelID()
 	// 发送RPC请求，验证登录信息
-	if err := login(request, ctx, channel); err != nil {
-		return "", err
+	loginResp, err := login(request, ctx, channel)
+	if err != nil {
+		return websocket.AcceptorResult{Error: err}
 	}
-
 	response := new(pb.HandshakeResponse)
 	response.Status = pb.HandshakeStatus_AccessDenied
 	marshal, err := proto.Marshal(response)
 	if err != nil {
-		return "", err
+		return websocket.AcceptorResult{Error: err}
 	}
 	frame = ws.NewFrame(ws.OpBinary, true, marshal)
-	err = ws.WriteFrame(conn, frame)
-	return channel, err
+	if err := ws.WriteFrame(conn, frame); err != nil {
+		return websocket.AcceptorResult{Error: err}
+	}
+	return websocket.AcceptorResult{
+		UserID:    loginResp.UserID,
+		DeviceID:  loginResp.DeviceID,
+		ChannelID: channel,
+	}
+
 }
 
 // login 设备登录，设备必须通过websocket发送握手包接入聊天服务，握手时会从授权服务检查用户Token和设备信息
-func login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel string) error {
+func login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel string) (*pb.LoginResponse, error) {
 	// 连接到授权服务
 	conn, err := naming.GetClientConn("auth")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	client := pb.NewAuthClient(conn)
 	// RPC 调用进行登录
@@ -76,16 +83,16 @@ func login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel 
 		Channel: channel,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	switch response.Code {
 	case pb.Success:
-		return nil
+		return response, nil
 	case pb.Error:
 		log.Println("login error: ", response.Message)
-		return errors.New("access denied")
+		return nil, errors.New("access denied")
 	default:
-		return errors.New("access denied")
+		return nil, errors.New("access denied")
 	}
 }
 

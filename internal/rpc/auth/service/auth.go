@@ -106,8 +106,11 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 			Code: pb.AccessDenied,
 		}, nil
 	}
+	uid, _ := stringutil.HexStringToInt64(claims.UserId)
 	return &pb.LoginResponse{
-		Code: pb.Success,
+		Code:     pb.Success,
+		UserID:   uid,
+		DeviceID: claims.DeviceId,
 	}, nil
 }
 

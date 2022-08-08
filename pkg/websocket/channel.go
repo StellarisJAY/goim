@@ -21,13 +21,18 @@ type Channel struct {
 	cancel     context.CancelFunc
 	status     uint32
 	id         string
+	userID     int64
+	deviceID   string
 }
 
-func NewChannel(connection *Connection, id string) *Channel {
+func NewChannel(connection *Connection, id string, userID int64, deviceID string) *Channel {
 	c := &Channel{
 		connection: connection,
 		writeChan:  make(chan []byte, 1<<20),
 		status:     StatusNew,
+		id:         id,
+		userID:     userID,
+		deviceID:   deviceID,
 	}
 	c.closed, c.cancel = context.WithCancel(context.Background())
 	return c

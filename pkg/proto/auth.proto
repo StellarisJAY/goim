@@ -25,6 +25,8 @@ message LoginRequest {
 message LoginResponse {
   int32 code = 1;
   string message = 2;
+  int64 userID = 3;
+  string deviceID = 4;
 }
 
 message RegisterRequest {
