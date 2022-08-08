@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gobwas/ws"
 	"github.com/google/uuid"
 	"github.com/stellarisJAY/goim/pkg/naming"
@@ -27,7 +28,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	_ = conn.SetReadDeadline(time.Now().Add(HandshakeReadTimeout))
 	frame, err := websocket.ReadFrame(conn)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("read handshake frame error: %w", err)
 	}
 	if frame.Header.OpCode != ws.OpBinary {
 		return "", errors.New("wrong type of op code for handshake")
@@ -47,9 +48,17 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	// 发送RPC请求，验证登录信息
 	if err := login(request, ctx, channel); err != nil {
 		return "", err
-	} else {
-		return channel, nil
 	}
+
+	response := new(pb.HandshakeResponse)
+	response.Status = pb.HandshakeStatus_AccessDenied
+	marshal, err := proto.Marshal(response)
+	if err != nil {
+		return "", err
+	}
+	frame = ws.NewFrame(ws.OpBinary, true, marshal)
+	err = ws.WriteFrame(conn, frame)
+	return channel, err
 }
 
 // login 设备登录，设备必须通过websocket发送握手包接入聊天服务，握手时会从授权服务检查用户Token和设备信息

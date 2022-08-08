@@ -2,6 +2,15 @@ syntax = "proto3";
 package client;
 option go_package = "./pb";
 
+enum HandshakeStatus{
+  Success = 0;
+  AccessDenied = 1;
+}
+
 message HandshakeRequest{
   string token = 1;
+}
+
+message HandshakeResponse{
+  HandshakeStatus status = 1;
 }
