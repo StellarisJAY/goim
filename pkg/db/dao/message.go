@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func InsertMessage(msg *model.Message) error {
@@ -41,4 +43,43 @@ func InsertOfflineMessages(messages []*model.OfflineMessage) error {
 	}
 	_, err := collection.InsertMany(context.Background(), temp, nil)
 	return err
+}
+
+func ListOfflineMessages(userID int64, lastSeq int64) ([]*model.OfflineMessage, error) {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	// 按照seq排序
+	opts := options.Find().SetSort(bson.D{{"seq", 1}})
+	query := bson.D{
+		{"to", userID},
+		{"seq", bson.D{{"$gt", lastSeq}}},
+	}
+	result, err := database.Collection(db.CollectionOfflineMessage).Find(context.TODO(), query, opts)
+	if err != nil {
+		return nil, err
+	}
+	messages := make([]*model.OfflineMessage, 0)
+	if result.All(context.TODO(), &messages) != nil {
+		return nil, err
+	}
+	return messages, nil
+}
+
+func ListOfflineGroupMessages(userID int64, groupID int64, lastTimestamp int64) ([]*model.OfflineMessage, error) {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	// 按照seq排序
+	opts := options.Find().SetSort(bson.D{{"seq", 1}})
+	query := bson.D{
+		{"from", groupID},
+		{"to", userID},
+		{"timestamp", bson.D{{"$gt", lastTimestamp}}},
+	}
+	result, err := database.Collection(db.CollectionOfflineMessage).Find(context.TODO(), query, opts)
+	if err != nil {
+		return nil, err
+	}
+	messages := make([]*model.OfflineMessage, 0)
+	if result.All(context.TODO(), &messages) != nil {
+		return nil, err
+	}
+	return messages, nil
 }

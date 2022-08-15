@@ -3,13 +3,12 @@ package service
 import (
 	"context"
 	"github.com/stellarisJAY/goim/pkg/config"
-	"github.com/stellarisJAY/goim/pkg/db"
+	"github.com/stellarisJAY/goim/pkg/db/dao"
+	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/kafka"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
 	"github.com/stellarisJAY/goim/pkg/wordfilter"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MessageServiceImpl struct {
@@ -38,27 +37,29 @@ func NewMessageServiceImpl() *MessageServiceImpl {
 // 2. 将消息按照序列号排序
 // 3. 返回消息列表
 func (m *MessageServiceImpl) SyncOfflineMessages(ctx context.Context, request *pb.SyncMsgRequest) (*pb.SyncMsgResponse, error) {
-	database := db.DB.MongoDB.Database(db.MongoDBName)
-	// 按照seq排序
-	opts := options.Find().SetSort(bson.D{{"seq", 1}})
-	// 查询 to == userID AND seq > lastSeq
-	cursor, err := database.
-		Collection(db.CollectionOfflineMessage).
-		Find(context.TODO(), bson.D{{"to", request.UserID}, {"seq", bson.D{{"$gt", request.LastSeq}}}}, opts)
-
+	var messages []*model.OfflineMessage
+	var err error
+	if *request.Flag == int32(pb.MessageFlag_Group) {
+		messages, err = dao.ListOfflineGroupMessages(request.UserID, *request.From, request.LastSeq)
+	} else {
+		// 查询 to == userID AND seq > lastSeq
+		messages, err = dao.ListOfflineMessages(request.UserID, request.LastSeq)
+	}
 	if err != nil {
 		return &pb.SyncMsgResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
-	// Unmarshal
-	msgs := make([]*pb.BaseMsg, 0, cursor.RemainingBatchLength())
-	for cursor.Next(context.TODO()) {
-		raw := cursor.Current
-		message := new(pb.BaseMsg)
-		err := bson.Unmarshal(raw, message)
-		if err != nil {
-			continue
+	// 转换message到baseMsg
+	msgs := make([]*pb.BaseMsg, len(messages))
+	for i, message := range messages {
+		msgs[i] = &pb.BaseMsg{
+			Id:        message.ID,
+			From:      message.From,
+			To:        message.To,
+			Content:   string(message.Content),
+			Flag:      pb.MessageFlag(message.Flag),
+			Timestamp: message.Timestamp,
+			Seq:       message.Seq,
 		}
-		msgs = append(msgs, message)
 	}
 	response := &pb.SyncMsgResponse{
 		Code:     pb.Success,
