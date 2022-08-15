@@ -51,6 +51,7 @@ type Message struct {
 
 // OfflineMessage 离线消息表
 type OfflineMessage struct {
+	ID        int64  `json:"id" bson:"id"`
 	From      int64  `json:"from" bson:"from"`
 	To        int64  `json:"to" bson:"to"`
 	Content   []byte `json:"content" bson:"content"`
