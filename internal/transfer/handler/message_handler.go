@@ -49,6 +49,7 @@ func handleSingleMessage(message *pb.BaseMsg) error {
 	}
 	message.Seq = seq
 	offlineMessage := &model.OfflineMessage{
+		ID:        message.Id,
 		From:      message.From,
 		To:        message.To,
 		Content:   []byte(message.Content),
@@ -66,6 +67,7 @@ func handleSingleMessage(message *pb.BaseMsg) error {
 // handleGroupChat 群聊消息处理
 func handleGroupChat(message *pb.BaseMsg) error {
 	offlineMessage := &model.OfflineMessage{
+		ID:        message.Id,
 		From:      message.From,
 		To:        message.To,
 		Content:   []byte(message.Content),
