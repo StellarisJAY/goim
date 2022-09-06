@@ -51,6 +51,16 @@ type SyncOfflineMessageResponse struct {
 	Messages []*pb.BaseMsg `json:"messages"`
 }
 
+type SyncOfflineGroupMessageRequest struct {
+	Groups     []int64 `json:"groups" validate:"required"`
+	Timestamps []int64 `json:"timestamps" validate:"required"`
+}
+
+type SyncOfflineGroupMessageResponse struct {
+	BaseResponse
+	GroupMessages []*pb.SingleGroupMessages
+}
+
 // CreateGroupRequest 创建群聊请求
 type CreateGroupRequest struct {
 	Name        string `json:"name" validate:"required"`

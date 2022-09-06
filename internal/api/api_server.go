@@ -33,6 +33,7 @@ func Init() {
 		messageParty.Use(middleware.TokenVerifier)
 		messageParty.Done(middleware.ErrorHandler)
 		messageParty.Get("/offline/{seq:int64}", handler.SyncOfflineMessageHandler)
+		messageParty.Get("/offline/group", handler.SyncOfflineGroupMessages)
 	}
 	// 用户信息API
 	userParty := application.Party("/user")
