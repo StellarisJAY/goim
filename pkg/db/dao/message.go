@@ -13,6 +13,12 @@ func InsertMessage(msg *model.Message) error {
 	return tx.Error
 }
 
+// InsertMessages 批量插入消息
+func InsertMessages(messages []*model.Message) error {
+	tx := db.DB.MySQL.CreateInBatches(messages, len(messages))
+	return tx.Error
+}
+
 // ListMessages 获取两个用户之间一段时间内的消息列表
 func ListMessages(user1, user2 int64, startTime, endTime int64) ([]*model.Message, error) {
 	messages := make([]*model.Message, 0)
