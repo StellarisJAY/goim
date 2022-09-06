@@ -1,10 +1,15 @@
 package middleware
 
 import (
+	_context "context"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/authutil"
+	"github.com/stellarisJAY/goim/pkg/naming"
+	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/stringutil"
 	"log"
+	"time"
 )
 
 const (
@@ -18,7 +23,7 @@ var TokenVerifier = func(ctx context.Context) {
 		ctx.EndRequest()
 		return
 	}
-	userID, deviceID, valid, expired := authutil.ValidateToken(token)
+	userID, deviceID, valid, expired, expireAt := authutil.ValidateToken(token)
 	if !valid {
 		ctx.StatusCode(iris.StatusUnauthorized)
 		_, _ = ctx.WriteString("invalid token")
@@ -30,6 +35,22 @@ var TokenVerifier = func(ctx context.Context) {
 		_, _ = ctx.WriteString("token expired")
 		ctx.EndRequest()
 		return
+	}
+	// token有效时间小于等于10分钟，更新token
+	if time.Now().Sub(time.UnixMilli(expireAt)).Minutes() <= 10 {
+		authService, err := GetAuthService()
+		if err != nil {
+			log.Printf("update token for user: %s failed", userID)
+		} else {
+			uid, _ := stringutil.HexStringToInt64(userID)
+			response, err := authService.UpdateToken(_context.TODO(), &pb.UpdateTokenRequest{UserID: uid, DeviceID: deviceID})
+			if err != nil || response.Code == pb.Error {
+				log.Printf("update token for user: %s failed", userID)
+			} else {
+				recorder := ctx.Recorder()
+				recorder.Header().Set("AuthUpdateToken", token)
+			}
+		}
 	}
 	ctx.Params().Set("userID", userID)
 	ctx.Params().Set("deviceID", deviceID)
@@ -46,4 +67,14 @@ var ErrorHandler = func(ctx context.Context) {
 			_, _ = ctx.WriteString("Error Occurred: " + err.Error())
 		}
 	}
+}
+
+func GetAuthService() (pb.AuthClient, error) {
+	// 从服务发现获取 RPC 客户端连接
+	conn, err := naming.GetClientConn("auth")
+	if err != nil {
+		return nil, err
+	}
+	// RPC调用用户注册服务
+	return pb.NewAuthClient(conn), nil
 }
