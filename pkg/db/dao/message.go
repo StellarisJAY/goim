@@ -69,8 +69,7 @@ func ListOfflineGroupMessages(userID int64, groupID int64, lastTimestamp int64) 
 	// 按照seq排序
 	opts := options.Find().SetSort(bson.D{{"seq", 1}})
 	query := bson.D{
-		{"from", groupID},
-		{"to", userID},
+		{"to", groupID},
 		{"timestamp", bson.D{{"$gt", lastTimestamp}}},
 	}
 	result, err := database.Collection(db.CollectionOfflineMessage).Find(context.TODO(), query, opts)
