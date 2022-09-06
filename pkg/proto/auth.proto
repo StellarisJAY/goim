@@ -50,6 +50,17 @@ message KickSessionResponse {
   string message = 2;
 }
 
+message UpdateTokenRequest {
+  int64 userID = 1;
+  string deviceID = 2;
+}
+
+message UpdateTokenResponse {
+  int32 code = 1;
+  string message = 2;
+  string token = 3;
+}
+
 // 授权服务
 service Auth {
   // AuthorizeDevice 设备授权，客户端设备登录时会调用该接口，生成与设备ID、用户ID绑定的Token，作为后续的权限认证Token
@@ -60,4 +71,6 @@ service Auth {
   rpc Register(RegisterRequest) returns (RegisterResponse) {}
   // KickSession 踢出已经断开的session
   rpc KickSession(KickSessionRequest) returns (KickSessionResponse) {}
+  // UpdateToken 为客户端更新即将过期的token
+  rpc UpdateToken(UpdateTokenRequest) returns (UpdateTokenResponse) {}
 }

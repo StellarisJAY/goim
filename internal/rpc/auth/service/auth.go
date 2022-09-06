@@ -13,6 +13,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
+	"gorm.io/gorm"
 	"log"
 	"time"
 )
@@ -126,6 +127,25 @@ func (as *AuthServiceImpl) KickSession(ctx context.Context, request *pb.KickSess
 		}
 	}
 	return &pb.KickSessionResponse{Code: pb.Success}, nil
+}
+
+func (as *AuthServiceImpl) UpdateToken(ctx context.Context, request *pb.UpdateTokenRequest) (*pb.UpdateTokenResponse, error) {
+	_, err := dao.FindUserInfo(request.UserID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return &pb.UpdateTokenResponse{Code: pb.Error, Message: "user not available"}, nil
+		}
+		return &pb.UpdateTokenResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	// todo 检查用户状态
+	if token, err := generateToken(request.UserID, request.DeviceID); err != nil {
+		return &pb.UpdateTokenResponse{Code: pb.Error, Message: err.Error()}, nil
+	} else {
+		return &pb.UpdateTokenResponse{
+			Code:  pb.Success,
+			Token: token,
+		}, nil
+	}
 }
 
 // generateToken 通过用户ID 和 设备ID 生成Token
