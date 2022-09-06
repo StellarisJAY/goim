@@ -13,7 +13,7 @@ type Claims struct {
 	DeviceId string `json:"deviceId"`
 }
 
-func ValidateToken(token string) (userID, deviceID string, valid, expired bool) {
+func ValidateToken(token string) (userID, deviceID string, valid, expired bool, expireAt int64) {
 	claims, err := parseToken(token)
 	if err != nil {
 		valid = false
@@ -23,6 +23,7 @@ func ValidateToken(token string) (userID, deviceID string, valid, expired bool) 
 		expired = true
 		return
 	}
+	expireAt = claims.ExpiresAt
 	userID = claims.UserId
 	deviceID = claims.DeviceId
 	valid = true
