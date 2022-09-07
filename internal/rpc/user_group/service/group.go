@@ -131,7 +131,7 @@ func (g *GroupServiceImpl) ListGroupMembers(ctx context.Context, request *pb.Lis
 func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUserRequest) (*pb.InviteUserResponse, error) {
 	// 查看用户是否已经进群
 	member, err := dao.FindGroupMember(request.GroupID, request.UserID)
-	if err == nil && member != nil {
+	if err == nil && member.UserID != 0 {
 		return &pb.InviteUserResponse{Code: pb.InvalidOperation, Message: "member already in group chat"}, nil
 	}
 	if err != nil {
@@ -242,4 +242,9 @@ func (g *GroupServiceImpl) ListGroupInvitations(ctx context.Context, request *pb
 		Code:        pb.Success,
 		Invitations: groupInvitations,
 	}, nil
+}
+
+// ListGroups 查询用户已经加入的群聊信息列表
+func (g *GroupServiceImpl) ListGroups(ctx context.Context, request *pb.ListGroupsRequest) (*pb.ListGroupsResponse, error) {
+	return nil, nil
 }
