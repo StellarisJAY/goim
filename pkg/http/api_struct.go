@@ -126,3 +126,14 @@ type GetFriendInfoResponse struct {
 	BaseResponse
 	Info *pb.FriendInfo `json:"info"`
 }
+
+type SyncGroupLatestMessagesRequest struct {
+	GroupID       int64 `json:"groupID" validate:"required"`
+	Limit         int32 `json:"limit" validate:"required"`
+	LastTimestamp int64 `json:"lastTimestamp"`
+}
+
+type SyncGroupLatestMessagesResponse struct {
+	BaseResponse
+	Msgs []*pb.BaseMsg `json:"msgs"`
+}
