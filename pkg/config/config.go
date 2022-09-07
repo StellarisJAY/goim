@@ -20,6 +20,7 @@ type config struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
 		Address  string `yaml:"address"`
+		DB       string `yaml:"DB"`
 	} `yaml:"mysql"`
 	Redis struct {
 		Address      string `yaml:"address"`

@@ -9,14 +9,13 @@ import (
 	"sync"
 )
 
-const DBName = "db_goim"
-
 type MysqlDB struct {
 	sync.RWMutex
 	*gorm.DB
 }
 
 func InitMySQL() (*MysqlDB, error) {
+	DBName := config.Config.MySQL.DB
 	connect := fmt.Sprintf("%s:%s@tcp(%s)/mysql?charset=utf8", config.Config.MySQL.User, config.Config.MySQL.Password, config.Config.MySQL.Address)
 	db, err := gorm.Open(mysql.Open(connect))
 	if err != nil {
