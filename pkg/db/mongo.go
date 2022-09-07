@@ -50,8 +50,10 @@ func InitMongoDB() (*mongo.Client, error) {
 	_, err = client.Database(MongoDBName).
 		Collection(CollectionGroupInvitation).
 		Indexes().
-		CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.A{bson.D{{"userID", 1}, {"groupID", 1}}}, Options: uniqueOption})
-
+		CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{{"userID", 1}, {"groupID", 1}}, Options: uniqueOption})
+	if err != nil {
+		panic("failed to create collection: group_invitations, " + err.Error())
+	}
 	// 创建好友请求表，设置请求3天过期
 	friendOptions := options.CreateCollection().SetExpireAfterSeconds(Day * 3)
 	_ = client.Database(MongoDBName).
@@ -60,6 +62,9 @@ func InitMongoDB() (*mongo.Client, error) {
 	_, err = client.Database(MongoDBName).
 		Collection(CollectionFriendRequest).
 		Indexes().
-		CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.A{bson.D{{"requester", 1}, {"target", 1}}}, Options: uniqueOption})
+		CreateOne(context.TODO(), mongo.IndexModel{Keys: bson.D{{"requester", 1}, {"target", 1}}, Options: uniqueOption})
+	if err != nil {
+		panic("failed to create collection: friend_requests, " + err.Error())
+	}
 	return client, nil
 }
