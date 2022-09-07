@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -73,8 +74,9 @@ func ListOfflineMessages(userID int64, lastSeq int64) ([]*model.OfflineMessage, 
 func ListOfflineGroupMessages(userID int64, groupID int64, lastTimestamp int64) ([]*model.OfflineMessage, error) {
 	database := db.DB.MongoDB.Database(db.MongoDBName)
 	// 按照seq排序
-	opts := options.Find().SetSort(bson.D{{"seq", 1}})
+	opts := options.Find().SetSort(bson.D{{"timestamp", 1}})
 	query := bson.D{
+		{"Flag", pb.MessageFlag_Group},
 		{"to", groupID},
 		{"timestamp", bson.D{{"$gt", lastTimestamp}}},
 	}
@@ -83,7 +85,37 @@ func ListOfflineGroupMessages(userID int64, groupID int64, lastTimestamp int64) 
 		return nil, err
 	}
 	messages := make([]*model.OfflineMessage, 0)
-	if result.All(context.TODO(), &messages) != nil {
+	if err = result.All(context.TODO(), &messages); err != nil {
+		return nil, err
+	}
+	return messages, nil
+}
+
+// ListLatestOfflineGroupMessages 查询群聊最新的离线消息
+func ListLatestOfflineGroupMessages(groupID int64, lastTimestamp int64, limit int32) ([]*model.OfflineMessage, error) {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	// 按照timestamp 倒序
+	opts := options.Find().SetSort(bson.D{{"timestamp", -1}}).SetLimit(int64(limit))
+	var query bson.D
+	// lastTimeStamp 为 -1，从最新一条消息开始查询
+	if lastTimestamp == -1 {
+		query = bson.D{
+			{"Flag", pb.MessageFlag_Group},
+			{"to", groupID},
+		}
+	} else {
+		query = bson.D{
+			{"Flag", pb.MessageFlag_Group},
+			{"to", groupID},
+			{"timestamp", bson.D{{"$lt", lastTimestamp}}},
+		}
+	}
+	cur, err := database.Collection(db.CollectionOfflineMessage).Find(context.TODO(), query, opts)
+	if err != nil {
+		return nil, err
+	}
+	messages := make([]*model.OfflineMessage, limit)
+	if err = cur.All(context.TODO(), &messages); err != nil {
 		return nil, err
 	}
 	return messages, nil

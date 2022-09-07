@@ -81,9 +81,22 @@ message SyncGroupMsgResponse {
   repeated SingleGroupMessages groupMessages = 3;
 }
 
+message SyncGroupLatestMessagesRequest {
+  int64 groupID = 1;
+  int32 limit = 2;
+  int64 lastTimestamp = 3;
+}
+
+message SyncGroupLatestMessagesResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated BaseMsg msgs = 3;
+}
+
 service message {
   rpc SyncOfflineMessages(SyncMsgRequest) returns (SyncMsgResponse) {}
   // SendMessage 发送消息
   rpc SendMessage(SendMsgRequest) returns (SendMsgResponse) {}
   rpc SyncOfflineGroupMessages(SyncGroupMsgRequest) returns (SyncGroupMsgResponse) {}
+  rpc SyncGroupLatestMessages(SyncGroupLatestMessagesRequest) returns (SyncGroupLatestMessagesResponse) {}
 }

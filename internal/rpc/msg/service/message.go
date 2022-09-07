@@ -101,6 +101,23 @@ func (m *MessageServiceImpl) SyncOfflineGroupMessages(ctx context.Context, reque
 	}, nil
 }
 
+// SyncGroupLatestMessages 同步群聊中最近的 n 条消息
+// 1. 从离线消息表倒序查询，如果request中的timestamp为-1，则从最新一条消息开始，否则从timestamp位置开始
+// 2. 仅查询request中给出的limit条消息
+func (m *MessageServiceImpl) SyncGroupLatestMessages(ctx context.Context, request *pb.SyncGroupLatestMessagesRequest) (*pb.SyncGroupLatestMessagesResponse, error) {
+	messages, err := dao.ListLatestOfflineGroupMessages(request.GroupID, request.LastTimestamp, request.Limit)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return &pb.SyncGroupLatestMessagesResponse{Code: pb.Success}, nil
+		}
+		return &pb.SyncGroupLatestMessagesResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.SyncGroupLatestMessagesResponse{
+		Code: pb.Success,
+		Msgs: OfflineMessagesToBaseMessages(messages),
+	}, nil
+}
+
 func OfflineMessagesToBaseMessages(offlineMessages []*model.OfflineMessage) []*pb.BaseMsg {
 	msgs := make([]*pb.BaseMsg, len(offlineMessages))
 	for i, m := range offlineMessages {
