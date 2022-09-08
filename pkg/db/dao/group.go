@@ -9,6 +9,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gorm.io/gorm"
 )
 
 const (
@@ -154,4 +155,32 @@ func GetAndDeleteInvitation(invID int64) (*model.GroupInvitation, error) {
 		return nil, err
 	}
 	return invitation, nil
+}
+
+// ListUserJoinedGroupIds 列出用户加入的所有群聊的ID
+func ListUserJoinedGroupIds(userID int64) ([]int64, error) {
+	groups := make([]int64, 0)
+	result := db.DB.MySQL.
+		Select("group_id").
+		Table("group_members").
+		Where("user_id=?", userID).
+		Find(&groups)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return nil, result.Error
+	}
+	return groups, nil
+}
+
+// ListGroupInfos 列出给定ID的所有群聊基本信息
+func ListGroupInfos(groupIDs []int64) ([]*model.Group, error) {
+	groups := make([]*model.Group, 0)
+	result := db.DB.MySQL.
+		Select("*").
+		Table("groups").
+		Where("id in ?", groupIDs).
+		Find(&groups)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return nil, result.Error
+	}
+	return groups, nil
 }
