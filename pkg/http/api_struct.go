@@ -137,3 +137,8 @@ type SyncGroupLatestMessagesResponse struct {
 	BaseResponse
 	Msgs []*pb.BaseMsg `json:"msgs"`
 }
+
+type ListJoinedGroupsResponse struct {
+	BaseResponse
+	Groups []*pb.GroupInfo
+}

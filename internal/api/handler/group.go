@@ -186,6 +186,28 @@ var AcceptInvitationHandler = func(ctx context.Context) {
 	})
 }
 
+var ListJoinedGroupsHandler = func(ctx context.Context) {
+	defer func() {
+		if err, ok := recover().(error); ok {
+			handleError(ctx, err)
+		}
+	}()
+	userID, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
+	service, err := getGroupService()
+	if err != nil {
+		panic(err)
+	}
+	if resp, err := service.ListGroups(_context.TODO(), &pb.ListGroupsRequest{UserID: userID}); err != nil {
+		panic(err)
+	} else {
+		result := &http.ListJoinedGroupsResponse{
+			BaseResponse: http.BaseResponse{Code: resp.Code, Message: resp.Message},
+			Groups:       resp.Groups,
+		}
+		_, _ = ctx.JSON(result)
+	}
+}
+
 func getGroupService() (pb.GroupClient, error) {
 	conn, err := naming.GetClientConn("user_group")
 	if err != nil {

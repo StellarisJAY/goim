@@ -56,6 +56,7 @@ func Init() {
 		groupParty.Post("/{gid:int64}/invite/{uid:int64}", handler.InviteUserHandler)
 		groupParty.Get("/invitations", handler.ListInvitationsHandler)
 		groupParty.Post("/invitation/{invID:int64}", handler.AcceptInvitationHandler)
+		groupParty.Get("/list", handler.ListJoinedGroupsHandler)
 	}
 	// 好友相关API
 	friendParty := application.Party("/friend")
