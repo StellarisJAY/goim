@@ -103,6 +103,16 @@ message ListInvitationResponse{
   repeated GroupInvitation invitations = 3;
 }
 
+message ListGroupsRequest {
+  int64 userID = 1;
+}
+
+message ListGroupsResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated GroupInfo groups = 4;
+}
+
 // Group 群聊相关RPC服务
 service Group {
   // CreateGroup 创建群聊
@@ -117,4 +127,6 @@ service Group {
   rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse) {}
   // ListGroupInvitations 列出进群邀请记录
   rpc ListGroupInvitations(ListInvitationRequest) returns (ListInvitationResponse) {}
+
+  rpc ListGroups(ListGroupsRequest) returns (ListGroupsResponse) {}
 }

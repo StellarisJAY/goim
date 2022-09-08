@@ -81,15 +81,8 @@ func (g *GroupServiceImpl) GetGroupInfo(ctx context.Context, request *pb.GetGrou
 		return &pb.GetGroupInfoResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	return &pb.GetGroupInfoResponse{
-		Code: pb.Success,
-		Group: &pb.GroupInfo{
-			GroupID:      groupInfo.ID,
-			Name:         groupInfo.Name,
-			Description:  groupInfo.Description,
-			OwnerID:      groupInfo.OwnerID,
-			OwnerAccount: groupInfo.OwnerAccount,
-			CreateTime:   groupInfo.CreateTime,
-		},
+		Code:  pb.Success,
+		Group: GroupModelToDTO(groupInfo),
 	}, nil
 }
 
@@ -246,5 +239,36 @@ func (g *GroupServiceImpl) ListGroupInvitations(ctx context.Context, request *pb
 
 // ListGroups 查询用户已经加入的群聊信息列表
 func (g *GroupServiceImpl) ListGroups(ctx context.Context, request *pb.ListGroupsRequest) (*pb.ListGroupsResponse, error) {
-	return nil, nil
+	groupIds, err := dao.ListUserJoinedGroupIds(request.UserID)
+	if err != nil {
+		return &pb.ListGroupsResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	groups, err := dao.ListGroupInfos(groupIds)
+	if err != nil {
+		return &pb.ListGroupsResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.ListGroupsResponse{
+		Code:    pb.Success,
+		Message: "",
+		Groups:  GroupsToDTO(groups),
+	}, nil
+}
+
+func GroupsToDTO(groups []*model.Group) []*pb.GroupInfo {
+	infos := make([]*pb.GroupInfo, len(groups))
+	for i, g := range groups {
+		infos[i] = GroupModelToDTO(g)
+	}
+	return infos
+}
+
+func GroupModelToDTO(group *model.Group) *pb.GroupInfo {
+	return &pb.GroupInfo{
+		GroupID:      group.ID,
+		Name:         group.Name,
+		Description:  group.Description,
+		OwnerID:      group.OwnerID,
+		OwnerAccount: group.OwnerAccount,
+		CreateTime:   group.CreateTime,
+	}
 }
