@@ -13,6 +13,25 @@ import (
 
 var persistWorkers = pool.NewWorkerPool(runtime.NumCPU() * 2)
 
+var persistChannel = make(chan *model.Message, 1024)
+
+func init() {
+	persistWorkers.Submit(func() {
+		for msg := range persistChannel {
+			size := len(persistChannel)
+			messages := make([]*model.Message, size+1)
+			messages[0] = msg
+			for i := 0; i < size; i++ {
+				messages[i+1] = <-persistChannel
+			}
+			err := dao.InsertMessages(messages)
+			if err != nil {
+				log.Println("persist messages error: ", err)
+			}
+		}
+	})
+}
+
 var PersistMessageHandler = func(message *sarama.ConsumerMessage) error {
 	value := message.Value
 	msg := new(pb.BaseMsg)
