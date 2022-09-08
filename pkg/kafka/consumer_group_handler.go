@@ -26,6 +26,9 @@ func (b *baseConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSess
 	for message := range claim.Messages() {
 		if err := b.handle(message); err != nil {
 			return err
+		} else {
+			// mark message 给sarama 自动提交
+			session.MarkMessage(message, "")
 		}
 	}
 	return nil

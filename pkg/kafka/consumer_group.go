@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"github.com/Shopify/sarama"
+	"time"
 )
 
 // ConsumerGroup 消费者组，一条消息只会被相同消费者组的一个消费者消费，每个消费者负责部分partition范围的消息
@@ -18,6 +19,9 @@ func NewConsumerGroup(groupID string, addr []string, topics []string) *ConsumerG
 	// 暂时配置从最新的offset消费
 	config.Consumer.Offsets.Initial = sarama.OffsetNewest
 	config.Consumer.Return.Errors = true
+	// 设置位移自动提交，提交间隔1s
+	config.Consumer.Offsets.AutoCommit.Enable = true
+	config.Consumer.Offsets.AutoCommit.Interval = time.Second
 	cg, err := sarama.NewConsumerGroup(addr, groupID, config)
 	if err != nil {
 		panic(err.Error())
