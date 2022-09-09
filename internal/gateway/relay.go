@@ -2,10 +2,10 @@ package gateway
 
 import (
 	"context"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
 	"google.golang.org/protobuf/proto"
-	"log"
 )
 
 // PushMessage 消息下行 RPC 服务
@@ -60,7 +60,7 @@ func (s *Server) Broadcast(ctx context.Context, request *pb.BroadcastRequest) (*
 		err := channel.Push(marshal)
 		if err != nil {
 			// 推送失败，将channelID添加到失败列表
-			log.Println("failed to push message to channel: ", channel.ID())
+			log.Errorf("failed to push message to channel: %s, error: %v", channel.ID(), err)
 			fails = append(fails, channel.ID())
 		}
 	}

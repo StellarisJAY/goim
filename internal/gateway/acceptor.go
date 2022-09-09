@@ -6,17 +6,16 @@ import (
 	"fmt"
 	"github.com/gobwas/ws"
 	"github.com/google/uuid"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
 	"google.golang.org/protobuf/proto"
-	"log"
 	"net"
 	"time"
 )
 
 const (
-	HandshakeTimeout     = time.Second * 5
 	HandshakeReadTimeout = time.Second * 5
 )
 
@@ -60,6 +59,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	if err := ws.WriteFrame(conn, frame); err != nil {
 		return websocket.AcceptorResult{Error: err}
 	}
+	log.Info("Accepted websocket connection, userID: %d, Device: %d, channel:  %s", loginResp.UserID, loginResp.DeviceID, channel)
 	return websocket.AcceptorResult{
 		UserID:    loginResp.UserID,
 		DeviceID:  loginResp.DeviceID,
@@ -89,7 +89,7 @@ func login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel 
 	case pb.Success:
 		return response, nil
 	case pb.Error:
-		log.Println("login error: ", response.Message)
+		log.Errorf("login error: %s", response.Message)
 		return nil, errors.New("access denied")
 	default:
 		return nil, errors.New("access denied")
