@@ -5,7 +5,7 @@ import (
 	"github.com/stellarisJAY/goim/internal/api/handler"
 	"github.com/stellarisJAY/goim/internal/api/middleware"
 	"github.com/stellarisJAY/goim/pkg/config"
-	"log"
+	"github.com/stellarisJAY/goim/pkg/log"
 )
 
 var application *iris.Application
@@ -79,6 +79,6 @@ func Init() {
 func Start() {
 	err := application.Run(iris.Addr(":" + config.Config.ApiServer.Port))
 	if err != nil {
-		log.Println(err)
+		log.Errorf("iris http server error: %v", err)
 	}
 }
