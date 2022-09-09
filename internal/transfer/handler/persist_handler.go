@@ -4,10 +4,10 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/pool"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/protobuf/proto"
-	"log"
 	"runtime"
 )
 
@@ -26,7 +26,7 @@ func init() {
 			}
 			err := dao.InsertMessages(messages)
 			if err != nil {
-				log.Println("persist messages error: ", err)
+				log.Warn("persist messages error: ", err)
 			}
 		}
 	})
@@ -61,7 +61,7 @@ var PersistMessageHandler = func(message *sarama.ConsumerMessage) error {
 		}
 		err := dao.InsertMessage(message)
 		if err != nil {
-			log.Println("persist message error: ", err)
+			log.Warn("persist message error: ", err)
 		}
 	})
 	return nil

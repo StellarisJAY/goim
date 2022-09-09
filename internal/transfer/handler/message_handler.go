@@ -6,11 +6,11 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/pool"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/protobuf/proto"
-	"log"
 	"runtime"
 )
 
@@ -33,7 +33,7 @@ var MessageTransferHandler = func(message *sarama.ConsumerMessage) error {
 	default:
 	}
 	if err != nil {
-		log.Println(err)
+		log.Warn("handle message failed, msgID: %d, error: %v", msg.Id, err)
 	}
 	return nil
 }
@@ -93,18 +93,18 @@ func pushMessage(message *pb.BaseMsg) error {
 			// 与gateway连接
 			conn, psErr := naming.DialConnection(session.Gateway)
 			if psErr != nil {
-				log.Println("connect gateway error: ", psErr)
+				log.Warn("connect gateway error: ", psErr)
 				return
 			}
 			// RPC push message
 			client := pb.NewRelayClient(conn)
 			response, psErr := client.PushMessage(context.Background(), &pb.PushMsgRequest{Message: message, Channel: session.Channel})
 			if psErr != nil {
-				log.Println("push message RPC error: ", psErr)
+				log.Warn("push message RPC error: ", psErr)
 				return
 			}
 			if response.Base.Code != pb.Success {
-				log.Println("push message result: ", response.Base.Message)
+				log.Info("push message result: ", response.Base.Message)
 			}
 		})
 	}
@@ -134,7 +134,7 @@ func pushGroupMessage(message *pb.BaseMsg) error {
 		pushWorker.Submit(func() {
 			conn, err := naming.DialConnection(gateway)
 			if err != nil {
-				log.Println("Connect to gateway failed, gateway: ", gateway)
+				log.Warn("Connect to gateway failed, gateway: ", gateway)
 				return
 			}
 			client := pb.NewRelayClient(conn)
@@ -144,7 +144,7 @@ func pushGroupMessage(message *pb.BaseMsg) error {
 				Channels: channels,
 			})
 			if err != nil {
-				log.Printf("RPC Broadcast message failed, gateway: %s, error: %v", gateway, err)
+				log.Warn("RPC Broadcast message failed, gateway: %s, error: %v", gateway, err)
 			}
 		})
 	}

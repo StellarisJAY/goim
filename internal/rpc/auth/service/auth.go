@@ -1,7 +1,7 @@
 package service
 
 import (
-	context "context"
+	"context"
 	"crypto/md5"
 	"errors"
 	"fmt"
@@ -10,11 +10,11 @@ import (
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
 	"gorm.io/gorm"
-	"log"
 	"time"
 )
 
@@ -77,6 +77,7 @@ func (as *AuthServiceImpl) AuthorizeDevice(ctx context.Context, request *pb.Auth
 	})
 	// 生成 Token
 	if token, err := generateToken(user.ID, request.DeviceID); err != nil {
+		log.Warn("generate token for user %d failed, error: %v", user.ID, err)
 		return nil, err
 	} else {
 		return &pb.AuthResponse{
@@ -103,7 +104,7 @@ func (as *AuthServiceImpl) LoginDevice(ctx context.Context, request *pb.LoginReq
 	}
 	// 缓存设备的session信息，在 Redis中记录 userId: {deviceId: {gateway, channel}}
 	if err := newSession(request.Gateway, request.Channel, claims.UserId, claims.DeviceId); err != nil {
-		log.Println(err)
+		log.Warn("save user %d session failed: %v", claims.UserId, err)
 		return &pb.LoginResponse{
 			Code: pb.AccessDenied,
 		}, nil

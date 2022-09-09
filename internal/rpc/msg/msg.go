@@ -3,11 +3,12 @@ package msg
 import (
 	"github.com/stellarisJAY/goim/internal/rpc/msg/service"
 	"github.com/stellarisJAY/goim/pkg/config"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/grpc"
-	"log"
 	"net"
+	"time"
 )
 
 var server *grpc.Server
@@ -15,6 +16,7 @@ var server *grpc.Server
 func Init() {
 	server = grpc.NewServer()
 	pb.RegisterMessageServer(server, service.NewMessageServiceImpl())
+	startTime := time.Now()
 	// 注册聊天服务
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ServiceName: "chat",
@@ -31,6 +33,7 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
+	log.Info("message service registered, time used: %d ms", time.Now().Sub(startTime).Milliseconds())
 }
 
 func Start() {
@@ -40,6 +43,6 @@ func Start() {
 	}
 	err = server.Serve(listen)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 }

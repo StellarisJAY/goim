@@ -3,16 +3,19 @@ package user_group
 import (
 	"github.com/stellarisJAY/goim/internal/rpc/user_group/service"
 	"github.com/stellarisJAY/goim/pkg/config"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/grpc"
 	"net"
+	"time"
 )
 
 var server *grpc.Server
 
 func Init() {
 	server = grpc.NewServer()
+	startTime := time.Now()
 	pb.RegisterUserServer(server, &service.UserServiceImpl{})
 	pb.RegisterGroupServer(server, service.NewGroupServiceImpl())
 	pb.RegisterFriendServer(server, service.NewFriendServiceImpl())
@@ -24,6 +27,7 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
+	log.Info("user-group service registered, time used: %d ms", time.Now().Sub(startTime).Milliseconds())
 }
 
 func Start() {
