@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/hashicorp/consul/api"
 	"github.com/stellarisJAY/goim/pkg/config"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"google.golang.org/grpc"
-	"log"
 )
 
 var consulAddress string
@@ -27,7 +27,7 @@ func init() {
 		panic(err)
 	}
 	client = c
-	log.Println("consul service discovery initialized")
+	log.Info("consul service discovery initialized")
 }
 
 // GetClientConn 获取一个指定服务的客户端连接
@@ -51,6 +51,5 @@ func RegisterService(registration ServiceRegistration) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("service %s registered to consul", registration.ServiceName)
 	return nil
 }

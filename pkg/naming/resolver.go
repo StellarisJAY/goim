@@ -3,8 +3,8 @@ package naming
 import (
 	"errors"
 	"github.com/hashicorp/consul/api"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"google.golang.org/grpc/resolver"
-	"log"
 	"net/url"
 )
 
@@ -60,12 +60,12 @@ func (c *consulResolver) watch() {
 	for {
 		services, meta, err := client.Health().Service(c.serviceName, c.serviceName, true, &api.QueryOptions{WaitIndex: c.lastIndex})
 		if err != nil {
-			log.Println("watch healthy services error ", err)
+			log.Warn("watch healthy services error %v", err)
 			break
 		}
 		addresses := make([]resolver.Address, 0, len(services))
 		for _, service := range services {
-			log.Printf("new address of service %s online : %s", c.serviceName, service.Service.Address)
+			log.Info("new address of service %s online : %s", c.serviceName, service.Service.Address)
 			addresses = append(addresses, resolver.Address{Addr: service.Service.Address})
 		}
 		c.lastIndex = meta.LastIndex

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"github.com/gobwas/ws"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
-	"log"
 	"sync/atomic"
 )
 
@@ -54,7 +54,7 @@ func (c *Channel) Start() error {
 	go func() {
 		err := c.writeLoop()
 		if err != nil {
-			log.Println("write loop error: ", err)
+			log.Warn("write loop error: %v", err)
 		}
 		c.Close()
 	}()
@@ -84,7 +84,6 @@ func (c *Channel) ReadLoop() error {
 			ws.Cipher(frame.Payload, frame.Header.Mask, 0)
 			frame.Header.Masked = false
 		}
-		log.Printf("received frame: %v", frame)
 	}
 }
 
@@ -136,11 +135,11 @@ func (c *Channel) gracefulShutdown() {
 		DeviceID: c.deviceID,
 	})
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return
 	}
 	if resp.Code != pb.Success {
-		log.Println("graceful shutdown kick session error: ", resp.Message)
+		log.Warn("graceful shutdown kick session error: %s", resp.Message)
 		return
 	}
 }

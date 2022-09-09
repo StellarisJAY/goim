@@ -3,7 +3,7 @@ package websocket
 import (
 	"github.com/gobwas/ws"
 	"github.com/stellarisJAY/goim/pkg/config"
-	"log"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"net"
 	"net/http"
 	"sync"
@@ -43,12 +43,12 @@ func (s *Server) Start() error {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		if err != nil {
-			log.Printf("failed to upgrade HTTP to websocket for %s , error: %v", r.RemoteAddr, err)
+			log.Warn("failed to upgrade HTTP to websocket for %s , error: %v", r.RemoteAddr, err)
 			return
 		}
 		result := s.Acceptor.Accept(conn, AcceptorContext{Gateway: config.Config.RpcServer.Address})
 		if result.Error != nil {
-			log.Printf("connection refused: %v", err)
+			log.Warn("connection refused: %v", err)
 			_ = conn.Close()
 			return
 		}

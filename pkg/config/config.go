@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/ghodss/yaml"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -60,7 +60,7 @@ func init() {
 	} else {
 		cfgName = ROOT + "config/config.yaml"
 	}
-	log.Println(cfgName)
+	log.Info("loading config file: %s", cfgName)
 	bytes, err := ioutil.ReadFile(cfgName)
 	if err != nil {
 		panic(err)
