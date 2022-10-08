@@ -1,4 +1,4 @@
-package naming
+package consul
 
 import (
 	"errors"
@@ -10,13 +10,15 @@ import (
 
 const consulScheme = "consul"
 
-type consulResolver struct {
+type Resolver struct {
 	cc          resolver.ClientConn // client conn
 	serviceName string              // 服务名称
 	lastIndex   uint64              // consul 订阅的最后一个index
+	ns          *Naming
 }
 
 type consulBuilder struct {
+	ns *Naming
 }
 
 var (
@@ -24,8 +26,7 @@ var (
 )
 
 func init() {
-	// 注册 resolver 到grpc
-	resolver.Register(&consulBuilder{})
+
 }
 
 func (c *consulBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
@@ -33,13 +34,14 @@ func (c *consulBuilder) Build(target resolver.Target, cc resolver.ClientConn, op
 	if err != nil {
 		return nil, err
 	}
-	cr := &consulResolver{
+	cr := &Resolver{
 		cc:          cc,
 		lastIndex:   0,
 		serviceName: name,
+		ns:          c.ns,
 	}
 	// 订阅之前先获取当前存在的服务列表
-	services, meta, err := client.Health().Service(name, "", true, nil)
+	services, meta, err := c.ns.client.Health().Service(name, "", true, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +58,9 @@ func (c *consulBuilder) Build(target resolver.Target, cc resolver.ClientConn, op
 }
 
 // watch 订阅 consul 服务列表的变化
-func (c *consulResolver) watch() {
+func (c *Resolver) watch() {
 	for {
-		services, meta, err := client.Health().Service(c.serviceName, c.serviceName, true, &api.QueryOptions{WaitIndex: c.lastIndex})
+		services, meta, err := c.ns.client.Health().Service(c.serviceName, c.serviceName, true, &api.QueryOptions{WaitIndex: c.lastIndex})
 		if err != nil {
 			log.Warn("watch healthy services error %v", err)
 			break
@@ -78,11 +80,11 @@ func (c *consulBuilder) Scheme() string {
 	return consulScheme
 }
 
-func (c *consulResolver) ResolveNow(options resolver.ResolveNowOptions) {
+func (c *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
 
 }
 
-func (c *consulResolver) Close() {
+func (c *Resolver) Close() {
 
 }
 
