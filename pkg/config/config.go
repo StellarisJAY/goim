@@ -51,6 +51,7 @@ type config struct {
 		LookupAddresses []string `yaml:"lookupAddresses"`
 		NsqdAddress     string   `yaml:"nsqdAddress"`
 	} `yaml:"nsq"`
+	MessageQueue string `yaml:"messageQueue"`
 }
 
 const ROOT = "./"
