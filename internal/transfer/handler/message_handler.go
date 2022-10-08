@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Shopify/sarama"
+	"github.com/nsqio/go-nsq"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/log"
@@ -20,6 +21,26 @@ var pushWorker = pool.NewWorkerPool(runtime.NumCPU() * 2)
 // 1. 从消息队列消费到一条消息后，
 var MessageTransferHandler = func(message *sarama.ConsumerMessage) error {
 	value := message.Value
+	msg := new(pb.BaseMsg)
+	if err := proto.Unmarshal(value, msg); err != nil {
+		return err
+	}
+	var err error
+	switch msg.Flag {
+	case pb.MessageFlag_From:
+		err = handleSingleMessage(msg)
+	case pb.MessageFlag_Group:
+		err = handleGroupChat(msg)
+	default:
+	}
+	if err != nil {
+		log.Warn("handle message failed, msgID: %d, error: %v", msg.Id, err)
+	}
+	return nil
+}
+
+var NsqMessageHandler = func(message *nsq.Message) error {
+	value := message.Body
 	msg := new(pb.BaseMsg)
 	if err := proto.Unmarshal(value, msg); err != nil {
 		return err
