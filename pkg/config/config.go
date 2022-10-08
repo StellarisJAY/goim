@@ -1,10 +1,9 @@
 package config
 
 import (
+	"flag"
 	"github.com/ghodss/yaml"
-	"github.com/stellarisJAY/goim/pkg/log"
 	"io/ioutil"
-	"os"
 )
 
 var Config config
@@ -48,19 +47,18 @@ type config struct {
 	Message struct {
 		OfflineExpireTime int `yaml:"offlineExpireDays"`
 	} `yaml:"message"`
+	Nsq struct {
+		LookupAddresses []string `yaml:"lookupAddresses"`
+		NsqdAddress     string   `yaml:"nsqdAddress"`
+	} `yaml:"nsq"`
 }
 
 const ROOT = "./"
 
 func init() {
-	args := os.Args
 	var cfgName string
-	if len(args) > 1 {
-		cfgName = args[1]
-	} else {
-		cfgName = ROOT + "config/config.yaml"
-	}
-	log.Info("loading config file: %s", cfgName)
+	flag.StringVar(&cfgName, "config", "config/config.yaml", "config file name")
+	flag.Parse()
 	bytes, err := ioutil.ReadFile(cfgName)
 	if err != nil {
 		panic(err)
