@@ -15,14 +15,14 @@ type MysqlDB struct {
 }
 
 func InitMySQL() (*MysqlDB, error) {
-	DBName := config.Config.MySQL.DB
+	DBName := config.Config.MySQL.Database
 	connect := fmt.Sprintf("%s:%s@tcp(%s)/mysql?charset=utf8", config.Config.MySQL.User, config.Config.MySQL.Password, config.Config.MySQL.Address)
 	db, err := gorm.Open(mysql.Open(connect))
 	if err != nil {
 		return nil, fmt.Errorf("can't connect to mysql database: %w", err)
 	}
 	// 创建数据库
-	createDB := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", DBName)
+	createDB := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", DBName)
 	err = db.Exec(createDB).Error
 	if err != nil {
 		return nil, fmt.Errorf("can't create database in target mysql server: %w", err)

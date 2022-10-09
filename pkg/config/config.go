@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"github.com/ghodss/yaml"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"io/ioutil"
 )
 
@@ -19,7 +20,7 @@ type config struct {
 		User     string `yaml:"user"`
 		Password string `yaml:"password"`
 		Address  string `yaml:"address"`
-		DB       string `yaml:"DB"`
+		Database string `yaml:"database"`
 	} `yaml:"mysql"`
 	Redis struct {
 		Address      string `yaml:"address"`
@@ -51,7 +52,11 @@ type config struct {
 		LookupAddresses []string `yaml:"lookupAddresses"`
 		NsqdAddress     string   `yaml:"nsqdAddress"`
 	} `yaml:"nsq"`
+	Etcd struct {
+		Endpoints []string `yaml:"endpoints"`
+	} `yaml:"etcd"`
 	MessageQueue string `yaml:"messageQueue"`
+	Naming       string `yaml:"naming"`
 }
 
 const ROOT = "./"
@@ -68,4 +73,5 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	log.Info("config file loaded %s, %s", Config.MySQL.Database, Config.MySQL.Address)
 }
