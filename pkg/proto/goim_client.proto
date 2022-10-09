@@ -1,5 +1,5 @@
 syntax = "proto3";
-package client;
+package goim_client;
 option go_package = "./pb";
 
 enum HandshakeStatus{

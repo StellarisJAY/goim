@@ -1,5 +1,5 @@
 syntax = "proto3";
-package group;
+package goim_group;
 option go_package = "./pb";
 
 enum GroupMemberStatus {

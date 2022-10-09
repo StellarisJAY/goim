@@ -1,5 +1,5 @@
 syntax = "proto3";
-package msg;
+package goim_msg;
 option go_package = "./pb";
 
 // MessageFlag 消息类型定义

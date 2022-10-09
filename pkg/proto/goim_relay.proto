@@ -1,20 +1,20 @@
 syntax = "proto3";
-import "common.proto";
-import "msg.proto";
-package relay;
+import "goim_common.proto";
+import "goim_msg.proto";
+package goim_relay;
 option go_package = "./pb";
 
 message PushMsgRequest{
   string channel = 1;
-  msg.BaseMsg message = 2;
+  goim_msg.BaseMsg message = 2;
 }
 
 message PushMsgResponse{
-  common.BaseResponse base = 1;
+  goim_common.BaseResponse base = 1;
 }
 
 message BroadcastRequest{
-  msg.BaseMsg message = 1;
+  goim_msg.BaseMsg message = 1;
   repeated string channels = 2;
 }
 

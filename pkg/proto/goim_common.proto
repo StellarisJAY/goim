@@ -1,5 +1,5 @@
 syntax = "proto3";
-package common;
+package goim_common;
 option go_package = "./pb";
 
 message BaseResponse{

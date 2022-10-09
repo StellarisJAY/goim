@@ -1,5 +1,5 @@
 syntax = "proto3";
-package auth;
+package goim_auth;
 option go_package = "./pb";
 
 message AuthRequest {
