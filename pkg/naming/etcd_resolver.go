@@ -89,7 +89,7 @@ func (r *EtcdResolver) Close() {
 }
 
 func parseEtcdTarget(target resolver.Target) (serviceName string, err error) {
-	if target.Scheme != consulScheme {
+	if target.Scheme != etcdScheme {
 		err = fmt.Errorf("invalid url scheme")
 		return
 	}
