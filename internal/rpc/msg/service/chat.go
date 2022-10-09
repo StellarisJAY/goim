@@ -45,7 +45,7 @@ func (m *MessageServiceImpl) SendMessage(ctx context.Context, request *pb.SendMs
 	}
 	// 发送给推送服务
 	key := fmt.Sprintf("%x", message.Id)
-	_, _, err = m.transferProducer.PushMessage(key, marshal)
+	err = m.producer.PushMessage(pb.MessageTransferTopic, key, marshal)
 	if err != nil {
 		return &pb.SendMsgResponse{Code: pb.Error, Message: err.Error()}, nil
 	}

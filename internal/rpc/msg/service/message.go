@@ -2,34 +2,51 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/kafka"
+	"github.com/stellarisJAY/goim/pkg/nsq"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
 	"github.com/stellarisJAY/goim/pkg/wordfilter"
 	"go.mongodb.org/mongo-driver/mongo"
+	"strings"
 )
 
+type MessageProducer interface {
+	PushMessage(topic, key string, value []byte) error
+}
+
 type MessageServiceImpl struct {
-	transferProducer *kafka.Producer
-	idGenerator      *snowflake.Snowflake
-	wordFilter       wordfilter.Filter
+	idGenerator *snowflake.Snowflake
+	wordFilter  wordfilter.Filter
+	producer    MessageProducer
 }
 
 func NewMessageServiceImpl() *MessageServiceImpl {
-	transProducer, err := kafka.NewProducer(config.Config.Kafka.Addrs, pb.MessageTransferTopic)
-	if err != nil {
-		panic(err)
-	}
 	// 从配置文件读取敏感词
 	filter := wordfilter.NewTrieTreeFilter()
 	filter.Build(config.Config.SensitiveWords)
+	var producer MessageProducer
+	var err error
+	mq := strings.ToLower(config.Config.MessageQueue)
+	switch mq {
+	case "kafka":
+		producer, err = kafka.NewProducer(config.Config.Kafka.Addrs, pb.MessageTransferTopic)
+		if err != nil {
+			panic(fmt.Errorf("create kafka producer error %w", err))
+		}
+	case "nsq":
+		producer = nsq.NewProducer()
+	default:
+		panic(fmt.Errorf("unknown or unsupported message queue %s", mq))
+	}
 	return &MessageServiceImpl{
-		transferProducer: transProducer,
-		idGenerator:      snowflake.NewSnowflake(config.Config.MachineID),
-		wordFilter:       filter,
+		idGenerator: snowflake.NewSnowflake(config.Config.MachineID),
+		wordFilter:  filter,
+		producer:    producer,
 	}
 }
 

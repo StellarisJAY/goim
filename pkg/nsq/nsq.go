@@ -49,6 +49,10 @@ func (c *Consumer) Connect() {
 	}
 }
 
+func (pr *Producer) PushMessage(topic string, key string, value []byte) error {
+	return pr.pd.Publish(topic, value)
+}
+
 func (pr *Producer) Publish(topic string, body []byte) error {
 	return pr.pd.Publish(topic, body)
 }

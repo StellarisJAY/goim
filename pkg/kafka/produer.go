@@ -30,14 +30,15 @@ func NewProducer(addr []string, topic string) (*Producer, error) {
 	return p, nil
 }
 
-func (p *Producer) PushMessage(key string, value []byte) (partition int32, offset int64, err error) {
+func (p *Producer) PushMessage(topic string, key string, value []byte) error {
 	if len(key) == 0 || value == nil || len(value) == 0 {
-		return -1, -1, errors.New("key or value can't be empty")
+		return errors.New("key or value can't be empty")
 	}
 	message := &sarama.ProducerMessage{
 		Topic: p.Topic,
 		Key:   sarama.StringEncoder(key),
 		Value: sarama.ByteEncoder(value),
 	}
-	return p.SyncProducer.SendMessage(message)
+	_, _, err := p.SyncProducer.SendMessage(message)
+	return err
 }
