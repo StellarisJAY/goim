@@ -1,21 +1,20 @@
-package consul
+package naming
 
 import (
 	"context"
 	"github.com/hashicorp/consul/api"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
-	"github.com/stellarisJAY/goim/pkg/naming"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 )
 
-type Naming struct {
+type ConsulNaming struct {
 	consulAddress string
 	client        *api.Client
 }
 
-func (ns *Naming) Init() {
+func (ns *ConsulNaming) Init() {
 	ns.consulAddress = config.Config.Consul.Address
 	// 初始化 consul 客户端
 	conf := api.DefaultConfig()
@@ -31,18 +30,18 @@ func (ns *Naming) Init() {
 }
 
 // GetClientConn 获取一个指定服务的客户端连接
-func (ns *Naming) GetClientConn(serviceName string) (*grpc.ClientConn, error) {
+func (ns *ConsulNaming) GetClientConn(serviceName string) (*grpc.ClientConn, error) {
 	return grpc.DialContext(context.Background(), consulScheme+"://"+ns.consulAddress+"/"+serviceName, grpc.WithInsecure())
 }
 
 // DialConnection 获取指定地址的客户端连接
-func (ns *Naming) DialConnection(address string) (*grpc.ClientConn, error) {
+func (ns *ConsulNaming) DialConnection(address string) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	return conn, err
 }
 
 // RegisterService 注册服务
-func (ns *Naming) RegisterService(registration naming.ServiceRegistration) error {
+func (ns *ConsulNaming) RegisterService(registration ServiceRegistration) error {
 	err := ns.client.Agent().ServiceRegister(&api.AgentServiceRegistration{
 		Name:    registration.ServiceName,
 		Address: registration.Address,

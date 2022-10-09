@@ -3,8 +3,6 @@ package naming
 import (
 	"fmt"
 	"github.com/stellarisJAY/goim/pkg/config"
-	"github.com/stellarisJAY/goim/pkg/naming/consul"
-	"github.com/stellarisJAY/goim/pkg/naming/etcd"
 	"google.golang.org/grpc"
 	"strings"
 )
@@ -31,9 +29,9 @@ func init() {
 	n := strings.ToLower(config.Config.Naming)
 	switch n {
 	case "consul":
-		ns = &consul.Naming{}
+		ns = &ConsulNaming{}
 	case "etcd":
-		ns = &etcd.Naming{}
+		ns = &EtcdNaming{}
 	default:
 		panic(fmt.Errorf("unknown or unsupported naming system: %s", n))
 	}

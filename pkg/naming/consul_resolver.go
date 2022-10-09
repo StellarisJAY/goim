@@ -1,40 +1,35 @@
-package consul
+package naming
 
 import (
-	"errors"
+	"fmt"
 	"github.com/hashicorp/consul/api"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"google.golang.org/grpc/resolver"
-	"net/url"
 )
 
 const consulScheme = "consul"
 
-type Resolver struct {
+type ConsulResolver struct {
 	cc          resolver.ClientConn // client conn
 	serviceName string              // 服务名称
 	lastIndex   uint64              // consul 订阅的最后一个index
-	ns          *Naming
+	ns          *ConsulNaming
 }
 
 type consulBuilder struct {
-	ns *Naming
+	ns *ConsulNaming
 }
-
-var (
-	WrongSchemeError = errors.New("wrong scheme for resolver")
-)
 
 func init() {
 
 }
 
 func (c *consulBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
-	_, _, name, err := parseTarget(target.URL)
+	name, err := parseConsulTarget(target)
 	if err != nil {
 		return nil, err
 	}
-	cr := &Resolver{
+	cr := &ConsulResolver{
 		cc:          cc,
 		lastIndex:   0,
 		serviceName: name,
@@ -58,7 +53,7 @@ func (c *consulBuilder) Build(target resolver.Target, cc resolver.ClientConn, op
 }
 
 // watch 订阅 consul 服务列表的变化
-func (c *Resolver) watch() {
+func (c *ConsulResolver) watch() {
 	for {
 		services, meta, err := c.ns.client.Health().Service(c.serviceName, c.serviceName, true, &api.QueryOptions{WaitIndex: c.lastIndex})
 		if err != nil {
@@ -80,21 +75,19 @@ func (c *consulBuilder) Scheme() string {
 	return consulScheme
 }
 
-func (c *Resolver) ResolveNow(options resolver.ResolveNowOptions) {
+func (c *ConsulResolver) ResolveNow(options resolver.ResolveNowOptions) {
 
 }
 
-func (c *Resolver) Close() {
+func (c *ConsulResolver) Close() {
 
 }
 
-func parseTarget(url url.URL) (host, port, serviceName string, err error) {
-	if url.Scheme != consulScheme {
-		err = WrongSchemeError
+func parseConsulTarget(target resolver.Target) (serviceName string, err error) {
+	if target.Scheme != consulScheme {
+		err = fmt.Errorf("invalid url scheme")
 		return
 	}
-	host = url.Host
-	port = url.Port()
-	serviceName = url.Path
+	serviceName = target.Endpoint
 	return
 }
