@@ -56,3 +56,20 @@ func Delete(key string) error {
 	del := db.DB.Redis.Del(context.TODO(), key)
 	return del.Err()
 }
+
+func IsMember(key, member string, missFunc func(string, string) (bool, error)) (bool, error) {
+	if res := db.DB.Redis.SIsMember(context.TODO(), key, member); res.Err() != nil && res.Err() == redis.Nil {
+		isMember, err := missFunc(key, member)
+		if err != nil {
+			return false, err
+		}
+		if isMember {
+			db.DB.Redis.SAdd(context.TODO(), key, member)
+		}
+		return isMember, nil
+	} else if res.Err() != nil {
+		return false, res.Err()
+	} else {
+		return res.Val(), nil
+	}
+}
