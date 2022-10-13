@@ -22,7 +22,6 @@ const (
 	TokenTimeout = time.Hour * 2
 )
 
-var secretKey = []byte("secret key not defined yet")
 var userIdGenerator = snowflake.NewSnowflake(config.Config.MachineID)
 
 type Claims struct {
