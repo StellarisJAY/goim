@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/stellarisJAY/goim/pkg/config"
+	"github.com/stellarisJAY/goim/pkg/db/cache"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
@@ -30,11 +32,11 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	// 查询好友关系是否已经存在
-	friendship, err := dao.GetFriendInfo(request.UserID, request.TargetUser)
-	if err != nil && err != gorm.ErrRecordNotFound {
+	friendship, err := dao.CheckFriendship(request.UserID, request.TargetUser)
+	if err != nil {
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
-	if friendship != nil {
+	if friendship {
 		return &pb.AddFriendResponse{
 			Code:    pb.InvalidOperation,
 			Message: "already established friendship",
@@ -106,9 +108,8 @@ func (f *FriendServiceImpl) AcceptFriend(ctx context.Context, request *pb.Accept
 	}
 	// MySQL记录好友关系
 	err = dao.InsertFriendship(fs1, fs2)
-	// Redis缓存好友关系
-	_ = dao.CacheFriendship(fs1)
-	_ = dao.CacheFriendship(fs2)
+	// 删除缓存
+	_ = cache.Delete(fmt.Sprintf("%s%d", dao.KeyFriendIDList, application.Target))
 	if err != nil {
 		return &pb.AcceptFriendResponse{
 			Code:    pb.Error,
@@ -119,13 +120,14 @@ func (f *FriendServiceImpl) AcceptFriend(ctx context.Context, request *pb.Accept
 }
 
 func (f *FriendServiceImpl) ListFriends(ctx context.Context, request *pb.FriendListRequest) (*pb.FriendListResponse, error) {
-	friends, err := dao.ListFriends(request.UserID)
+	friendIDs, err := dao.ListFriendIDs(request.UserID)
 	if err != nil {
 		return &pb.FriendListResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
-	infos := make([]*pb.FriendInfo, 0, len(friends))
-	for _, friend := range friends {
-		userInfo, err := dao.FindUserInfo(friend.FriendID)
+
+	infos := make([]*pb.FriendInfo, 0, len(friendIDs))
+	for _, friend := range friendIDs {
+		userInfo, err := dao.FindUserInfo(friend)
 		if err != nil {
 			continue
 		}
@@ -133,7 +135,6 @@ func (f *FriendServiceImpl) ListFriends(ctx context.Context, request *pb.FriendL
 			UserID:       userInfo.ID,
 			Account:      userInfo.Account,
 			NickName:     userInfo.NickName,
-			AcceptTime:   friend.AcceptTime,
 			RegisterTime: userInfo.RegisterTime,
 		})
 	}
@@ -145,16 +146,15 @@ func (f *FriendServiceImpl) ListFriends(ctx context.Context, request *pb.FriendL
 }
 
 func (f *FriendServiceImpl) GetFriendInfo(ctx context.Context, request *pb.FriendInfoRequest) (*pb.FriendInfoResponse, error) {
-	// 查询好友关系是否存在
-	friend, err := dao.GetFriendInfo(request.UserID, request.FriendID)
+	friendship, err := dao.CheckFriendship(request.UserID, request.FriendID)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return &pb.FriendInfoResponse{Code: pb.NotFound, Message: "friend not found"}, nil
-		}
 		return &pb.FriendInfoResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
+	if !friendship {
+		return &pb.FriendInfoResponse{Code: pb.AccessDenied, Message: "target user is not your friend"}, nil
+	}
 	// 通过好友关系查询好友的个人信息
-	friendInfo, err := dao.FindUserInfo(friend.FriendID)
+	friendInfo, err := dao.FindUserInfo(request.FriendID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return &pb.FriendInfoResponse{Code: pb.NotFound, Message: "friend information not found"}, nil
@@ -168,7 +168,6 @@ func (f *FriendServiceImpl) GetFriendInfo(ctx context.Context, request *pb.Frien
 			UserID:       friendInfo.ID,
 			Account:      friendInfo.Account,
 			NickName:     friendInfo.NickName,
-			AcceptTime:   friend.AcceptTime,
 			RegisterTime: friendInfo.RegisterTime,
 		},
 	}, nil

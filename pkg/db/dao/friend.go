@@ -1,66 +1,54 @@
 package dao
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
-	"github.com/go-redis/redis/v8"
 	"github.com/stellarisJAY/goim/pkg/db"
+	"github.com/stellarisJAY/goim/pkg/db/cache"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/stringutil"
+	"gorm.io/gorm"
+	"strconv"
 )
 
 const (
-	KeyFriendRelation = "user_friends_"
+	KeyFriendIDList = "user_friend_ids_%d"
 )
 
-func GetFriendInfo(userID, friendID int64) (*model.Friend, error) {
-	// 缓存获取好友信息
-	marshal, err := db.DB.Redis.HGet(context.TODO(), fmt.Sprintf("%s%d", KeyFriendRelation, userID), fmt.Sprintf("%x", friendID)).Bytes()
-	if err != nil {
-		if err == redis.Nil {
-			// 缓存未命中，从MySQL读取
-			friend := &model.Friend{}
-			tx := db.DB.MySQL.
-				Table("friends").
-				Where("owner_id=? AND friend_id=?", userID, friendID).
-				Take(friend)
-			if tx.Error != nil {
-				return nil, tx.Error
-			}
-			// 写回缓存
-			_ = CacheFriendship(friend)
-			return friend, nil
+func CheckFriendship(userID int64, friendID int64) (bool, error) {
+	key := fmt.Sprintf(KeyFriendIDList, userID)
+	return cache.IsMember(key, strconv.FormatInt(friendID, 10), func(s string, s2 string) (bool, error) {
+		var friend *model.Friend
+		tx := db.DB.MySQL.Table("friends").
+			Where("owner_id=? AND friend_id=?", userID, friendID).
+			Find(friend)
+		if tx.Error != nil && tx.Error == gorm.ErrRecordNotFound {
+			return false, nil
+		} else if tx.Error != nil {
+			return false, tx.Error
+		} else {
+			return true, nil
 		}
-	}
-	friend := &model.Friend{}
-	err = json.Unmarshal(marshal, friend)
+	})
+}
+
+func ListFriendIDs(userID int64) ([]int64, error) {
+	members, err := cache.ListMembers(fmt.Sprintf(KeyFriendIDList, userID), 0, func(key string) []string {
+		var friends []int64
+		tx := db.DB.MySQL.Table("friends").
+			Where("owner_id=?", userID).
+			Select("friend_id").
+			Find(&friends)
+		if tx.Error != nil {
+			return nil
+		}
+		return stringutil.Int64ListToString(friends)
+	})
 	if err != nil {
 		return nil, err
 	}
-	return friend, nil
-}
-
-func ListFriends(userID int64) ([]*model.Friend, error) {
-	friends := make([]*model.Friend, 0)
-	tx := db.DB.MySQL.
-		Table("friends").
-		Where("owner_id=?", userID).
-		Find(&friends)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	return friends, nil
+	return stringutil.StringListToInt64(members), nil
 }
 
 func InsertFriendship(friendships ...*model.Friend) error {
 	return db.DB.MySQL.CreateInBatches(friendships[:], 2).Error
-}
-
-func CacheFriendship(friendship *model.Friend) error {
-	marshal, err := json.Marshal(friendship)
-	if err != nil {
-		return err
-	}
-	hSet := db.DB.Redis.HSet(context.TODO(), fmt.Sprintf("%s%d", KeyFriendRelation, friendship.OwnerID), fmt.Sprintf("%x", friendship.FriendID), marshal)
-	return hSet.Err()
 }
