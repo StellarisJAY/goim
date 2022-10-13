@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"time"
@@ -37,19 +38,24 @@ func ListMembers(key string, expire time.Duration, missFunc func(key string) []s
 	return result, nil
 }
 
-func Get(key string, expire time.Duration, missFunc func(key string) []byte) ([]byte, error) {
+func Get(key string, expire time.Duration, missFunc func(key string) (interface{}, error)) (interface{}, error) {
 	res := db.DB.Redis.Get(context.TODO(), key)
 	if res.Err() != nil && res.Err() == redis.Nil {
-		value := missFunc(key)
-		if value != nil && len(value) > 0 {
-			db.DB.Redis.Set(context.TODO(), key, value, 0)
+		if value, err := missFunc(key); err != nil {
+			return nil, err
+		} else if value != nil {
+			marshal, err := json.Marshal(value)
+			if err != nil {
+				return nil, err
+			}
+			db.DB.Redis.Set(context.TODO(), key, marshal, expire)
+			return value, nil
 		}
-		return value, nil
+		return nil, nil
 	} else if res.Err() != nil {
 		return nil, res.Err()
 	}
-	result, _ := res.Result()
-	return []byte(result), nil
+	return []byte(res.Val()), nil
 }
 
 func Delete(key string) error {
