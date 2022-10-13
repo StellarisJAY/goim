@@ -60,14 +60,7 @@ func (m *MessageServiceImpl) SendMessage(ctx context.Context, request *pb.SendMs
 
 // isFriends 检查消息双方是否是好友关系
 func isFriends(from, to int64) (bool, error) {
-	_, err := dao.GetFriendInfo(from, to)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
+	return dao.CheckFriendship(from, to)
 }
 
 // isGroupMember 检查用户是否是群成员，是否能够在群聊中发言

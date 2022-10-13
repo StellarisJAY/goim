@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/stellarisJAY/goim/pkg/db"
+	"github.com/stellarisJAY/goim/pkg/db/cache"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,7 +14,7 @@ import (
 )
 
 const (
-	KeyGroupInfo = "group_info_"
+	KeyGroupInfo = "group_info_%d"
 )
 
 func InsertGroup(group *model.Group) error {
@@ -22,25 +23,34 @@ func InsertGroup(group *model.Group) error {
 }
 
 func FindGroupInfo(groupID int64) (*model.Group, error) {
-	group := &model.Group{}
-	// 从Redis读取群信息
-	marshal, err := db.DB.Redis.Get(context.TODO(), fmt.Sprintf("%s%d", KeyGroupInfo, groupID)).Bytes()
-	if err != nil {
-		if err == redis.Nil {
-			// 从MySQL获取
-			tx := db.DB.MySQL.Table("groups").Where("id=?", groupID).Take(group)
-			if tx.Error != nil {
-				return nil, tx.Error
-			}
-			marshal, _ = json.Marshal(group)
-			// 写入Redis
-			_ = db.DB.Redis.Set(context.TODO(), fmt.Sprintf("%s%d", KeyGroupInfo, groupID), marshal, 0)
+	key := fmt.Sprintf(KeyUserInfo, groupID)
+	res, err := cache.Get(key, 0, func(key string) (interface{}, error) {
+		group := &model.Group{}
+		tx := db.DB.MySQL.Table("groups").Where("id=?", groupID).Take(group)
+		if tx.Error != nil && tx.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		} else if tx.Error != nil {
+			return nil, tx.Error
+		} else {
 			return group, nil
 		}
+	})
+	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(marshal, group)
-	return group, err
+	if res == nil {
+		return nil, nil
+	} else if group, ok := res.(*model.Group); ok {
+		return group, nil
+	} else if bytes, ok := res.([]byte); ok {
+		group := &model.Group{}
+		if err := json.Unmarshal(bytes, group); err != nil {
+			return nil, err
+		}
+		return group, nil
+	} else {
+		return nil, err
+	}
 }
 
 func AddGroupMember(groupMember *model.GroupMember) error {
