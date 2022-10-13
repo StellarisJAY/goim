@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/cache"
@@ -29,8 +28,8 @@ func FindUserByAccount(account string) (*model.User, bool, error) {
 
 func FindUserInfo(userID int64) (*model.UserInfo, error) {
 	key := fmt.Sprintf(KeyUserInfo, userID)
-	result, err := cache.Get(key, 0, func(key string) (interface{}, error) {
-		user := &model.User{}
+	result, err := cache.Get(key, 0, func(key string) (*model.UserInfo, error) {
+		user := &model.UserInfo{}
 		if tx := db.DB.MySQL.Where("id=?", user).Find(user); tx.Error != nil && tx.Error == gorm.ErrRecordNotFound {
 			return nil, nil
 		} else if tx.Error != nil {
@@ -42,18 +41,7 @@ func FindUserInfo(userID int64) (*model.UserInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	if result == nil {
-		return nil, nil
-	} else if user, ok := result.(*model.UserInfo); ok {
-		return user, nil
-	} else if bytes, ok := result.([]byte); ok {
-		user := &model.UserInfo{}
-		if err := json.Unmarshal(bytes, user); err != nil {
-			return nil, err
-		}
-		return user, nil
-	}
-	return nil, err
+	return result, nil
 }
 
 func UpdateUserInfo(user *model.UserInfo) error {

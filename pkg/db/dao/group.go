@@ -24,7 +24,7 @@ func InsertGroup(group *model.Group) error {
 
 func FindGroupInfo(groupID int64) (*model.Group, error) {
 	key := fmt.Sprintf(KeyUserInfo, groupID)
-	res, err := cache.Get(key, 0, func(key string) (interface{}, error) {
+	res, err := cache.Get(key, 0, func(key string) (*model.Group, error) {
 		group := &model.Group{}
 		tx := db.DB.MySQL.Table("groups").Where("id=?", groupID).Take(group)
 		if tx.Error != nil && tx.Error == gorm.ErrRecordNotFound {
@@ -38,19 +38,7 @@ func FindGroupInfo(groupID int64) (*model.Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res == nil {
-		return nil, nil
-	} else if group, ok := res.(*model.Group); ok {
-		return group, nil
-	} else if bytes, ok := res.([]byte); ok {
-		group := &model.Group{}
-		if err := json.Unmarshal(bytes, group); err != nil {
-			return nil, err
-		}
-		return group, nil
-	} else {
-		return nil, err
-	}
+	return res, nil
 }
 
 func AddGroupMember(groupMember *model.GroupMember) error {

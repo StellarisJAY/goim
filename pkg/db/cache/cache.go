@@ -38,7 +38,8 @@ func ListMembers(key string, expire time.Duration, missFunc func(key string) []s
 	return result, nil
 }
 
-func Get(key string, expire time.Duration, missFunc func(key string) (interface{}, error)) (interface{}, error) {
+// Get 从缓存获取一个数据并自动json反序列化，如果cache miss 自动通过missFunc获取，并写回缓存
+func Get[T any](key string, expire time.Duration, missFunc func(key string) (*T, error)) (*T, error) {
 	res := db.DB.Redis.Get(context.TODO(), key)
 	if res.Err() != nil && res.Err() == redis.Nil {
 		if value, err := missFunc(key); err != nil {
@@ -54,8 +55,13 @@ func Get(key string, expire time.Duration, missFunc func(key string) (interface{
 		return nil, nil
 	} else if res.Err() != nil {
 		return nil, res.Err()
+	} else {
+		v := new(T)
+		if err := json.Unmarshal([]byte(res.Val()), v); err != nil {
+			return nil, err
+		}
+		return v, nil
 	}
-	return []byte(res.Val()), nil
 }
 
 func Delete(key string) error {
