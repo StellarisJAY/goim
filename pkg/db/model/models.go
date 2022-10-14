@@ -16,12 +16,12 @@ const (
 
 // User 用户表
 type User struct {
-	ID           int64  `gorm:"column:id;primaryKey;type:int8"`
-	Account      string `gorm:"column:account;unique;type:varchar(255)"`
-	Password     string `gorm:"column:password;type:varchar(255)"`
-	NickName     string `gorm:"column:nick_name;type:varchar(64)"`
-	Salt         string `gorm:"column:salt"`
-	RegisterTime int64  `gorm:"column:register_time;type:int8"`
+	ID           int64  `gorm:"column:id;primaryKey;type:int8" json:"id"`
+	Account      string `gorm:"column:account;unique;type:varchar(255)" json:"account"`
+	Password     string `gorm:"column:password;type:varchar(255)" json:"password"`
+	NickName     string `gorm:"column:nick_name;type:varchar(64)" json:"nickName"`
+	Salt         string `gorm:"column:salt" json:"salt"`
+	RegisterTime int64  `gorm:"column:register_time;type:int8" json:"registerTime"`
 }
 
 type UserInfo struct {
