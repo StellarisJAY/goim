@@ -3,19 +3,16 @@ package dao
 import (
 	"context"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/cache"
 	"github.com/stellarisJAY/goim/pkg/db/model"
-	"github.com/stellarisJAY/goim/pkg/stringutil"
 	"gorm.io/gorm"
 	"strconv"
 )
 
 const sessionPrefix = "goim_session_"
-const keyGroupMemberSession = "goim_group_members_"
 
 // 保存session的脚本
 // 因为保存session需要检查该设备是否已经登录在某个网关，使用单个Redis命令无法做到。
@@ -46,17 +43,6 @@ func SaveSession(userId int64, deviceId, gateway, channel string) (string, strin
 	return "", "", nil
 }
 
-// AddGroupMemberSession 将用户添加到Redis的群成员列表
-func AddGroupMemberSession(member *model.GroupMember) error {
-	key := fmt.Sprintf("%s%d", keyGroupMemberSession, member.GroupID)
-	marshal, err := json.Marshal(member)
-	if err != nil {
-		return err
-	}
-	cmd := db.DB.Redis.HSet(context.TODO(), key, fmt.Sprintf("%x", member.UserID), marshal)
-	return cmd.Err()
-}
-
 // GetSessions 获取除了 fromDevice 以外 用户的所有登录设备 session 信息
 func GetSessions(userId int64, fromDevice string, fromUser int64) ([]model.Session, error) {
 	key := fmt.Sprintf("%s%d", sessionPrefix, userId)
@@ -79,14 +65,12 @@ func GetSessions(userId int64, fromDevice string, fromUser int64) ([]model.Sessi
 
 func GetGroupSessions(groupId int64, fromDevice string, fromUser int64) (map[int64][]model.Session, error) {
 	// 获取群成员IDs
-	cmd := db.DB.Redis.SMembers(context.TODO(), fmt.Sprintf("%s%d", keyGroupMemberSession, groupId))
-	result, err := cmd.Result()
+	groupMembers, err := ListGroupMemberIDs(groupId)
 	if err != nil {
 		return nil, err
 	}
 	sessions := make(map[int64][]model.Session)
-	for _, member := range result {
-		userID, err := stringutil.HexStringToInt64(member)
+	for _, userID := range groupMembers {
 		if err != nil {
 			continue
 		}
