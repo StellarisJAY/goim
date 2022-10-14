@@ -25,7 +25,7 @@ func List(key string, expire time.Duration, missFunc func(key string) []string) 
 
 func ListMembers(key string, expire time.Duration, missFunc func(key string) []string) ([]string, error) {
 	res := db.DB.Redis.SMembers(context.TODO(), key)
-	if res.Err() != nil && res.Err() == redis.Nil {
+	if (res.Err() != nil && res.Err() == redis.Nil) || len(res.Val()) == 0 {
 		values := missFunc(key)
 		if values != nil && len(values) > 0 {
 			db.DB.Redis.SAdd(context.TODO(), key, values)
@@ -70,7 +70,7 @@ func Delete(key string) error {
 }
 
 func IsMember(key, member string, missFunc func(string, string) (bool, error)) (bool, error) {
-	if res := db.DB.Redis.SIsMember(context.TODO(), key, member); res.Err() != nil && res.Err() == redis.Nil {
+	if res := db.DB.Redis.SIsMember(context.TODO(), key, member); !res.Val() || (res.Err() != nil && res.Err() == redis.Nil) {
 		isMember, err := missFunc(key, member)
 		if err != nil {
 			return false, err
