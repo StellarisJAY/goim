@@ -47,7 +47,7 @@ func FindUserInfo(userID int64) (*model.UserInfo, error) {
 	return &model.UserInfo{ID: result.ID, Account: result.Account, NickName: result.NickName, RegisterTime: result.RegisterTime}, nil
 }
 
-func UpdateUserInfo(user *model.UserInfo) error {
+func UpdateUserNickname(user *model.UserInfo) error {
 	// 更新数据库
 	tx := db.DB.MySQL.Where("id=?", user.ID).Find(&model.User{}).UpdateColumn("nick_name", user.NickName)
 	if tx.Error != nil {

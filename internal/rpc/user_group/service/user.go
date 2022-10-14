@@ -24,7 +24,7 @@ func (u *UserServiceImpl) FindUserByID(ctx context.Context, request *pb.FindUser
 }
 
 func (u *UserServiceImpl) UpdateUserInfo(ctx context.Context, request *pb.UpdateUserInfoRequest) (*pb.UpdateUserInfoResponse, error) {
-	err := dao.UpdateUserInfo(&model.UserInfo{
+	err := dao.UpdateUserNickname(&model.UserInfo{
 		ID:       request.Id,
 		NickName: request.NickName,
 	})
