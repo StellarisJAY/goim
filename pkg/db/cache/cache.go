@@ -23,10 +23,13 @@ func List(key string, expire time.Duration, missFunc func(key string) []string) 
 	return result, nil
 }
 
-func ListMembers(key string, expire time.Duration, missFunc func(key string) []string) ([]string, error) {
+func ListMembers(key string, expire time.Duration, missFunc func(key string) ([]string, error)) ([]string, error) {
 	res := db.DB.Redis.SMembers(context.TODO(), key)
 	if (res.Err() != nil && res.Err() == redis.Nil) || len(res.Val()) == 0 {
-		values := missFunc(key)
+		values, err := missFunc(key)
+		if err != nil {
+			return nil, err
+		}
 		if values != nil && len(values) > 0 {
 			db.DB.Redis.SAdd(context.TODO(), key, values)
 		}
@@ -84,4 +87,54 @@ func IsMember(key, member string, missFunc func(string, string) (bool, error)) (
 	} else {
 		return res.Val(), nil
 	}
+}
+
+func ListMembersGeneric[T any](key string, missFunc func(string) ([]*T, error)) ([]*T, error) {
+	res := db.DB.Redis.SMembers(context.TODO(), key)
+	if (res.Err() != nil && res.Err() == redis.Nil) || len(res.Val()) == 0 {
+		values, err := missFunc(key)
+		if err != nil {
+			return nil, err
+		}
+		if values != nil && len(values) > 0 {
+			serialized, err := serializeSlice(values)
+			if err != nil {
+				return nil, err
+			}
+			db.DB.Redis.SAdd(context.TODO(), key, serialized)
+		}
+		return values, nil
+	} else if res.Err() != nil {
+		return nil, res.Err()
+	}
+	if values, err := deserializeSlice(res.Val(), new(T)); err != nil {
+		return nil, err
+	} else {
+		return values, nil
+	}
+}
+
+func serializeSlice[T any](list []*T) ([]string, error) {
+	serialized := make([]string, len(list))
+	for i, obj := range list {
+		if marshal, err := json.Marshal(obj); err != nil {
+			return nil, err
+		} else {
+			serialized[i] = string(marshal)
+		}
+	}
+	return serialized, nil
+}
+
+func deserializeSlice[T any](list []string, baseType *T) ([]*T, error) {
+	deserialized := make([]*T, len(list))
+	for i, marshal := range list {
+		var t *T
+		if err := json.Unmarshal([]byte(marshal), t); err != nil {
+			return nil, err
+		} else {
+			deserialized[i] = t
+		}
+	}
+	return deserialized, nil
 }
