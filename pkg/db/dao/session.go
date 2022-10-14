@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/stellarisJAY/goim/pkg/db"
+	"github.com/stellarisJAY/goim/pkg/db/cache"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
+	"gorm.io/gorm"
+	"strconv"
 )
 
 const sessionPrefix = "goim_session_"
@@ -102,12 +105,21 @@ func KickSession(userID int64, deviceID string) error {
 	return del.Err()
 }
 
-func GroupMemberExists(groupID int64, userID int64) bool {
-	cmd := db.DB.Redis.SIsMember(context.TODO(), fmt.Sprintf("%s%d", keyGroupMemberSession, groupID), fmt.Sprintf("%x", userID))
-	if result, err := cmd.Result(); err != nil || !result {
-		return false
-	}
-	return true
+func GroupMemberExists(groupID int64, userID int64) (bool, error) {
+	return cache.IsMember(fmt.Sprintf(KeyGroupMembers, groupID), strconv.FormatInt(userID, 10), func(g string, m string) (bool, error) {
+		member := &model.GroupMember{}
+		result := db.DB.MySQL.
+			Table("group_members").
+			Where("group_id=? AND user_id=?", groupID, userID).
+			First(member)
+		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+			return false, result.Error
+		} else if result.Error != nil {
+			return false, nil
+		} else {
+			return true, nil
+		}
+	})
 }
 
 // session 编码格式：4字节gateLen + 4字节chanLen + gateway + channel

@@ -8,13 +8,16 @@ import (
 	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/cache"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/stringutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/gorm"
 )
 
 const (
-	KeyGroupInfo = "group_info_%d"
+	KeyGroupInfo    = "group_info_%d"
+	KeyJoinedGroup  = "user_joined_group_%d"
+	KeyGroupMembers = "group_members_%d"
 )
 
 func InsertGroup(group *model.Group) error {
@@ -23,10 +26,10 @@ func InsertGroup(group *model.Group) error {
 }
 
 func FindGroupInfo(groupID int64) (*model.Group, error) {
-	key := fmt.Sprintf(KeyUserInfo, groupID)
+	key := fmt.Sprintf(KeyGroupInfo, groupID)
 	res, err := cache.Get(key, 0, func(key string) (*model.Group, error) {
 		group := &model.Group{}
-		tx := db.DB.MySQL.Table("groups").Where("id=?", groupID).Take(group)
+		tx := db.DB.MySQL.Table("groups").Where("id=?", groupID).First(group)
 		if tx.Error != nil && tx.Error == gorm.ErrRecordNotFound {
 			return nil, nil
 		} else if tx.Error != nil {
@@ -83,6 +86,28 @@ func ListGroupMembers(groupID int64) ([]*model.GroupMemberFull, error) {
 		return nil, tx.Error
 	}
 	return members, nil
+}
+
+func ListGroupMemberIDs(groupID int64) ([]int64, error) {
+	memberIDs, err := cache.ListMembers(fmt.Sprintf(KeyGroupMembers, groupID), 0, func(key string) ([]string, error) {
+		var memberIDs []int64
+		result := db.DB.MySQL.
+			Select("user_id").
+			Table("group_members").
+			Where("group_id=?", groupID).
+			Find(&memberIDs)
+		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+			return nil, result.Error
+		} else if result.Error != nil {
+			return nil, nil
+		} else {
+			return stringutil.Int64ListToString(memberIDs), nil
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	return stringutil.StringListToInt64(memberIDs), nil
 }
 
 // FindGroupMember 查询群成员信息
@@ -157,16 +182,26 @@ func GetAndDeleteInvitation(invID int64) (*model.GroupInvitation, error) {
 
 // ListUserJoinedGroupIds 列出用户加入的所有群聊的ID
 func ListUserJoinedGroupIds(userID int64) ([]int64, error) {
-	groups := make([]int64, 0)
-	result := db.DB.MySQL.
-		Select("group_id").
-		Table("group_members").
-		Where("user_id=?", userID).
-		Find(&groups)
-	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-		return nil, result.Error
+	key := fmt.Sprintf(KeyJoinedGroup, userID)
+	groupIDs, err := cache.ListMembers(key, 0, func(key string) ([]string, error) {
+		var groups []int64
+		result := db.DB.MySQL.
+			Select("group_id").
+			Table("group_members").
+			Where("user_id=?", userID).
+			Find(&groups)
+		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+			return nil, result.Error
+		} else if result.Error != nil || len(groups) == 0 {
+			return nil, nil
+		} else {
+			return stringutil.Int64ListToString(groups), nil
+		}
+	})
+	if err != nil {
+		return nil, err
 	}
-	return groups, nil
+	return stringutil.StringListToInt64(groupIDs), nil
 }
 
 // ListGroupInfos 列出给定ID的所有群聊基本信息
