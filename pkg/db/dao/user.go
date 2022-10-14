@@ -28,9 +28,9 @@ func FindUserByAccount(account string) (*model.User, bool, error) {
 
 func FindUserInfo(userID int64) (*model.UserInfo, error) {
 	key := fmt.Sprintf(KeyUserInfo, userID)
-	result, err := cache.Get(key, 0, func(key string) (*model.UserInfo, error) {
-		user := &model.UserInfo{}
-		if tx := db.DB.MySQL.Where("id=?", user).Find(user); tx.Error != nil && tx.Error == gorm.ErrRecordNotFound {
+	result, err := cache.Get(key, 0, func(key string) (*model.User, error) {
+		user := &model.User{}
+		if tx := db.DB.MySQL.Model(user).Where("id=?", userID).First(user); tx.Error != nil && tx.Error == gorm.ErrRecordNotFound {
 			return nil, nil
 		} else if tx.Error != nil {
 			return nil, tx.Error
@@ -41,7 +41,10 @@ func FindUserInfo(userID int64) (*model.UserInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	if result == nil {
+		return nil, nil
+	}
+	return &model.UserInfo{ID: result.ID, Account: result.Account, NickName: result.NickName, RegisterTime: result.RegisterTime}, nil
 }
 
 func UpdateUserInfo(user *model.UserInfo) error {

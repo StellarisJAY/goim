@@ -16,11 +16,11 @@ const (
 
 func CheckFriendship(userID int64, friendID int64) (bool, error) {
 	key := fmt.Sprintf(KeyFriendIDList, userID)
-	return cache.IsMember(key, strconv.FormatInt(friendID, 10), func(s string, s2 string) (bool, error) {
-		var friend *model.Friend
+	return cache.IsMember(key, strconv.FormatInt(friendID, 10), func(key string, member string) (bool, error) {
+		friend := &model.Friend{}
 		tx := db.DB.MySQL.Table("friends").
 			Where("owner_id=? AND friend_id=?", userID, friendID).
-			Find(friend)
+			First(friend)
 		if tx.Error != nil && tx.Error == gorm.ErrRecordNotFound {
 			return false, nil
 		} else if tx.Error != nil {
