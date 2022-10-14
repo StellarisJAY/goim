@@ -5,6 +5,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"io/ioutil"
+	"testing"
 )
 
 var Config config
@@ -64,6 +65,7 @@ const ROOT = "./"
 func init() {
 	var cfgName string
 	flag.StringVar(&cfgName, "config", "config/config.yaml", "config file name")
+	testing.Init()
 	flag.Parse()
 	bytes, err := ioutil.ReadFile(cfgName)
 	if err != nil {
