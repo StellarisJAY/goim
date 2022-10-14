@@ -32,16 +32,16 @@ func CheckFriendship(userID int64, friendID int64) (bool, error) {
 }
 
 func ListFriendIDs(userID int64) ([]int64, error) {
-	members, err := cache.ListMembers(fmt.Sprintf(KeyFriendIDList, userID), 0, func(key string) []string {
+	members, err := cache.ListMembers(fmt.Sprintf(KeyFriendIDList, userID), 0, func(key string) ([]string, error) {
 		var friends []int64
 		tx := db.DB.MySQL.Table("friends").
 			Where("owner_id=?", userID).
 			Select("friend_id").
 			Find(&friends)
 		if tx.Error != nil {
-			return nil
+			return nil, tx.Error
 		}
-		return stringutil.Int64ListToString(friends)
+		return stringutil.Int64ListToString(friends), nil
 	})
 	if err != nil {
 		return nil, err
