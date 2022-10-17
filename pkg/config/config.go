@@ -56,8 +56,9 @@ type config struct {
 	Etcd struct {
 		Endpoints []string `yaml:"endpoints"`
 	} `yaml:"etcd"`
-	MessageQueue string `yaml:"messageQueue"`
-	Naming       string `yaml:"naming"`
+	MessageQueue   string `yaml:"messageQueue"`
+	Naming         string `yaml:"naming"`
+	SyncPushOnline bool   `yaml:"syncPushOnline"`
 }
 
 const ROOT = "./"
