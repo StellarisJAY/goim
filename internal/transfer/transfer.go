@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/stellarisJAY/goim/internal/transfer/handler"
 	"github.com/stellarisJAY/goim/pkg/config"
-	"github.com/stellarisJAY/goim/pkg/kafka"
-	"github.com/stellarisJAY/goim/pkg/nsq"
+	"github.com/stellarisJAY/goim/pkg/mq/kafka"
+	"github.com/stellarisJAY/goim/pkg/mq/nsq"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"strings"
 )
