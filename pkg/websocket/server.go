@@ -26,15 +26,17 @@ type AcceptorContext struct {
 }
 
 type Server struct {
-	Address  string
-	Channels sync.Map
-	Acceptor Acceptor
+	Address   string
+	Channels  sync.Map
+	Acceptor  Acceptor
+	UserConns *sync.Map
 }
 
 func NewServer(address string) *Server {
 	return &Server{
-		Address:  address,
-		Channels: sync.Map{},
+		Address:   address,
+		Channels:  sync.Map{},
+		UserConns: &sync.Map{},
 	}
 }
 
@@ -55,6 +57,7 @@ func (s *Server) Start() error {
 		connection := NewConnection(conn)
 		channel := NewChannel(connection, result.ChannelID, result.UserID, result.DeviceID)
 		s.Channels.Store(channel.id, channel)
+		s.UserConns.Store(result.UserID, channel)
 		go func() {
 			_ = channel.Start()
 		}()
