@@ -1,21 +1,47 @@
 package handler
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/nsqio/go-nsq"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/log"
+	"github.com/stellarisJAY/goim/pkg/mq"
+	"github.com/stellarisJAY/goim/pkg/mq/kafka"
+	_nsq "github.com/stellarisJAY/goim/pkg/mq/nsq"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/pool"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/protobuf/proto"
 	"runtime"
+	"strconv"
+	"strings"
 )
 
-var pushWorker = pool.NewWorkerPool(runtime.NumCPU() * 2)
+var (
+	pushWorker            = pool.NewWorkerPool(runtime.NumCPU() * 2)
+	onlineMessageProducer mq.MessageProducer
+)
+
+func init() {
+	configMQ := strings.ToLower(config.Config.MessageQueue)
+	switch configMQ {
+	case "nsq":
+		onlineMessageProducer = _nsq.NewProducer()
+	case "kafka":
+		producer, err := kafka.NewProducer(config.Config.Kafka.Addrs, pb.MessagePushTopic)
+		if err != nil {
+			panic(err)
+		}
+		onlineMessageProducer = producer
+	default:
+		panic(fmt.Errorf("unsupported message queue: %s", configMQ))
+	}
+}
 
 // MessageTransferHandler 消息中转处理器
 // 1. 从消息队列消费到一条消息后，
@@ -103,33 +129,16 @@ func handleGroupChat(message *pb.BaseMsg) error {
 	return pushGroupMessage(message)
 }
 
+// pushMessage 推送消息，分为同步和异步两种推送方式
+// 同步推送调用Gateway的RPC服务发送给用户所处的指定网关，该过程中需要查询Redis缓存寻址
+// 异步推送直接把消息发送给消息队列，由Gateway异步消费后发送给客户端
 func pushMessage(message *pb.BaseMsg) error {
-	// 查询目标用户所在的session
-	sessions, err := dao.GetSessions(message.To, message.DeviceId, message.From)
-	if err != nil {
-		return fmt.Errorf("get session info error: %w", err)
+	syncPush := config.Config.SyncPushOnline
+	if syncPush {
+		return pushOnlineSync(message)
+	} else {
+		return pushOnlineMQ(message)
 	}
-	for _, session := range sessions {
-		pushWorker.Submit(func() {
-			// 与gateway连接
-			conn, psErr := naming.DialConnection(session.Gateway)
-			if psErr != nil {
-				log.Warn("connect gateway error: ", psErr)
-				return
-			}
-			// RPC push message
-			client := pb.NewRelayClient(conn)
-			response, psErr := client.PushMessage(context.Background(), &pb.PushMsgRequest{Message: message, Channel: session.Channel})
-			if psErr != nil {
-				log.Warn("push message RPC error: ", psErr)
-				return
-			}
-			if response.Base.Code != pb.Success {
-				log.Info("push message result: ", response.Base.Message)
-			}
-		})
-	}
-	return nil
 }
 
 // pushGroupMessage 推送群聊消息，尝试向群聊中的每个用户推送消息
@@ -170,4 +179,54 @@ func pushGroupMessage(message *pb.BaseMsg) error {
 		})
 	}
 	return nil
+}
+
+// pushOnlineSync 同步发送
+// 1. 从Redis寻址，获取用户所在的网关器服务地址
+// 2. 通过RPC向网关发送消息
+func pushOnlineSync(message *pb.BaseMsg) error {
+	// 查询目标用户所在的session
+	sessions, err := dao.GetSessions(message.To, message.DeviceId, message.From)
+	if err != nil {
+		return fmt.Errorf("get session info error: %w", err)
+	}
+	for _, session := range sessions {
+		pushWorker.Submit(func() {
+			// 与gateway连接
+			conn, psErr := naming.DialConnection(session.Gateway)
+			if psErr != nil {
+				log.Warn("connect gateway error: ", psErr)
+				return
+			}
+			// RPC push message
+			client := pb.NewRelayClient(conn)
+			response, psErr := client.PushMessage(context.Background(), &pb.PushMsgRequest{Message: message, Channel: session.Channel})
+			if psErr != nil {
+				log.Warn("push message RPC error: ", psErr)
+				return
+			}
+			if response.Base.Code != pb.Success {
+				log.Info("push message result: ", response.Base.Message)
+			}
+		})
+	}
+	return nil
+}
+
+func pushOnlineMQ(message *pb.BaseMsg) error {
+	if marshal, err := proto.Marshal(message); err != nil {
+		return fmt.Errorf("push message marshal error: %w", err)
+	} else {
+		key := strconv.FormatInt(message.To, 10)
+		switch onlineMessageProducer.(type) {
+		case *_nsq.Producer:
+			body := bytes.Buffer{}
+			body.Write([]byte(key))
+			body.Write([]byte(";"))
+			body.Write(marshal)
+			return onlineMessageProducer.PushMessage(pb.MessagePushTopic, key, body.Bytes())
+		default:
+			return onlineMessageProducer.PushMessage(pb.MessagePushTopic, key, marshal)
+		}
+	}
 }

@@ -14,4 +14,6 @@ const (
 	MessageTransferTopic = "goim_message_transfer"
 	MessageTransferGroup = "goim_group_transfer"
 	MessagePersistGroup  = "goim_group_persist"
+
+	MessagePushTopic = "goim_message_push"
 )
