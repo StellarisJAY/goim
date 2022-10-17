@@ -44,13 +44,6 @@ func (c *Channel) Start() error {
 	if !atomic.CompareAndSwapUint32(&c.status, StatusNew, StatusStarted) {
 		return errors.New("can't start channel from current state")
 	}
-	//go func() {
-	//	err := c.ReadLoop()
-	//	if err != nil {
-	//		log.Println("read loop error: ", err)
-	//	}
-	//	c.Close()
-	//}()
 	go func() {
 		err := c.writeLoop()
 		if err != nil {
@@ -61,30 +54,6 @@ func (c *Channel) Start() error {
 	<-c.closed.Done()
 	c.gracefulShutdown()
 	return nil
-}
-
-func (c *Channel) ReadLoop() error {
-	for {
-		select {
-		case <-c.closed.Done():
-			return nil
-		default:
-		}
-		frame, err := c.connection.Read()
-		if err != nil {
-			return err
-		}
-		if frame.Header.OpCode == ws.OpPing {
-			err = c.connection.Send(ws.OpPong, nil)
-			if err != nil {
-				return err
-			}
-		}
-		if frame.Header.Masked {
-			ws.Cipher(frame.Payload, frame.Header.Mask, 0)
-			frame.Header.Masked = false
-		}
-	}
 }
 
 func (c *Channel) writeLoop() error {
