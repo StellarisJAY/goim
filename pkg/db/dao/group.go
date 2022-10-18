@@ -112,7 +112,7 @@ func ListGroupMemberIDs(groupID int64) ([]int64, error) {
 func FindGroupMember(groupID, userID int64) (*model.GroupMember, error) {
 	member := &model.GroupMember{}
 	result := db.DB.MySQL.
-		Table("group_member").
+		Table("group_members").
 		Where("group_id=? AND user_id=?", groupID, userID).
 		First(member)
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
