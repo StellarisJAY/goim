@@ -31,9 +31,9 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	if err != nil {
 		return websocket.AcceptorResult{Error: fmt.Errorf("read handshake frame error: %w", err)}
 	}
-	if frame.Header.OpCode != ws.OpBinary {
-		return websocket.AcceptorResult{Error: errors.New("wrong type of op code for handshake")}
-	}
+	//if frame.Header.OpCode != ws.OpBinary {
+	//	return websocket.AcceptorResult{Error: errors.New("wrong type of op code for handshake")}
+	//}
 	if frame.Header.Masked {
 		ws.Cipher(frame.Payload, frame.Header.Mask, 0)
 		frame.Header.Masked = false
@@ -41,7 +41,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	// 解码握手请求
 	request, err := unmarshalHandshakeRequest(frame.Payload)
 	if err != nil {
-		return websocket.AcceptorResult{Error: errors.New("wrong binary content for handshake")}
+		return websocket.AcceptorResult{Error: fmt.Errorf("unmarshal handshake request error: %w", err)}
 	}
 	// 生成ChannelID
 	channel := generateChannelID()

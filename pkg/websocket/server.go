@@ -50,7 +50,7 @@ func (s *Server) Start() error {
 		}
 		result := s.Acceptor.Accept(conn, AcceptorContext{Gateway: config.Config.RpcServer.Address})
 		if result.Error != nil {
-			log.Warn("connection refused: %v", err)
+			log.Warn("connection from %s failed: %v", conn.RemoteAddr().String(), result.Error)
 			_ = conn.Close()
 			return
 		}
