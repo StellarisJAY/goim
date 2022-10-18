@@ -127,7 +127,7 @@ func handleGroupChat(message *pb.BaseMsg) error {
 		return fmt.Errorf("insert offline message error %w", err)
 	}
 	// 同步模式使用RPC广播给gateway服务
-	if config.Config.SyncPushOnline {
+	if config.Config.Transfer.SyncPushOnline {
 		return pushGroupSync(message)
 	} else {
 		// 异步模式使用MQ转发消息
@@ -139,7 +139,7 @@ func handleGroupChat(message *pb.BaseMsg) error {
 // 同步推送调用Gateway的RPC服务发送给用户所处的指定网关，该过程中需要查询Redis缓存寻址
 // 异步推送直接把消息发送给消息队列，由Gateway异步消费后发送给客户端
 func pushMessage(message *pb.BaseMsg) error {
-	syncPush := config.Config.SyncPushOnline
+	syncPush := config.Config.Transfer.SyncPushOnline
 	if syncPush {
 		return pushOnlineSync(message)
 	} else {
