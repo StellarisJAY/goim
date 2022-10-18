@@ -2,10 +2,12 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gobwas/ws"
 	"github.com/google/uuid"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
@@ -37,8 +39,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 		frame.Header.Masked = false
 	}
 	// 解码握手请求
-	request := new(pb.HandshakeRequest)
-	err = proto.Unmarshal(frame.Payload, request)
+	request, err := unmarshalHandshakeRequest(frame.Payload)
 	if err != nil {
 		return websocket.AcceptorResult{Error: errors.New("wrong binary content for handshake")}
 	}
@@ -51,7 +52,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	}
 	response := new(pb.HandshakeResponse)
 	response.Status = pb.HandshakeStatus_AccessDenied
-	marshal, err := proto.Marshal(response)
+	marshal, err := marshalHandshakeResponse(response)
 	if err != nil {
 		return websocket.AcceptorResult{Error: err}
 	}
@@ -100,4 +101,26 @@ func login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel 
 func generateChannelID() string {
 	uid, _ := uuid.NewUUID()
 	return uid.String()
+}
+
+func unmarshalHandshakeRequest(payload []byte) (*pb.HandshakeRequest, error) {
+	request := &pb.HandshakeRequest{}
+	if config.Config.Gateway.UseJsonMsg {
+		if err := json.Unmarshal(payload, request); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := proto.Unmarshal(payload, request); err != nil {
+			return nil, err
+		}
+	}
+	return request, nil
+}
+
+func marshalHandshakeResponse(response *pb.HandshakeResponse) ([]byte, error) {
+	if config.Config.Gateway.UseJsonMsg {
+		return json.Marshal(response)
+	} else {
+		return proto.Marshal(response)
+	}
 }

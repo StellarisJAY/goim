@@ -2,6 +2,8 @@ package gateway
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
@@ -16,7 +18,7 @@ func (s *Server) PushMessage(ctx context.Context, request *pb.PushMsgRequest) (*
 	if ok {
 		// 将 message 编码后向channel发送
 		channel := load.(*websocket.Channel)
-		marshal, err := proto.Marshal(request.Message)
+		marshal, err := marshalMessage(request.Message)
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +53,7 @@ func (s *Server) Broadcast(ctx context.Context, request *pb.BroadcastRequest) (*
 		fails = append(fails, id)
 	}
 	// 编码消息
-	marshal, err := proto.Marshal(request.Message)
+	marshal, err := marshalMessage(request.Message)
 	if err != nil {
 		return nil, err
 	}
@@ -65,4 +67,12 @@ func (s *Server) Broadcast(ctx context.Context, request *pb.BroadcastRequest) (*
 		}
 	}
 	return &pb.BroadcastResponse{Fails: fails}, nil
+}
+
+func marshalMessage(message *pb.BaseMsg) ([]byte, error) {
+	if config.Config.Gateway.UseJsonMsg {
+		return json.Marshal(message)
+	} else {
+		return proto.Marshal(message)
+	}
 }

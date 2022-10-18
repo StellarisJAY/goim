@@ -2,10 +2,14 @@ package gateway
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/nsqio/go-nsq"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
+	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
+	"google.golang.org/protobuf/proto"
 	"strconv"
 )
 
@@ -25,6 +29,12 @@ func (s *Server) HandleNSQ(message *nsq.Message) error {
 			return nil
 		}
 		payload := buffer.Bytes()
+		if config.Config.Gateway.UseJsonMsg {
+			payload, err = protoMessageToJsonMessage(payload)
+			if err != nil {
+				return fmt.Errorf("can't transfer protobuf message to json: %w", err)
+			}
+		}
 		log.Debug("message to user %d, content-length: %d", userID, len(payload))
 		channel := value.(*websocket.Channel)
 		if err := channel.Push(payload); err != nil {
@@ -32,4 +42,12 @@ func (s *Server) HandleNSQ(message *nsq.Message) error {
 		}
 		return nil
 	}
+}
+
+func protoMessageToJsonMessage(payload []byte) ([]byte, error) {
+	message := &pb.BaseMsg{}
+	if err := proto.Unmarshal(payload, message); err != nil {
+		return nil, err
+	}
+	return json.Marshal(message)
 }

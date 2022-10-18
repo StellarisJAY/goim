@@ -56,12 +56,15 @@ type config struct {
 	Etcd struct {
 		Endpoints []string `yaml:"endpoints"`
 	} `yaml:"etcd"`
-	MessageQueue   string `yaml:"messageQueue"`
-	Naming         string `yaml:"naming"`
-	SyncPushOnline bool   `yaml:"syncPushOnline"`
+	MessageQueue string `yaml:"messageQueue"`
+	Naming       string `yaml:"naming"`
+	Transfer     struct {
+		SyncPushOnline bool `yaml:"syncPushOnline"`
+	} `yaml:"transfer"`
+	Gateway struct {
+		UseJsonMsg bool `yaml:"useJsonMsg"`
+	} `yaml:"gateway"`
 }
-
-const ROOT = "./"
 
 func init() {
 	var cfgName string
