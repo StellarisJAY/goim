@@ -108,6 +108,28 @@ func ListGroupMemberIDs(groupID int64) ([]int64, error) {
 	return stringutil.StringListToInt64(memberIDs), nil
 }
 
+func ListStringGroupMemberIDs(groupID int64) ([]string, error) {
+	memberIDs, err := cache.ListMembers(fmt.Sprintf(KeyGroupMembers, groupID), 0, func(key string) ([]string, error) {
+		var memberIDs []int64
+		result := db.DB.MySQL.
+			Select("user_id").
+			Table("group_members").
+			Where("group_id=?", groupID).
+			Find(&memberIDs)
+		if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+			return nil, result.Error
+		} else if result.Error != nil {
+			return nil, nil
+		} else {
+			return stringutil.Int64ListToString(memberIDs), nil
+		}
+	})
+	if err != nil {
+		return nil, err
+	}
+	return memberIDs, nil
+}
+
 // FindGroupMember 查询群成员信息
 func FindGroupMember(groupID, userID int64) (*model.GroupMember, error) {
 	member := &model.GroupMember{}

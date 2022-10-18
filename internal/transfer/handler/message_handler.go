@@ -126,7 +126,13 @@ func handleGroupChat(message *pb.BaseMsg) error {
 	if err != nil {
 		return fmt.Errorf("insert offline message error %w", err)
 	}
-	return pushGroupMessage(message)
+	// 同步模式使用RPC广播给gateway服务
+	if config.Config.SyncPushOnline {
+		return pushGroupSync(message)
+	} else {
+		// 异步模式使用MQ转发消息
+		return pushGroupMQ(message)
+	}
 }
 
 // pushMessage 推送消息，分为同步和异步两种推送方式
@@ -141,8 +147,8 @@ func pushMessage(message *pb.BaseMsg) error {
 	}
 }
 
-// pushGroupMessage 推送群聊消息，尝试向群聊中的每个用户推送消息
-func pushGroupMessage(message *pb.BaseMsg) error {
+// pushGroupSync 推送群聊消息，尝试向群聊中的每个用户推送消息
+func pushGroupSync(message *pb.BaseMsg) error {
 	sessions, err := dao.GetGroupSessions(message.To, message.DeviceId, message.From)
 	if err != nil {
 		return fmt.Errorf("get group session error: %w", err)
@@ -214,12 +220,32 @@ func pushOnlineSync(message *pb.BaseMsg) error {
 }
 
 func pushOnlineMQ(message *pb.BaseMsg) error {
+	key := strconv.FormatInt(message.To, 10)
+	return pushToMQ(message, key)
+}
+
+func pushGroupMQ(message *pb.BaseMsg) error {
+	groupID := message.To
+	groupMembers, err := dao.ListStringGroupMemberIDs(groupID)
+	if err != nil {
+		return err
+	}
+	for _, memberID := range groupMembers {
+		if err := pushToMQ(message, memberID); err != nil {
+			log.Warn("failed to push mq group: %d member: %s, error: %w", groupID, memberID, err)
+		}
+	}
+	return nil
+}
+
+// pushToMQ 消息推送到消息队列
+func pushToMQ(message *pb.BaseMsg, key string) error {
 	if marshal, err := proto.Marshal(message); err != nil {
 		return fmt.Errorf("push message marshal error: %w", err)
 	} else {
-		key := strconv.FormatInt(message.To, 10)
 		switch onlineMessageProducer.(type) {
 		case *_nsq.Producer:
+			// 由于NSQ消息队列没有消息key，所以需要在消息体中手动插入key
 			body := bytes.Buffer{}
 			body.Write([]byte(key))
 			body.Write([]byte(";"))
