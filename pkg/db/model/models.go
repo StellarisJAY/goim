@@ -94,7 +94,7 @@ type GroupMemberFull struct {
 
 // GroupInvitation 进群邀请记录，仅在MongoDB保存三天
 type GroupInvitation struct {
-	ID             int64  `bson:"id" json:"id""`
+	ID             int64  `bson:"id" json:"id"`
 	UserID         int64  `bson:"userID" json:"userID"`
 	GroupID        int64  `bson:"groupID" json:"groupID"`
 	Timestamp      int64  `bson:"timestamp" json:"timestamp"`
@@ -120,5 +120,5 @@ type AddFriendRequest struct {
 
 type SensitiveWord struct {
 	Word     string `gorm:"column:word;type:varchar(64)"`
-	Category byte   `gorm:"column:type;type:tinyint""` // 敏感词分类：不文明用语、暴恐色情赌博、广告、欺诈诱骗、政治
+	Category byte   `gorm:"column:type;type:tinyint"` // 敏感词分类：不文明用语、暴恐色情赌博、广告、欺诈诱骗、政治
 }
