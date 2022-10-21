@@ -154,7 +154,7 @@ func pushMessage(message *pb.BaseMsg) error {
 
 // pushGroupSync 推送群聊消息，尝试向群聊中的每个用户推送消息
 func pushGroupSync(message *pb.BaseMsg) error {
-	sessions, err := dao.GetGroupSessions(message.To, message.DeviceId, message.From)
+	sessions, err := dao.BatchGetGroupSessions(message.To, message.DeviceId, message.From)
 	if err != nil {
 		return fmt.Errorf("get group session error: %w", err)
 	}
