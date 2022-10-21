@@ -18,7 +18,7 @@ type Consumer struct {
 func NewProducer() *Producer {
 	nsqdAddr := config.Config.Nsq.NsqdAddress
 	nsqConfig := nsq.NewConfig()
-	producer, err := nsq.NewProducer("127.0.0.1:4150", nsqConfig)
+	producer, err := nsq.NewProducer(nsqdAddr, nsqConfig)
 	if err != nil {
 		panic(fmt.Errorf("create nsq producer error, %w", err))
 	}
