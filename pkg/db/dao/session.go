@@ -23,6 +23,16 @@ var saveSessionScript = `
 	return old
 `
 
+// 查询全部群成员所在网关服务器
+var loadGroupMemberSessionsScript = `
+	local sessions = {};
+	for i = 1, #KEYS do
+		local sess = redis.call('hgetall', KEYS[i]);
+		table.insert(sessions, sess);
+	end;
+	return sessions;
+`
+
 // SaveSession 保存某个用户的某台设备的登录信息
 // 如果查询到该设备已经存在登录信息，则需要返回原来所在的网关和channel
 func SaveSession(userId int64, deviceId, gateway, channel string) (string, string, error) {
@@ -74,6 +84,7 @@ func GetGroupSessions(groupId int64, fromDevice string, fromUser int64) (map[int
 		if err != nil {
 			continue
 		}
+		//todo 优化群聊成员session获取，当前方式redis请求次数过多
 		session, err := GetSessions(userID, fromDevice, fromUser)
 		if err != nil {
 			continue
@@ -81,6 +92,41 @@ func GetGroupSessions(groupId int64, fromDevice string, fromUser int64) (map[int
 		sessions[userID] = session
 	}
 	return sessions, nil
+}
+
+func BatchGetGroupSessions(groupID int64, fromDevice string, fromUser int64) (map[int64][]model.Session, error) {
+	groupMembers, err := ListGroupMemberIDs(groupID)
+	if err != nil {
+		return nil, err
+	}
+	keys := make([]string, len(groupMembers))
+	for i, id := range groupMembers {
+		keys[i] = fmt.Sprintf("%s%d", sessionPrefix, id)
+	}
+	result := db.DB.Redis.Eval(context.TODO(), loadGroupMemberSessionsScript, keys, nil)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+	memberSessions, err := result.Slice()
+	if err != nil {
+		return nil, err
+	}
+	sessionMap := make(map[int64][]model.Session)
+	for j, s := range memberSessions {
+		sessions := s.([]interface{})
+		var deviceSessions []model.Session
+		n := len(sessions)
+		for i := 0; i < n; {
+			if i+1 >= n {
+				break
+			}
+			gateway, channel := decodeSession([]byte(sessions[i+1].(string)))
+			deviceSessions = append(deviceSessions, model.Session{Gateway: gateway, Channel: channel})
+			i += 2
+		}
+		sessionMap[groupMembers[j]] = deviceSessions
+	}
+	return sessionMap, nil
 }
 
 func KickSession(userID int64, deviceID string) error {
