@@ -62,7 +62,8 @@ type config struct {
 		SyncPushOnline bool `yaml:"syncPushOnline"`
 	} `yaml:"transfer"`
 	Gateway struct {
-		UseJsonMsg bool `yaml:"useJsonMsg"`
+		UseJsonMsg    bool   `yaml:"useJsonMsg"`
+		ConsumerGroup string `yaml:"consumerGroup"`
 	} `yaml:"gateway"`
 }
 

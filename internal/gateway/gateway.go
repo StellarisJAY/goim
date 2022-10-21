@@ -1,6 +1,9 @@
 package gateway
 
 import (
+	"context"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/mq/kafka"
@@ -37,11 +40,21 @@ func (s *Server) Init() {
 	s.wsServer = websocket.NewServer(config.Config.WebsocketServer.Address)
 	s.wsServer.Acceptor = &GateAcceptor{}
 	useMQ := strings.ToLower(config.Config.MessageQueue)
+	group := config.Config.Gateway.ConsumerGroup
+	if group == "" {
+		id, err := uuid.NewUUID()
+		if err != nil {
+			panic(fmt.Errorf("auto generate gateway uuid failed error %w", err))
+		}
+		group = id.String()
+	}
 	switch useMQ {
 	case "kafka":
-
+		s.kafkaCG = kafka.NewConsumerGroup(group, config.Config.Kafka.Addrs, []string{pb.MessagePushTopic})
+		s.kafkaCG.Start(context.TODO(), s.HandleKafka)
 	case "nsq":
-		s.nsqConsumer = nsq.NewConsumer(pb.MessagePushTopic, "gateway", s.HandleNSQ)
+		//todo gateway 单独的channel
+		s.nsqConsumer = nsq.NewConsumer(pb.MessagePushTopic, group, s.HandleNSQ)
 		s.nsqConsumer.Connect()
 	}
 	log.Info("Gateway service registered, time used: %d ms", time.Now().UnixMilli()-startTime)
