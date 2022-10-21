@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/nsqio/go-nsq"
+	"github.com/panjf2000/ants/v2"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
@@ -14,7 +15,6 @@ import (
 	"github.com/stellarisJAY/goim/pkg/mq/kafka"
 	_nsq "github.com/stellarisJAY/goim/pkg/mq/nsq"
 	"github.com/stellarisJAY/goim/pkg/naming"
-	"github.com/stellarisJAY/goim/pkg/pool"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/protobuf/proto"
 	"runtime"
@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	pushWorker            = pool.NewWorkerPool(runtime.NumCPU() * 2)
+	pushWorkerPool        *ants.Pool
 	onlineMessageProducer mq.MessageProducer
 )
 
@@ -40,6 +40,11 @@ func init() {
 		onlineMessageProducer = producer
 	default:
 		panic(fmt.Errorf("unsupported message queue: %s", configMQ))
+	}
+	if wp, err := ants.NewPool(runtime.NumCPU()*2, nil); err != nil {
+		panic(fmt.Errorf("error occurred when creating push worker: %w", err))
+	} else {
+		pushWorkerPool = wp
 	}
 }
 
@@ -167,24 +172,47 @@ func pushGroupSync(message *pb.BaseMsg) error {
 	}
 	// 向每个网关推送消息
 	for gateway, channels := range gates {
-		pushWorker.Submit(func() {
-			conn, err := naming.DialConnection(gateway)
-			if err != nil {
-				log.Warn("Connect to gateway failed, gateway: ", gateway)
-				return
-			}
-			client := pb.NewRelayClient(conn)
-			// 向网关服务发送广播消息请求
-			_, err = client.Broadcast(context.TODO(), &pb.BroadcastRequest{
-				Message:  message,
-				Channels: channels,
-			})
-			if err != nil {
-				log.Warn("RPC Broadcast message failed, gateway: %s, error: %v", gateway, err)
-			}
+		_ = pushWorkerPool.Submit(func() {
+			groupPushTask(gateway, channels, message)
 		})
 	}
 	return nil
+}
+
+func groupPushTask(gateway string, channels []string, message *pb.BaseMsg) {
+	conn, err := naming.DialConnection(gateway)
+	if err != nil {
+		log.Warn("Connect to gateway failed, gateway: ", gateway)
+		return
+	}
+	client := pb.NewRelayClient(conn)
+	// 向网关服务发送广播消息请求
+	_, err = client.Broadcast(context.TODO(), &pb.BroadcastRequest{
+		Message:  message,
+		Channels: channels,
+	})
+	if err != nil {
+		log.Warn("RPC Broadcast message failed, gateway: %s, error: %v", gateway, err)
+	}
+}
+
+func syncPushTask(session model.Session, message *pb.BaseMsg) {
+	// 与gateway连接
+	conn, psErr := naming.DialConnection(session.Gateway)
+	if psErr != nil {
+		log.Warn("connect gateway error: ", psErr)
+		return
+	}
+	// RPC push message
+	client := pb.NewRelayClient(conn)
+	response, psErr := client.PushMessage(context.Background(), &pb.PushMsgRequest{Message: message, Channel: session.Channel})
+	if psErr != nil {
+		log.Warn("push message RPC error: ", psErr)
+		return
+	}
+	if response.Base.Code != pb.Success {
+		log.Info("push message result: ", response.Base.Message)
+	}
 }
 
 // pushOnlineSync 同步发送
@@ -197,23 +225,8 @@ func pushOnlineSync(message *pb.BaseMsg) error {
 		return fmt.Errorf("get session info error: %w", err)
 	}
 	for _, session := range sessions {
-		pushWorker.Submit(func() {
-			// 与gateway连接
-			conn, psErr := naming.DialConnection(session.Gateway)
-			if psErr != nil {
-				log.Warn("connect gateway error: ", psErr)
-				return
-			}
-			// RPC push message
-			client := pb.NewRelayClient(conn)
-			response, psErr := client.PushMessage(context.Background(), &pb.PushMsgRequest{Message: message, Channel: session.Channel})
-			if psErr != nil {
-				log.Warn("push message RPC error: ", psErr)
-				return
-			}
-			if response.Base.Code != pb.Success {
-				log.Info("push message result: ", response.Base.Message)
-			}
+		_ = pushWorkerPool.Submit(func() {
+			syncPushTask(session, message)
 		})
 	}
 	return nil
