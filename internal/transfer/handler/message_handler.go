@@ -243,16 +243,22 @@ func pushGroupMQ(message *pb.BaseMsg) error {
 	if err != nil {
 		return err
 	}
-	for _, memberID := range groupMembers {
-		if err := pushToMQ(message, memberID); err != nil {
-			log.Warn("failed to push mq group: %d member: %s, error: %w", groupID, memberID, err)
-		}
+	mqMsg := messageToMqGroupMessage(message)
+	mqMsg.GroupMembers = groupMembers
+	err = pushToMQ(mqMsg, "group")
+	if err != nil {
+		log.Warn("failed to push mq group: %d, error: %w", groupID, err)
 	}
+	//for _, memberID := range groupMembers {
+	//	if err := pushToMQ(message, memberID); err != nil {
+	//		log.Warn("failed to push mq group: %d member: %s, error: %w", groupID, memberID, err)
+	//	}
+	//}
 	return nil
 }
 
 // pushToMQ 消息推送到消息队列
-func pushToMQ(message *pb.BaseMsg, key string) error {
+func pushToMQ(message proto.Message, key string) error {
 	if marshal, err := proto.Marshal(message); err != nil {
 		return fmt.Errorf("push message marshal error: %w", err)
 	} else {
@@ -267,5 +273,18 @@ func pushToMQ(message *pb.BaseMsg, key string) error {
 		default:
 			return onlineMessageProducer.PushMessage(pb.MessagePushTopic, key, marshal)
 		}
+	}
+}
+
+func messageToMqGroupMessage(baseMsg *pb.BaseMsg) *pb.MqGroupMessage {
+	return &pb.MqGroupMessage{
+		From:      baseMsg.From,
+		To:        baseMsg.To,
+		Content:   baseMsg.Content,
+		Flag:      baseMsg.Flag,
+		Timestamp: baseMsg.Timestamp,
+		Id:        baseMsg.From,
+		Seq:       baseMsg.Seq,
+		DeviceId:  baseMsg.DeviceId,
 	}
 }
