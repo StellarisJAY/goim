@@ -93,6 +93,18 @@ message SyncGroupLatestMessagesResponse {
   repeated BaseMsg msgs = 3;
 }
 
+message MqGroupMessage {
+  int64 from = 1;
+  int64 to = 2;
+  string content = 3;
+  MessageFlag flag = 4;
+  int64 timestamp = 5;
+  int64 id = 6;
+  int64 seq = 7;
+  string deviceId = 8;
+  repeated string groupMembers = 9;
+}
+
 service message {
   rpc SyncOfflineMessages(SyncMsgRequest) returns (SyncMsgResponse) {}
   // SendMessage 发送消息
