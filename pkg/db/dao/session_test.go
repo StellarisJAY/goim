@@ -1,9 +1,7 @@
 package dao
 
 import (
-	"context"
 	"fmt"
-	"github.com/stellarisJAY/goim/pkg/db"
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"testing"
 )
@@ -32,8 +30,17 @@ func TestBatchGetGroupSessions(t *testing.T) {
 }
 
 func BenchmarkBatchGetGroupSessions(b *testing.B) {
-	keys := []string{"goim_session_1001", "goim_session_1002"}
-	for i := 0; i < b.N; i++ {
-		_ = db.DB.Redis.Eval(context.TODO(), loadGroupMemberSessionsScript, keys, nil)
-	}
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = BatchGetGroupSessions(10001, "device-a", 1001)
+		}
+	})
+}
+
+func BenchmarkGetGroupSessions(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = GetGroupSessions(10001, "device-a", 1001)
+		}
+	})
 }
