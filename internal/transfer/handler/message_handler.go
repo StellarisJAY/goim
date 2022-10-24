@@ -41,7 +41,7 @@ func init() {
 	default:
 		panic(fmt.Errorf("unsupported message queue: %s", configMQ))
 	}
-	if wp, err := ants.NewPool(runtime.NumCPU()*2, nil); err != nil {
+	if wp, err := ants.NewPool(runtime.NumCPU() * 2); err != nil {
 		panic(fmt.Errorf("error occurred when creating push worker: %w", err))
 	} else {
 		pushWorkerPool = wp

@@ -16,7 +16,7 @@ import (
 var persistWorkerPool *ants.Pool
 
 func init() {
-	wp, err := ants.NewPool(runtime.NumCPU()*2, nil)
+	wp, err := ants.NewPool(runtime.NumCPU() * 2)
 	if err != nil {
 		panic(fmt.Errorf("error occured when creating ants worker pool %w", err))
 	}
