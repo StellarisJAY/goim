@@ -65,7 +65,7 @@ var SyncOfflineGroupMessages = func(ctx context.Context) {
 		}
 	}()
 	request := http.SyncOfflineGroupMessageRequest{}
-	err := ctx.ReadJSON(request)
+	err := ctx.ReadJSON(&request)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		_, _ = ctx.WriteString("invalid request")

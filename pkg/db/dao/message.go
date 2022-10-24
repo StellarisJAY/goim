@@ -100,21 +100,21 @@ func ListLatestOfflineGroupMessages(groupID int64, lastTimestamp int64, limit in
 	// lastTimeStamp 为 -1，从最新一条消息开始查询
 	if lastTimestamp == -1 {
 		query = bson.D{
-			{"Flag", pb.MessageFlag_Group},
+			{"flag", pb.MessageFlag_Group},
 			{"to", groupID},
 		}
 	} else {
 		query = bson.D{
-			{"Flag", pb.MessageFlag_Group},
+			{"flag", pb.MessageFlag_Group},
 			{"to", groupID},
-			{"timestamp", bson.D{{"$lt", lastTimestamp}}},
+			{"timestamp", bson.D{{"$lte", lastTimestamp}}},
 		}
 	}
 	cur, err := database.Collection(db.CollectionOfflineMessage).Find(context.TODO(), query, opts)
 	if err != nil {
 		return nil, err
 	}
-	messages := make([]*model.OfflineMessage, limit)
+	messages := make([]*model.OfflineMessage, 0)
 	if err = cur.All(context.TODO(), &messages); err != nil {
 		return nil, err
 	}

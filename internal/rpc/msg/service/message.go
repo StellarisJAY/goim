@@ -137,7 +137,7 @@ func OfflineMessagesToBaseMessages(offlineMessages []*model.OfflineMessage) []*p
 	for i, m := range offlineMessages {
 		msgs[i] = &pb.BaseMsg{
 			From:      m.From,
-			To:        m.From,
+			To:        m.To,
 			Content:   string(m.Content),
 			Flag:      pb.MessageFlag(m.Flag),
 			Timestamp: m.Timestamp,
