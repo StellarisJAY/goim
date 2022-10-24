@@ -34,8 +34,7 @@ func Init() {
 		messageParty.Done(middleware.ErrorHandler)
 		messageParty.Get("/offline/{seq:int64}", handler.SyncOfflineMessageHandler)
 		messageParty.Get("/offline/group", handler.SyncOfflineGroupMessages)
-		// todo 同步群聊最新的消息
-		messageParty.Get("/offline/group/latest/{groupID:int64}", handler.SyncLatestGroupMessages)
+		messageParty.Get("/offline/group/latest", handler.SyncLatestGroupMessages)
 	}
 	// 用户信息API
 	userParty := application.Party("/user")
