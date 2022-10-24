@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/gobwas/ws"
+	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
@@ -57,15 +58,19 @@ func (c *Channel) Start() error {
 }
 
 func (c *Channel) writeLoop() error {
+	opCode := ws.OpBinary
+	if config.Config.Gateway.UseJsonMsg {
+		opCode = ws.OpText
+	}
 	for payload := range c.writeChan {
-		err := c.connection.Send(ws.OpBinary, payload)
+		err := c.connection.Send(opCode, payload)
 		if err != nil {
 			return err
 		}
 		n := len(c.writeChan)
 		for i := 0; i < n; i++ {
 			payload = <-c.writeChan
-			err := c.connection.Send(ws.OpBinary, payload)
+			err := c.connection.Send(opCode, payload)
 			if err != nil {
 				return err
 			}
