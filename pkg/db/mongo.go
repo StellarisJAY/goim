@@ -14,6 +14,7 @@ const (
 	CollectionOfflineMessage  = "offlineMessage"
 	CollectionGroupInvitation = "groupInvitation"
 	CollectionFriendRequest   = "friendRequest"
+	CollectionNotification    = "notification"
 )
 
 var Day = int64(time.Hour) * 24

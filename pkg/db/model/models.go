@@ -122,3 +122,13 @@ type SensitiveWord struct {
 	Word     string `gorm:"column:word;type:varchar(64)"`
 	Category byte   `gorm:"column:type;type:tinyint"` // 敏感词分类：不文明用语、暴恐色情赌博、广告、欺诈诱骗、政治
 }
+
+// Notification 通知
+type Notification struct {
+	Id          int64  `bson:"id" json:"id"`
+	Receiver    int64  `bson:"receiver" json:"receiver"`       // 通知接收者
+	TriggerUser int64  `bson:"triggerUser" json:"triggerUser"` // 通知触发者
+	Type        byte   `bson:"type" json:"type"`               // 通知类型
+	Message     string `bson:"message" json:"message"`         // 内容
+	Read        bool   `bson:"read" json:"read"`
+}
