@@ -123,6 +123,12 @@ type SensitiveWord struct {
 	Category byte   `gorm:"column:type;type:tinyint"` // 敏感词分类：不文明用语、暴恐色情赌博、广告、欺诈诱骗、政治
 }
 
+const (
+	NotificationFriendRequest byte = iota + 1
+	NotificationFriendRequestAccepted
+	NotificationGroupInvitation
+)
+
 // Notification 通知
 type Notification struct {
 	Id          int64  `bson:"id" json:"id"`

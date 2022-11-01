@@ -62,3 +62,19 @@ func ListAllNotifications(receiver int64) ([]*model.Notification, error) {
 	}
 	return notifications, nil
 }
+
+func ListNotificationOfType(receiver int64, nType byte) ([]*model.Notification, error) {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	collection := database.Collection(db.CollectionNotification)
+	filter := bson.D{{"receiver", receiver}, {"type", nType}}
+	cursor, err := collection.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+	notifications := make([]*model.Notification, 0)
+	err = cursor.All(context.TODO(), &notifications)
+	if err != nil {
+		return nil, err
+	}
+	return notifications, nil
+}
