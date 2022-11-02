@@ -105,10 +105,44 @@ message MqGroupMessage {
   repeated string groupMembers = 9;
 }
 
+message Notification {
+  int64 id = 1;
+  int64 receiver = 2;
+  int64 triggerUser = 3;
+  string message = 4;
+  bool read = 5;
+}
+
+message ListNotificationRequest {
+  int64 userID = 1;
+  bool notRead = 2;
+}
+
+message ListNotificationResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated Notification notifications = 3;
+}
+
+message MarkNotificationReadRequest {
+  int64 userID = 1;
+  int64 notificationID = 2;
+}
+
+message MarkNotificationReadResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
+
+
 service message {
   rpc SyncOfflineMessages(SyncMsgRequest) returns (SyncMsgResponse) {}
   // SendMessage 发送消息
   rpc SendMessage(SendMsgRequest) returns (SendMsgResponse) {}
   rpc SyncOfflineGroupMessages(SyncGroupMsgRequest) returns (SyncGroupMsgResponse) {}
   rpc SyncGroupLatestMessages(SyncGroupLatestMessagesRequest) returns (SyncGroupLatestMessagesResponse) {}
+
+  rpc ListNotifications(ListNotificationRequest) returns (ListNotificationResponse) {}
+  rpc MarkNotificationRead(MarkNotificationReadRequest) returns (MarkNotificationReadResponse) {}
 }

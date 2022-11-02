@@ -915,6 +915,313 @@ func (x *MqGroupMessage) GetGroupMembers() []string {
 	return nil
 }
 
+type Notification struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id          int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Receiver    int64  `protobuf:"varint,2,opt,name=receiver,proto3" json:"receiver,omitempty"`
+	TriggerUser int64  `protobuf:"varint,3,opt,name=triggerUser,proto3" json:"triggerUser,omitempty"`
+	Message     string `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
+	Read        bool   `protobuf:"varint,5,opt,name=read,proto3" json:"read,omitempty"`
+}
+
+func (x *Notification) Reset() {
+	*x = Notification{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_msg_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Notification) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Notification) ProtoMessage() {}
+
+func (x *Notification) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_msg_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Notification.ProtoReflect.Descriptor instead.
+func (*Notification) Descriptor() ([]byte, []int) {
+	return file_goim_msg_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *Notification) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Notification) GetReceiver() int64 {
+	if x != nil {
+		return x.Receiver
+	}
+	return 0
+}
+
+func (x *Notification) GetTriggerUser() int64 {
+	if x != nil {
+		return x.TriggerUser
+	}
+	return 0
+}
+
+func (x *Notification) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *Notification) GetRead() bool {
+	if x != nil {
+		return x.Read
+	}
+	return false
+}
+
+type ListNotificationRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserID  int64 `protobuf:"varint,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	NotRead bool  `protobuf:"varint,2,opt,name=notRead,proto3" json:"notRead,omitempty"`
+}
+
+func (x *ListNotificationRequest) Reset() {
+	*x = ListNotificationRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_msg_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListNotificationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNotificationRequest) ProtoMessage() {}
+
+func (x *ListNotificationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_msg_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNotificationRequest.ProtoReflect.Descriptor instead.
+func (*ListNotificationRequest) Descriptor() ([]byte, []int) {
+	return file_goim_msg_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListNotificationRequest) GetUserID() int64 {
+	if x != nil {
+		return x.UserID
+	}
+	return 0
+}
+
+func (x *ListNotificationRequest) GetNotRead() bool {
+	if x != nil {
+		return x.NotRead
+	}
+	return false
+}
+
+type ListNotificationResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Code          int32           `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string          `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Notifications []*Notification `protobuf:"bytes,3,rep,name=notifications,proto3" json:"notifications,omitempty"`
+}
+
+func (x *ListNotificationResponse) Reset() {
+	*x = ListNotificationResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_msg_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListNotificationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNotificationResponse) ProtoMessage() {}
+
+func (x *ListNotificationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_msg_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNotificationResponse.ProtoReflect.Descriptor instead.
+func (*ListNotificationResponse) Descriptor() ([]byte, []int) {
+	return file_goim_msg_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListNotificationResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *ListNotificationResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ListNotificationResponse) GetNotifications() []*Notification {
+	if x != nil {
+		return x.Notifications
+	}
+	return nil
+}
+
+type MarkNotificationReadRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserID         int64 `protobuf:"varint,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	NotificationID int64 `protobuf:"varint,2,opt,name=notificationID,proto3" json:"notificationID,omitempty"`
+}
+
+func (x *MarkNotificationReadRequest) Reset() {
+	*x = MarkNotificationReadRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_msg_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MarkNotificationReadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkNotificationReadRequest) ProtoMessage() {}
+
+func (x *MarkNotificationReadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_msg_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkNotificationReadRequest.ProtoReflect.Descriptor instead.
+func (*MarkNotificationReadRequest) Descriptor() ([]byte, []int) {
+	return file_goim_msg_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *MarkNotificationReadRequest) GetUserID() int64 {
+	if x != nil {
+		return x.UserID
+	}
+	return 0
+}
+
+func (x *MarkNotificationReadRequest) GetNotificationID() int64 {
+	if x != nil {
+		return x.NotificationID
+	}
+	return 0
+}
+
+type MarkNotificationReadResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Code    int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (x *MarkNotificationReadResponse) Reset() {
+	*x = MarkNotificationReadResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_msg_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MarkNotificationReadResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MarkNotificationReadResponse) ProtoMessage() {}
+
+func (x *MarkNotificationReadResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_msg_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MarkNotificationReadResponse.ProtoReflect.Descriptor instead.
+func (*MarkNotificationReadResponse) Descriptor() ([]byte, []int) {
+	return file_goim_msg_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *MarkNotificationReadResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *MarkNotificationReadResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_goim_msg_proto protoreflect.FileDescriptor
 
 var file_goim_msg_proto_rawDesc = []byte{
@@ -1020,7 +1327,40 @@ var file_goim_msg_proto_rawDesc = []byte{
 	0x49, 0x64, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x64, 0x65, 0x76, 0x69, 0x63, 0x65,
 	0x49, 0x64, 0x12, 0x22, 0x0a, 0x0c, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x4d, 0x65, 0x6d, 0x62, 0x65,
 	0x72, 0x73, 0x18, 0x09, 0x20, 0x03, 0x28, 0x09, 0x52, 0x0c, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x4d,
-	0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x2a, 0xd9, 0x01, 0x0a, 0x0b, 0x4d, 0x65, 0x73, 0x73, 0x61,
+	0x65, 0x6d, 0x62, 0x65, 0x72, 0x73, 0x22, 0x8a, 0x01, 0x0a, 0x0c, 0x4e, 0x6f, 0x74, 0x69, 0x66,
+	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x72, 0x65, 0x63, 0x65, 0x69,
+	0x76, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x08, 0x72, 0x65, 0x63, 0x65, 0x69,
+	0x76, 0x65, 0x72, 0x12, 0x20, 0x0a, 0x0b, 0x74, 0x72, 0x69, 0x67, 0x67, 0x65, 0x72, 0x55, 0x73,
+	0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0b, 0x74, 0x72, 0x69, 0x67, 0x67, 0x65,
+	0x72, 0x55, 0x73, 0x65, 0x72, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12,
+	0x12, 0x0a, 0x04, 0x72, 0x65, 0x61, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x04, 0x72,
+	0x65, 0x61, 0x64, 0x22, 0x4b, 0x0a, 0x17, 0x4c, 0x69, 0x73, 0x74, 0x4e, 0x6f, 0x74, 0x69, 0x66,
+	0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16,
+	0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06,
+	0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x18, 0x0a, 0x07, 0x6e, 0x6f, 0x74, 0x52, 0x65, 0x61,
+	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x07, 0x6e, 0x6f, 0x74, 0x52, 0x65, 0x61, 0x64,
+	0x22, 0x86, 0x01, 0x0a, 0x18, 0x4c, 0x69, 0x73, 0x74, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a,
+	0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64,
+	0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x3c, 0x0a, 0x0d, 0x6e,
+	0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x03, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x16, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x6d, 0x73, 0x67, 0x2e, 0x4e, 0x6f,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x0d, 0x6e, 0x6f, 0x74, 0x69,
+	0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x22, 0x5d, 0x0a, 0x1b, 0x4d, 0x61, 0x72,
+	0x6b, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x61,
+	0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72,
+	0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44,
+	0x12, 0x26, 0x0a, 0x0e, 0x6e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0e, 0x6e, 0x6f, 0x74, 0x69, 0x66, 0x69,
+	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x49, 0x44, 0x22, 0x4c, 0x0a, 0x1c, 0x4d, 0x61, 0x72, 0x6b,
+	0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x61, 0x64,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x18, 0x0a, 0x07,
+	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d,
+	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x2a, 0xd9, 0x01, 0x0a, 0x0b, 0x4d, 0x65, 0x73, 0x73, 0x61,
 	0x67, 0x65, 0x46, 0x6c, 0x61, 0x67, 0x12, 0x08, 0x0a, 0x04, 0x4e, 0x6f, 0x6e, 0x65, 0x10, 0x00,
 	0x12, 0x08, 0x0a, 0x04, 0x46, 0x72, 0x6f, 0x6d, 0x10, 0x01, 0x12, 0x06, 0x0a, 0x02, 0x54, 0x6f,
 	0x10, 0x02, 0x12, 0x09, 0x0a, 0x05, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x10, 0x03, 0x12, 0x12, 0x0a,
@@ -1034,7 +1374,7 @@ var file_goim_msg_proto_rawDesc = []byte{
 	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x48, 0x61, 0x6e, 0x64, 0x73, 0x68, 0x61, 0x6b, 0x65, 0x32,
 	0x10, 0xf7, 0x03, 0x12, 0x1d, 0x0a, 0x18, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x4d, 0x65,
 	0x73, 0x73, 0x61, 0x67, 0x65, 0x48, 0x61, 0x6e, 0x64, 0x73, 0x68, 0x61, 0x6b, 0x65, 0x33, 0x10,
-	0xf8, 0x03, 0x32, 0xec, 0x02, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x4c,
+	0xf8, 0x03, 0x32, 0xb3, 0x04, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x4c,
 	0x0a, 0x13, 0x53, 0x79, 0x6e, 0x63, 0x4f, 0x66, 0x66, 0x6c, 0x69, 0x6e, 0x65, 0x4d, 0x65, 0x73,
 	0x73, 0x61, 0x67, 0x65, 0x73, 0x12, 0x18, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x6d, 0x73, 0x67,
 	0x2e, 0x53, 0x79, 0x6e, 0x63, 0x4d, 0x73, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
@@ -1057,8 +1397,20 @@ var file_goim_msg_proto_rawDesc = []byte{
 	0x75, 0x65, 0x73, 0x74, 0x1a, 0x29, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x6d, 0x73, 0x67, 0x2e,
 	0x53, 0x79, 0x6e, 0x63, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x4c, 0x61, 0x74, 0x65, 0x73, 0x74, 0x4d,
 	0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
-	0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x00, 0x12, 0x5c, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x21, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x6d, 0x73,
+	0x67, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22, 0x2e, 0x67, 0x6f, 0x69, 0x6d,
+	0x5f, 0x6d, 0x73, 0x67, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
+	0x67, 0x0a, 0x14, 0x4d, 0x61, 0x72, 0x6b, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x52, 0x65, 0x61, 0x64, 0x12, 0x25, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x6d,
+	0x73, 0x67, 0x2e, 0x4d, 0x61, 0x72, 0x6b, 0x4e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x52, 0x65, 0x61, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x26,
+	0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x6d, 0x73, 0x67, 0x2e, 0x4d, 0x61, 0x72, 0x6b, 0x4e, 0x6f,
+	0x74, 0x69, 0x66, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x61, 0x64, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1074,7 +1426,7 @@ func file_goim_msg_proto_rawDescGZIP() []byte {
 }
 
 var file_goim_msg_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_goim_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_goim_msg_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_goim_msg_proto_goTypes = []interface{}{
 	(MessageFlag)(0),                        // 0: goim_msg.MessageFlag
 	(*BaseMsg)(nil),                         // 1: goim_msg.BaseMsg
@@ -1088,6 +1440,11 @@ var file_goim_msg_proto_goTypes = []interface{}{
 	(*SyncGroupLatestMessagesRequest)(nil),  // 9: goim_msg.SyncGroupLatestMessagesRequest
 	(*SyncGroupLatestMessagesResponse)(nil), // 10: goim_msg.SyncGroupLatestMessagesResponse
 	(*MqGroupMessage)(nil),                  // 11: goim_msg.MqGroupMessage
+	(*Notification)(nil),                    // 12: goim_msg.Notification
+	(*ListNotificationRequest)(nil),         // 13: goim_msg.ListNotificationRequest
+	(*ListNotificationResponse)(nil),        // 14: goim_msg.ListNotificationResponse
+	(*MarkNotificationReadRequest)(nil),     // 15: goim_msg.MarkNotificationReadRequest
+	(*MarkNotificationReadResponse)(nil),    // 16: goim_msg.MarkNotificationReadResponse
 }
 var file_goim_msg_proto_depIdxs = []int32{
 	0,  // 0: goim_msg.BaseMsg.flag:type_name -> goim_msg.MessageFlag
@@ -1097,19 +1454,24 @@ var file_goim_msg_proto_depIdxs = []int32{
 	7,  // 4: goim_msg.SyncGroupMsgResponse.groupMessages:type_name -> goim_msg.SingleGroupMessages
 	1,  // 5: goim_msg.SyncGroupLatestMessagesResponse.msgs:type_name -> goim_msg.BaseMsg
 	0,  // 6: goim_msg.MqGroupMessage.flag:type_name -> goim_msg.MessageFlag
-	4,  // 7: goim_msg.message.SyncOfflineMessages:input_type -> goim_msg.SyncMsgRequest
-	2,  // 8: goim_msg.message.SendMessage:input_type -> goim_msg.SendMsgRequest
-	6,  // 9: goim_msg.message.SyncOfflineGroupMessages:input_type -> goim_msg.SyncGroupMsgRequest
-	9,  // 10: goim_msg.message.SyncGroupLatestMessages:input_type -> goim_msg.SyncGroupLatestMessagesRequest
-	5,  // 11: goim_msg.message.SyncOfflineMessages:output_type -> goim_msg.SyncMsgResponse
-	3,  // 12: goim_msg.message.SendMessage:output_type -> goim_msg.SendMsgResponse
-	8,  // 13: goim_msg.message.SyncOfflineGroupMessages:output_type -> goim_msg.SyncGroupMsgResponse
-	10, // 14: goim_msg.message.SyncGroupLatestMessages:output_type -> goim_msg.SyncGroupLatestMessagesResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	12, // 7: goim_msg.ListNotificationResponse.notifications:type_name -> goim_msg.Notification
+	4,  // 8: goim_msg.message.SyncOfflineMessages:input_type -> goim_msg.SyncMsgRequest
+	2,  // 9: goim_msg.message.SendMessage:input_type -> goim_msg.SendMsgRequest
+	6,  // 10: goim_msg.message.SyncOfflineGroupMessages:input_type -> goim_msg.SyncGroupMsgRequest
+	9,  // 11: goim_msg.message.SyncGroupLatestMessages:input_type -> goim_msg.SyncGroupLatestMessagesRequest
+	13, // 12: goim_msg.message.ListNotifications:input_type -> goim_msg.ListNotificationRequest
+	15, // 13: goim_msg.message.MarkNotificationRead:input_type -> goim_msg.MarkNotificationReadRequest
+	5,  // 14: goim_msg.message.SyncOfflineMessages:output_type -> goim_msg.SyncMsgResponse
+	3,  // 15: goim_msg.message.SendMessage:output_type -> goim_msg.SendMsgResponse
+	8,  // 16: goim_msg.message.SyncOfflineGroupMessages:output_type -> goim_msg.SyncGroupMsgResponse
+	10, // 17: goim_msg.message.SyncGroupLatestMessages:output_type -> goim_msg.SyncGroupLatestMessagesResponse
+	14, // 18: goim_msg.message.ListNotifications:output_type -> goim_msg.ListNotificationResponse
+	16, // 19: goim_msg.message.MarkNotificationRead:output_type -> goim_msg.MarkNotificationReadResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_goim_msg_proto_init() }
@@ -1250,6 +1612,66 @@ func file_goim_msg_proto_init() {
 				return nil
 			}
 		}
+		file_goim_msg_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Notification); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_goim_msg_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListNotificationRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_goim_msg_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ListNotificationResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_goim_msg_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MarkNotificationReadRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_goim_msg_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MarkNotificationReadResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_goim_msg_proto_msgTypes[3].OneofWrappers = []interface{}{}
 	type x struct{}
@@ -1258,7 +1680,7 @@ func file_goim_msg_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_goim_msg_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   11,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -1290,6 +1712,8 @@ type MessageClient interface {
 	SendMessage(ctx context.Context, in *SendMsgRequest, opts ...grpc.CallOption) (*SendMsgResponse, error)
 	SyncOfflineGroupMessages(ctx context.Context, in *SyncGroupMsgRequest, opts ...grpc.CallOption) (*SyncGroupMsgResponse, error)
 	SyncGroupLatestMessages(ctx context.Context, in *SyncGroupLatestMessagesRequest, opts ...grpc.CallOption) (*SyncGroupLatestMessagesResponse, error)
+	ListNotifications(ctx context.Context, in *ListNotificationRequest, opts ...grpc.CallOption) (*ListNotificationResponse, error)
+	MarkNotificationRead(ctx context.Context, in *MarkNotificationReadRequest, opts ...grpc.CallOption) (*MarkNotificationReadResponse, error)
 }
 
 type messageClient struct {
@@ -1336,6 +1760,24 @@ func (c *messageClient) SyncGroupLatestMessages(ctx context.Context, in *SyncGro
 	return out, nil
 }
 
+func (c *messageClient) ListNotifications(ctx context.Context, in *ListNotificationRequest, opts ...grpc.CallOption) (*ListNotificationResponse, error) {
+	out := new(ListNotificationResponse)
+	err := c.cc.Invoke(ctx, "/goim_msg.message/ListNotifications", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messageClient) MarkNotificationRead(ctx context.Context, in *MarkNotificationReadRequest, opts ...grpc.CallOption) (*MarkNotificationReadResponse, error) {
+	out := new(MarkNotificationReadResponse)
+	err := c.cc.Invoke(ctx, "/goim_msg.message/MarkNotificationRead", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MessageServer is the server API for Message service.
 type MessageServer interface {
 	SyncOfflineMessages(context.Context, *SyncMsgRequest) (*SyncMsgResponse, error)
@@ -1343,6 +1785,8 @@ type MessageServer interface {
 	SendMessage(context.Context, *SendMsgRequest) (*SendMsgResponse, error)
 	SyncOfflineGroupMessages(context.Context, *SyncGroupMsgRequest) (*SyncGroupMsgResponse, error)
 	SyncGroupLatestMessages(context.Context, *SyncGroupLatestMessagesRequest) (*SyncGroupLatestMessagesResponse, error)
+	ListNotifications(context.Context, *ListNotificationRequest) (*ListNotificationResponse, error)
+	MarkNotificationRead(context.Context, *MarkNotificationReadRequest) (*MarkNotificationReadResponse, error)
 }
 
 // UnimplementedMessageServer can be embedded to have forward compatible implementations.
@@ -1360,6 +1804,12 @@ func (*UnimplementedMessageServer) SyncOfflineGroupMessages(context.Context, *Sy
 }
 func (*UnimplementedMessageServer) SyncGroupLatestMessages(context.Context, *SyncGroupLatestMessagesRequest) (*SyncGroupLatestMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SyncGroupLatestMessages not implemented")
+}
+func (*UnimplementedMessageServer) ListNotifications(context.Context, *ListNotificationRequest) (*ListNotificationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNotifications not implemented")
+}
+func (*UnimplementedMessageServer) MarkNotificationRead(context.Context, *MarkNotificationReadRequest) (*MarkNotificationReadResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MarkNotificationRead not implemented")
 }
 
 func RegisterMessageServer(s *grpc.Server, srv MessageServer) {
@@ -1438,6 +1888,42 @@ func _Message_SyncGroupLatestMessages_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Message_ListNotifications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNotificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessageServer).ListNotifications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/goim_msg.message/ListNotifications",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessageServer).ListNotifications(ctx, req.(*ListNotificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Message_MarkNotificationRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkNotificationReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessageServer).MarkNotificationRead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/goim_msg.message/MarkNotificationRead",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessageServer).MarkNotificationRead(ctx, req.(*MarkNotificationReadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Message_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "goim_msg.message",
 	HandlerType: (*MessageServer)(nil),
@@ -1457,6 +1943,14 @@ var _Message_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SyncGroupLatestMessages",
 			Handler:    _Message_SyncGroupLatestMessages_Handler,
+		},
+		{
+			MethodName: "ListNotifications",
+			Handler:    _Message_ListNotifications_Handler,
+		},
+		{
+			MethodName: "MarkNotificationRead",
+			Handler:    _Message_MarkNotificationRead_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

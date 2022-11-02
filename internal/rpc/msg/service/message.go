@@ -146,3 +146,42 @@ func OfflineMessagesToBaseMessages(offlineMessages []*model.OfflineMessage) []*p
 	}
 	return msgs
 }
+
+func (m *MessageServiceImpl) ListNotifications(ctx context.Context, request *pb.ListNotificationRequest) (*pb.ListNotificationResponse, error) {
+	var notifications []*model.Notification
+	var err error
+	if request.NotRead {
+		notifications, err = dao.ListNotReadNotifications(request.UserID)
+	} else {
+		notifications, err = dao.ListAllNotifications(request.UserID)
+	}
+	if err != nil {
+		return &pb.ListNotificationResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	result := make([]*pb.Notification, len(notifications))
+	for i, n := range notifications {
+		result[i] = &pb.Notification{
+			Id:          n.Id,
+			Receiver:    n.Receiver,
+			TriggerUser: n.TriggerUser,
+			Message:     n.Message,
+			Read:        n.Read,
+		}
+	}
+	return &pb.ListNotificationResponse{
+		Code:          pb.Success,
+		Notifications: result,
+	}, nil
+}
+
+func (m *MessageServiceImpl) MarkNotificationRead(ctx context.Context, request *pb.MarkNotificationReadRequest) (*pb.MarkNotificationReadResponse, error) {
+	err := dao.MarkNotificationRead(request.UserID)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return &pb.MarkNotificationReadResponse{Code: pb.NotFound, Message: "notification not found"}, nil
+		} else {
+			return &pb.MarkNotificationReadResponse{Code: pb.Error, Message: err.Error()}, nil
+		}
+	}
+	return &pb.MarkNotificationReadResponse{Code: pb.Success}, nil
+}
