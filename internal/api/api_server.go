@@ -73,7 +73,7 @@ func Init() {
 		// 添加好友申请
 		friendParty.Post("/application", handler.InsertFriendApplicationHandler)
 		// 列出好友申请
-		friendParty.Get("/application", handler.ListFriendApplications)
+		//friendParty.Get("/application", handler.ListFriendApplications)
 		// 接受好友申请
 		friendParty.Put("/application", handler.AcceptFriendHandler)
 		// 获取好友信息

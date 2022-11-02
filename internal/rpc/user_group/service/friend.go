@@ -7,9 +7,9 @@ import (
 	"github.com/stellarisJAY/goim/pkg/db/cache"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
+	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
-	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"time"
 )
@@ -42,81 +42,105 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 			Message: "already established friendship",
 		}, nil
 	}
-	err = dao.AddFriendRequest(&model.AddFriendRequest{
-		Requester: request.UserID,
-		Target:    request.TargetUser,
-		Timestamp: time.Now().UnixMilli(),
-		Message:   request.Message,
-	})
+	noteService, err := getNotificationService()
 	if err != nil {
-		if mongo.IsDuplicateKeyError(err) {
-			return &pb.AddFriendResponse{Code: pb.InvalidOperation, Message: "duplicate application"}, nil
-		}
-		return &pb.AddFriendResponse{Code: pb.Error, Message: "can't create add friend application"}, nil
+		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
-	return &pb.AddFriendResponse{
-		Code: pb.Success,
-	}, nil
+	notification := &pb.Notification{
+		Id:          notificationId.NextID(),
+		Receiver:    request.TargetUser,
+		TriggerUser: request.UserID,
+		Message:     "", // todo 用户自定义验证消息
+		Type:        int32(model.NotificationFriendRequest),
+		Timestamp:   time.Now().UnixMilli(),
+	}
+	// 发送添加好友通知
+	addNoteResp, err := noteService.AddNotification(ctx, &pb.AddNotificationRequest{Notification: notification})
+	if err != nil {
+		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.AddFriendResponse{Code: addNoteResp.Code, Message: addNoteResp.Message}, nil
 }
 
-func (f *FriendServiceImpl) ListAddFriendRequests(ctx context.Context, request *pb.ListAddFriendRequest) (*pb.ListAddFriendResponse, error) {
-	applications, err := dao.ListAddFriendRequests(request.UserID)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return &pb.ListAddFriendResponse{Code: pb.NotFound, Message: "no application found"}, nil
-		}
-		return &pb.ListAddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
-	}
-	friendApplications := make([]*pb.FriendApplication, 0, len(applications))
-	for _, app := range applications {
-		requester, err := dao.FindUserInfo(app.Requester)
-		if err != nil {
-			continue
-		}
-		friendApplications = append(friendApplications, &pb.FriendApplication{
-			UserID:    requester.ID,
-			Account:   requester.Account,
-			NickName:  requester.NickName,
-			Timestamp: app.Timestamp,
-			Message:   app.Message,
-		})
-	}
-	return &pb.ListAddFriendResponse{
-		Code:         pb.Success,
-		Applications: friendApplications,
-	}, nil
-}
+//func (f *FriendServiceImpl) ListAddFriendRequests(ctx context.Context, request *pb.ListAddFriendRequest) (*pb.ListAddFriendResponse, error) {
+//	applications, err := dao.ListAddFriendRequests(request.UserID)
+//	if err != nil {
+//		if err == mongo.ErrNoDocuments {
+//			return &pb.ListAddFriendResponse{Code: pb.NotFound, Message: "no application found"}, nil
+//		}
+//		return &pb.ListAddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
+//	}
+//	friendApplications := make([]*pb.FriendApplication, 0, len(applications))
+//	for _, app := range applications {
+//		requester, err := dao.FindUserInfo(app.Requester)
+//		if err != nil {
+//			continue
+//		}
+//		friendApplications = append(friendApplications, &pb.FriendApplication{
+//			UserID:    requester.ID,
+//			Account:   requester.Account,
+//			NickName:  requester.NickName,
+//			Timestamp: app.Timestamp,
+//			Message:   app.Message,
+//		})
+//	}
+//	return &pb.ListAddFriendResponse{
+//		Code:         pb.Success,
+//		Applications: friendApplications,
+//	}, nil
+//}
 
 func (f *FriendServiceImpl) AcceptFriend(ctx context.Context, request *pb.AcceptFriendRequest) (*pb.AcceptFriendResponse, error) {
-	application, err := dao.GetAndDeleteFriendRequest(request.TargetID, request.UserID)
+	noteService, err := getNotificationService()
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return &pb.AcceptFriendResponse{Code: pb.NotFound, Message: "no such application found"}, nil
-		}
 		return &pb.AcceptFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
+	getResp, err := noteService.GetNotification(ctx, &pb.GetNotificationRequest{Id: request.NotificationID})
+	if err != nil {
+		return &pb.AcceptFriendResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if getResp.Code != pb.Success {
+		return &pb.AcceptFriendResponse{Code: getResp.Code, Message: getResp.Message}, nil
+	}
+
+	// 检查好友通知是否属于该用户
+	notification := getResp.Notification
+	if notification.TriggerUser != request.TargetID || notification.Receiver != request.UserID {
+		return &pb.AcceptFriendResponse{Code: pb.AccessDenied, Message: "notification target user or trigger user mismatch"}, nil
+	}
+	// 删除通知
+	rmResp, err := noteService.RemoveNotification(ctx, &pb.RemoveNotificationRequest{Id: notification.Id})
+	if err != nil {
+		return &pb.AcceptFriendResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if rmResp.Code != pb.Success {
+		return &pb.AcceptFriendResponse{Code: rmResp.Code, Message: rmResp.Message}, nil
+	}
+
+	// 创建双向的好友记录
 	acceptTime := time.Now().UnixMilli()
 	fs1 := &model.Friend{
-		OwnerID:    application.Requester,
-		FriendID:   application.Target,
+		OwnerID:    request.TargetID,
+		FriendID:   request.UserID,
 		AcceptTime: acceptTime,
 	}
 	fs2 := &model.Friend{
-		OwnerID:    application.Target,
-		FriendID:   application.Requester,
+		OwnerID:    request.UserID,
+		FriendID:   request.TargetID,
 		AcceptTime: acceptTime,
 	}
 	// MySQL记录好友关系
 	err = dao.InsertFriendship(fs1, fs2)
 	// 删除缓存
-	_ = cache.Delete(fmt.Sprintf("%s%d", dao.KeyFriendIDList, application.Target))
+	_ = cache.Delete(fmt.Sprintf("%s%d", dao.KeyFriendIDList, request.UserID))
+	_ = cache.Delete(fmt.Sprintf("%s%d", dao.KeyFriendIDList, request.TargetID))
 	if err != nil {
 		return &pb.AcceptFriendResponse{
 			Code:    pb.Error,
 			Message: err.Error(),
 		}, nil
 	}
-	NotifyUser(application.Requester, application.Target, model.NotificationFriendRequestAccepted, "")
+	NotifyUser(request.TargetID, request.UserID, model.NotificationFriendRequestAccepted, "")
 	return &pb.AcceptFriendResponse{Code: pb.Success}, nil
 }
 
@@ -172,4 +196,12 @@ func (f *FriendServiceImpl) GetFriendInfo(ctx context.Context, request *pb.Frien
 			RegisterTime: friendInfo.RegisterTime,
 		},
 	}, nil
+}
+
+func getNotificationService() (pb.MessageClient, error) {
+	conn, err := naming.GetClientConn("message")
+	if err != nil {
+		return nil, err
+	}
+	return pb.NewMessageClient(conn), nil
 }

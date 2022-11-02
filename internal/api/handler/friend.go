@@ -83,26 +83,26 @@ var AcceptFriendHandler = func(ctx context.Context) {
 	})
 }
 
-var ListFriendApplications = func(ctx context.Context) {
-	defer func() {
-		if err, ok := recover().(error); ok {
-			handleError(ctx, err)
-		}
-	}()
-	uid, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
-	service, err := getFriendService()
-	if err != nil {
-		panic(err)
-	}
-	resp, err := service.ListAddFriendRequests(_context.TODO(), &pb.ListAddFriendRequest{UserID: uid})
-	if err != nil {
-		panic(err)
-	}
-	_, _ = ctx.JSON(&http.ListFriendApplicationsResponse{BaseResponse: http.BaseResponse{
-		Code:    resp.Code,
-		Message: resp.Message,
-	}, Applications: resp.Applications})
-}
+//var ListFriendApplications = func(ctx context.Context) {
+//	defer func() {
+//		if err, ok := recover().(error); ok {
+//			handleError(ctx, err)
+//		}
+//	}()
+//	uid, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
+//	service, err := getFriendService()
+//	if err != nil {
+//		panic(err)
+//	}
+//	resp, err := service.ListAddFriendRequests(_context.TODO(), &pb.ListAddFriendRequest{UserID: uid})
+//	if err != nil {
+//		panic(err)
+//	}
+//	_, _ = ctx.JSON(&http.ListFriendApplicationsResponse{BaseResponse: http.BaseResponse{
+//		Code:    resp.Code,
+//		Message: resp.Message,
+//	}, Applications: resp.Applications})
+//}
 
 var FriendListHandler = func(ctx context.Context) {
 	defer func() {

@@ -2,13 +2,13 @@ syntax = "proto3";
 package goim_friend;
 option go_package = "./pb";
 
-message FriendApplication {
-  int64 userID = 1;
-  string account = 2;
-  string nickName = 3;
-  int64 timestamp = 4;
-  string message = 5;
-}
+//message FriendApplication {
+//  int64 userID = 1;
+//  string account = 2;
+//  string nickName = 3;
+//  int64 timestamp = 4;
+//  string message = 5;
+//}
 
 message FriendInfo {
   int64 userID = 1;
@@ -29,19 +29,20 @@ message AddFriendResponse{
   string message = 2;
 }
 
-message ListAddFriendRequest {
-  int64 userID = 1;
-}
+//message ListAddFriendRequest {
+//  int64 userID = 1;
+//}
 
-message ListAddFriendResponse {
-  int32 code = 1;
-  string message = 2;
-  repeated FriendApplication applications = 3;
-}
+//message ListAddFriendResponse {
+//  int32 code = 1;
+//  string message = 2;
+//  repeated FriendApplication applications = 3;
+//}
 
 message AcceptFriendRequest {
   int64 userID = 1;
   int64 targetID = 2;
+  int64 notificationID = 3;
 }
 
 message AcceptFriendResponse {
@@ -75,7 +76,7 @@ service Friend {
   // AddFriend  添加好友
   rpc AddFriend(AddFriendRequest) returns (AddFriendResponse) {}
   // ListAddFriendRequests  列出添加好友请求
-  rpc ListAddFriendRequests(ListAddFriendRequest) returns (ListAddFriendResponse) {}
+  //rpc ListAddFriendRequests(ListAddFriendRequest) returns (ListAddFriendResponse) {}
   // AcceptFriend  接收添加好友请求
   rpc AcceptFriend(AcceptFriendRequest) returns (AcceptFriendResponse) {}
   // ListFriends 获取好友列表
