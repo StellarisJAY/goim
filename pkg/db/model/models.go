@@ -126,7 +126,10 @@ type SensitiveWord struct {
 const (
 	NotificationFriendRequest byte = iota + 1
 	NotificationFriendRequestAccepted
+	NotificationFriendRequestRefused
 	NotificationGroupInvitation
+	NotificationGroupInvitationAccepted
+	NotificationGroupInvitationRefused
 )
 
 // Notification 通知
@@ -137,4 +140,5 @@ type Notification struct {
 	Type        byte   `bson:"type" json:"type"`               // 通知类型
 	Message     string `bson:"message" json:"message"`         // 内容
 	Read        bool   `bson:"read" json:"read"`
+	Timestamp   int64  `bson:"timestamp" json:"timestamp"`
 }

@@ -111,6 +111,8 @@ message Notification {
   int64 triggerUser = 3;
   string message = 4;
   bool read = 5;
+  int32 type = 6;
+  int64 timestamp = 7;
 }
 
 message ListNotificationRequest {
@@ -134,7 +136,14 @@ message MarkNotificationReadResponse {
   string message = 2;
 }
 
+message AddNotificationRequest {
+  Notification notification = 1;
+}
 
+message AddNotificationResponse {
+  int32 code = 1;
+  string message = 2;
+}
 
 service message {
   rpc SyncOfflineMessages(SyncMsgRequest) returns (SyncMsgResponse) {}
@@ -145,4 +154,5 @@ service message {
 
   rpc ListNotifications(ListNotificationRequest) returns (ListNotificationResponse) {}
   rpc MarkNotificationRead(MarkNotificationReadRequest) returns (MarkNotificationReadResponse) {}
+  rpc AddNotification(AddNotificationRequest) returns (AddNotificationResponse) {}
 }
