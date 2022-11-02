@@ -116,6 +116,7 @@ func (f *FriendServiceImpl) AcceptFriend(ctx context.Context, request *pb.Accept
 			Message: err.Error(),
 		}, nil
 	}
+	NotifyUser(application.Requester, application.Target, model.NotificationFriendRequestAccepted, "")
 	return &pb.AcceptFriendResponse{Code: pb.Success}, nil
 }
 

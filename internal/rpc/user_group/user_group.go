@@ -35,6 +35,9 @@ func Start() {
 	if err != nil {
 		panic(err)
 	}
+	go func() {
+		service.AsyncPushSendNotification()
+	}()
 	err = server.Serve(listener)
 	if err != nil {
 		panic(err)

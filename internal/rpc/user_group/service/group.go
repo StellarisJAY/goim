@@ -178,6 +178,7 @@ func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.Acc
 			Message: err.Error(),
 		}, nil
 	}
+	NotifyUser(invitation.Inviter, invitation.UserID, model.NotificationGroupInvitation, "")
 	return &pb.AcceptInvitationResponse{
 		Code: pb.Success,
 	}, nil

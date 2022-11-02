@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"github.com/stellarisJAY/goim/pkg/config"
+	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
@@ -11,27 +11,34 @@ import (
 )
 
 var notificationId = snowflake.NewSnowflake(config.Config.MachineID)
+var notificationChan = make(chan *pb.Notification, 1024)
 
-// Notification 向某个用户发送一条通知
-func Notification(userID int64, from int64, flag pb.MessageFlag, message string) error {
-	conn, err := naming.GetClientConn("message")
-	if err != nil {
-		return err
+func NotifyUser(userID int64, triggerUser int64, nType byte, message string) {
+	notification := &pb.Notification{
+		Id:          notificationId.NextID(),
+		Receiver:    userID,
+		TriggerUser: triggerUser,
+		Message:     message,
+		Read:        false,
+		Type:        int32(nType),
+		Timestamp:   time.Now().UnixMilli(),
 	}
-	client := pb.NewMessageClient(conn)
-	response, err := client.SendMessage(context.TODO(), &pb.SendMsgRequest{Msg: &pb.BaseMsg{
-		From:      from,
-		To:        userID,
-		Content:   message,
-		Flag:      flag,
-		Timestamp: time.Now().UnixMilli(),
-		Id:        notificationId.NextID(),
-	}})
-	if err != nil {
-		return fmt.Errorf("send notification to user: %s failed, error: %w", userID, err)
+	notificationChan <- notification
+}
+
+func AsyncPushSendNotification() {
+	for notification := range notificationChan {
+		go func(notification *pb.Notification) {
+			conn, err := naming.GetClientConn("message")
+			if err != nil {
+				log.Warn("push notification get rpc service error %w", err)
+				return
+			}
+			service := pb.NewMessageClient(conn)
+			response, err := service.AddNotification(context.TODO(), &pb.AddNotificationRequest{Notification: notification})
+			if err != nil || response.Code == pb.Error {
+				log.Warn("push notification error %w", err)
+			}
+		}(notification)
 	}
-	if response.Code != pb.Success {
-		return fmt.Errorf("send notification to user: %s failed: %s", userID, response.Message)
-	}
-	return nil
 }
