@@ -61,7 +61,7 @@ func Init() {
 		groupParty.Get("/{id:int64}", handler.GroupInfoHandler)
 		groupParty.Get("/members/{id:int64}", handler.GroupMemberHandler)
 		groupParty.Post("/{gid:int64}/invite/{uid:int64}", handler.InviteUserHandler)
-		groupParty.Get("/invitations", handler.ListInvitationsHandler)
+		//groupParty.Get("/invitations", handler.ListInvitationsHandler)
 		groupParty.Post("/invitation/{invID:int64}", handler.AcceptInvitationHandler)
 		groupParty.Get("/list", handler.ListJoinedGroupsHandler)
 	}

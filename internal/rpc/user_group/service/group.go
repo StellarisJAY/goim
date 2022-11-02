@@ -7,7 +7,6 @@ import (
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
-	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"time"
 )
@@ -130,42 +129,59 @@ func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUse
 	if inviter == nil || inviter.Role == model.MemberRoleNormal {
 		return &pb.InviteUserResponse{Code: pb.Error, Message: "operation not allowed"}, nil
 	}
-	// 添加邀请记录
-	err = dao.InsertGroupInvitation(&model.GroupInvitation{
-		ID:             g.idGenerator.NextID(),
-		UserID:         request.UserID,
-		GroupID:        request.GroupID,
-		Timestamp:      time.Now().UnixMilli(),
-		Inviter:        request.Inviter,
-		InviterAccount: inviter.Account,
-	})
+	noteService, err := getNotificationService()
 	if err != nil {
-		if mongo.IsDuplicateKeyError(err) {
-			return &pb.InviteUserResponse{Code: pb.InvalidOperation, Message: "user already invited"}, nil
-		}
 		return &pb.InviteUserResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
-	return &pb.InviteUserResponse{Code: pb.Success}, nil
+	// 添加进群邀请
+	addNoteResp, err := noteService.AddNotification(ctx, &pb.AddNotificationRequest{Notification: &pb.Notification{
+		Id:          notificationId.NextID(),
+		Receiver:    request.UserID,
+		TriggerUser: request.GroupID,
+		Message:     "",
+		Read:        false,
+		Type:        int32(model.NotificationGroupInvitation),
+		Timestamp:   time.Now().UnixMilli(),
+	}})
+	if err != nil {
+		return &pb.InviteUserResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.InviteUserResponse{Code: addNoteResp.Code, Message: addNoteResp.Message}, nil
 }
 
 // AcceptInvitation 接收邀请，进入群聊
 func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.AcceptInvitationRequest) (*pb.AcceptInvitationResponse, error) {
-	// 获取并删除邀请信息
-	invitation, err := dao.GetAndDeleteInvitation(request.InvitationID)
+	noteService, err := getNotificationService()
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return &pb.AcceptInvitationResponse{Code: pb.NotFound, Message: "invitation not found"}, nil
-		}
 		return &pb.AcceptInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
-	groupID := invitation.GroupID
-	userID := invitation.UserID
-	if userID != request.UserID {
-		return &pb.AcceptInvitationResponse{Code: pb.InvalidOperation, Message: "invitation was for another user"}, nil
+	// 获取通知
+	getResp, err := noteService.GetNotification(ctx, &pb.GetNotificationRequest{Id: request.InvitationID})
+	if err != nil {
+		return &pb.AcceptInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
+	if getResp.Code != pb.Success {
+		return &pb.AcceptInvitationResponse{Code: getResp.Code, Message: getResp.Message}, nil
+	}
+	// 检查通知是否属于用户 和 通知类型是否正确
+	if request.UserID != getResp.Notification.Receiver {
+		return &pb.AcceptInvitationResponse{Code: pb.AccessDenied, Message: "userID and notification receiver mismatch"}, nil
+	}
+	if getResp.Notification.Type != int32(model.NotificationGroupInvitation) {
+		return &pb.AcceptInvitationResponse{Code: pb.Error, Message: "invalid group invitation"}, nil
+	}
+	// 删除通知
+	rmResp, err := noteService.RemoveNotification(ctx, &pb.RemoveNotificationRequest{Id: request.InvitationID})
+	if err != nil {
+		return &pb.AcceptInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if rmResp.Code != pb.Success {
+		return &pb.AcceptInvitationResponse{Code: rmResp.Code, Message: rmResp.Message}, nil
+	}
+
 	member := &model.GroupMember{
-		GroupID:  groupID,
-		UserID:   userID,
+		GroupID:  getResp.Notification.TriggerUser,
+		UserID:   getResp.Notification.Receiver,
 		JoinTime: time.Now().UnixMilli(),
 		Status:   model.MemberStatusNormal,
 		Role:     model.MemberRoleNormal,
@@ -178,50 +194,49 @@ func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.Acc
 			Message: err.Error(),
 		}, nil
 	}
-	NotifyUser(invitation.Inviter, invitation.UserID, model.NotificationGroupInvitation, "")
 	return &pb.AcceptInvitationResponse{
 		Code: pb.Success,
 	}, nil
 }
 
-// ListGroupInvitations 列出用户的进群邀请
-// 从MongoDB获取userID下的进群邀请
-// 从MySQL查询群名称等信息，然后封装成进群邀请返回
-func (g *GroupServiceImpl) ListGroupInvitations(ctx context.Context, request *pb.ListInvitationRequest) (*pb.ListInvitationResponse, error) {
-	// 从Mongo查询当前存在的邀请信息
-	invitations, err := dao.ListInvitations(request.UserID)
-	if err != nil {
-		return &pb.ListInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
-	}
-	if len(invitations) == 0 {
-		return &pb.ListInvitationResponse{Code: pb.NotFound, Message: "no invitations found"}, nil
-	}
-	groupIDs := make([]int64, len(invitations))
-	for i, inv := range invitations {
-		groupIDs[i] = inv.GroupID
-	}
-	// 查询邀请群聊的名称
-	names, err := dao.FindGroupNames(groupIDs)
-	if err != nil {
-		return &pb.ListInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
-	}
-	groupInvitations := make([]*pb.GroupInvitation, len(invitations))
-	// 封装proto对象
-	for i, inv := range invitations {
-		groupInvitations[i] = &pb.GroupInvitation{
-			GroupID:        inv.GroupID,
-			GroupName:      names[i],
-			InviterID:      inv.Inviter,
-			InviterAccount: inv.InviterAccount,
-			Timestamp:      inv.Timestamp,
-			ID:             inv.ID,
-		}
-	}
-	return &pb.ListInvitationResponse{
-		Code:        pb.Success,
-		Invitations: groupInvitations,
-	}, nil
-}
+//// ListGroupInvitations 列出用户的进群邀请
+//// 从MongoDB获取userID下的进群邀请
+//// 从MySQL查询群名称等信息，然后封装成进群邀请返回
+//func (g *GroupServiceImpl) ListGroupInvitations(ctx context.Context, request *pb.ListInvitationRequest) (*pb.ListInvitationResponse, error) {
+//	// 从Mongo查询当前存在的邀请信息
+//	invitations, err := dao.ListInvitations(request.UserID)
+//	if err != nil {
+//		return &pb.ListInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
+//	}
+//	if len(invitations) == 0 {
+//		return &pb.ListInvitationResponse{Code: pb.NotFound, Message: "no invitations found"}, nil
+//	}
+//	groupIDs := make([]int64, len(invitations))
+//	for i, inv := range invitations {
+//		groupIDs[i] = inv.GroupID
+//	}
+//	// 查询邀请群聊的名称
+//	names, err := dao.FindGroupNames(groupIDs)
+//	if err != nil {
+//		return &pb.ListInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
+//	}
+//	groupInvitations := make([]*pb.GroupInvitation, len(invitations))
+//	// 封装proto对象
+//	for i, inv := range invitations {
+//		groupInvitations[i] = &pb.GroupInvitation{
+//			GroupID:        inv.GroupID,
+//			GroupName:      names[i],
+//			InviterID:      inv.Inviter,
+//			InviterAccount: inv.InviterAccount,
+//			Timestamp:      inv.Timestamp,
+//			ID:             inv.ID,
+//		}
+//	}
+//	return &pb.ListInvitationResponse{
+//		Code:        pb.Success,
+//		Invitations: groupInvitations,
+//	}, nil
+//}
 
 // ListGroups 查询用户已经加入的群聊信息列表
 func (g *GroupServiceImpl) ListGroups(ctx context.Context, request *pb.ListGroupsRequest) (*pb.ListGroupsResponse, error) {

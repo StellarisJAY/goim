@@ -93,15 +93,15 @@ message GetGroupInfoResponse {
   GroupInfo group = 3;
 }
 
-message ListInvitationRequest {
-  int64 userID = 1;
-}
-
-message ListInvitationResponse{
-  int32 code = 1;
-  string message = 2;
-  repeated GroupInvitation invitations = 3;
-}
+//message ListInvitationRequest {
+//  int64 userID = 1;
+//}
+//
+//message ListInvitationResponse{
+//  int32 code = 1;
+//  string message = 2;
+//  repeated GroupInvitation invitations = 3;
+//}
 
 message ListGroupsRequest {
   int64 userID = 1;
@@ -126,7 +126,7 @@ service Group {
   // GetGroupInfo 获取群聊信息
   rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse) {}
   // ListGroupInvitations 列出进群邀请记录
-  rpc ListGroupInvitations(ListInvitationRequest) returns (ListInvitationResponse) {}
+//  rpc ListGroupInvitations(ListInvitationRequest) returns (ListInvitationResponse) {}
 
   rpc ListGroups(ListGroupsRequest) returns (ListGroupsResponse) {}
 }
