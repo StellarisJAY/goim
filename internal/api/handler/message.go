@@ -132,6 +132,61 @@ var SyncLatestGroupMessages = func(ctx context.Context) {
 	_, _ = ctx.JSON(response)
 }
 
+var ListNotifications = func(ctx context.Context) {
+	defer func() {
+		if err, ok := recover().(error); err != nil && ok {
+			handleError(ctx, err)
+		}
+	}()
+	uid, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
+	notReadOption, err := ctx.Params().GetBool("notRead")
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		_, _ = ctx.WriteString("wrong read option")
+		return
+	}
+	service, err := getMessageService()
+	if err != nil {
+		panic(err)
+	}
+	response, err := service.ListNotifications(_context.TODO(), &pb.ListNotificationRequest{UserID: uid, NotRead: notReadOption})
+	if err != nil {
+		panic(err)
+	}
+	resp := &http.ListNotificationRequest{
+		BaseResponse: http.BaseResponse{
+			Code:    response.Code,
+			Message: response.Message,
+		},
+		Notifications: response.Notifications,
+	}
+	_, _ = ctx.JSON(resp)
+}
+
+var MarkNotificationReadHandler = func(ctx context.Context) {
+	defer func() {
+		if err, ok := recover().(error); err != nil && ok {
+			handleError(ctx, err)
+		}
+	}()
+	uid, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
+	notificationID, err := ctx.Params().GetInt64("id")
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		_, _ = ctx.WriteString("invalid notification id")
+		return
+	}
+	service, err := getMessageService()
+	if err != nil {
+		panic(err)
+	}
+	response, err := service.MarkNotificationRead(_context.TODO(), &pb.MarkNotificationReadRequest{NotificationID: notificationID, UserID: uid})
+	if err != nil {
+		panic(err)
+	}
+	_, _ = ctx.JSON(&http.BaseResponse{Code: response.Code, Message: response.Message})
+}
+
 func getMessageService() (pb.MessageClient, error) {
 	conn, err := naming.GetClientConn("message")
 	if err != nil {

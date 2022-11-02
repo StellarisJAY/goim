@@ -36,6 +36,14 @@ func Init() {
 		messageParty.Get("/offline/group", handler.SyncOfflineGroupMessages)
 		messageParty.Get("/offline/group/latest", handler.SyncLatestGroupMessages)
 	}
+
+	notificationParty := application.Party("/notification")
+	{
+		notificationParty.Use(middleware.TokenVerifier)
+		notificationParty.Done(middleware.ErrorHandler)
+		notificationParty.Get("/list", handler.ListNotifications)
+		notificationParty.Post("/mark/read/{id:int64}", handler.MarkNotificationReadHandler)
+	}
 	// 用户信息API
 	userParty := application.Party("/user")
 	{

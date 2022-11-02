@@ -142,3 +142,8 @@ type ListJoinedGroupsResponse struct {
 	BaseResponse
 	Groups []*pb.GroupInfo
 }
+
+type ListNotificationRequest struct {
+	BaseResponse
+	Notifications []*pb.Notification
+}
