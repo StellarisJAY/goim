@@ -166,6 +166,8 @@ func (m *MessageServiceImpl) ListNotifications(ctx context.Context, request *pb.
 			TriggerUser: n.TriggerUser,
 			Message:     n.Message,
 			Read:        n.Read,
+			Type:        int32(n.Type),
+			Timestamp:   n.Timestamp,
 		}
 	}
 	return &pb.ListNotificationResponse{
@@ -184,4 +186,21 @@ func (m *MessageServiceImpl) MarkNotificationRead(ctx context.Context, request *
 		}
 	}
 	return &pb.MarkNotificationReadResponse{Code: pb.Success}, nil
+}
+
+func (m *MessageServiceImpl) AddNotification(ctx context.Context, request *pb.AddNotificationRequest) (*pb.AddNotificationResponse, error) {
+	notification := model.Notification{
+		Id:          request.Notification.Id,
+		Receiver:    request.Notification.Receiver,
+		TriggerUser: request.Notification.TriggerUser,
+		Type:        byte(request.Notification.Type),
+		Message:     request.Notification.Message,
+		Read:        false,
+		Timestamp:   request.Notification.Timestamp,
+	}
+	err := dao.AddNotification(&notification)
+	if err != nil {
+		return &pb.AddNotificationResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.AddNotificationResponse{Code: pb.Success}, nil
 }
