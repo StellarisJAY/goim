@@ -23,10 +23,10 @@ func MarkNotificationRead(id int64) error {
 	return err
 }
 
-func RemoveNotification(receiver int64) error {
+func RemoveNotification(id int64) error {
 	database := db.DB.MongoDB.Database(db.MongoDBName)
 	collection := database.Collection(db.CollectionNotification)
-	filter := bson.D{{"receiver", receiver}}
+	filter := bson.D{{"id", id}}
 	_, err := collection.DeleteMany(context.TODO(), filter)
 	return err
 }
@@ -77,4 +77,19 @@ func ListNotificationOfType(receiver int64, nType byte) ([]*model.Notification, 
 		return nil, err
 	}
 	return notifications, nil
+}
+
+func GetNotification(id int64) (*model.Notification, error) {
+	database := db.DB.MongoDB.Database(db.MongoDBName)
+	collection := database.Collection(db.CollectionNotification)
+	filter := bson.D{{"id", id}}
+	result := collection.FindOne(context.TODO(), filter)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+	notification := &model.Notification{}
+	if err := result.Decode(notification); err != nil {
+		return nil, err
+	}
+	return notification, nil
 }

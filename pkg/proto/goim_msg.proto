@@ -145,6 +145,25 @@ message AddNotificationResponse {
   string message = 2;
 }
 
+message GetNotificationRequest {
+  int64 id = 1;
+}
+
+message GetNotificationResponse {
+  int32 code = 1;
+  string message = 2;
+  Notification notification = 3;
+}
+
+message RemoveNotificationRequest {
+  int64 id = 1;
+}
+
+message RemoveNotificationResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
 service message {
   rpc SyncOfflineMessages(SyncMsgRequest) returns (SyncMsgResponse) {}
   // SendMessage 发送消息
@@ -155,4 +174,6 @@ service message {
   rpc ListNotifications(ListNotificationRequest) returns (ListNotificationResponse) {}
   rpc MarkNotificationRead(MarkNotificationReadRequest) returns (MarkNotificationReadResponse) {}
   rpc AddNotification(AddNotificationRequest) returns (AddNotificationResponse) {}
+  rpc GetNotification(GetNotificationRequest) returns (GetNotificationResponse) {}
+  rpc RemoveNotification(RemoveNotificationRequest) returns (RemoveNotificationResponse) {}
 }

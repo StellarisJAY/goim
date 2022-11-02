@@ -65,3 +65,33 @@ func (m *MessageServiceImpl) AddNotification(_ context.Context, request *pb.AddN
 	}
 	return &pb.AddNotificationResponse{Code: pb.Success}, nil
 }
+
+func (m *MessageServiceImpl) GetNotification(ctx context.Context, request *pb.GetNotificationRequest) (*pb.GetNotificationResponse, error) {
+	notification, err := dao.GetNotification(request.Id)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return &pb.GetNotificationResponse{Code: pb.NotFound, Message: "notification not found"}, nil
+		}
+		return &pb.GetNotificationResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.GetNotificationResponse{Code: pb.Success, Notification: &pb.Notification{
+		Id:          notification.Id,
+		Receiver:    notification.Receiver,
+		TriggerUser: notification.TriggerUser,
+		Message:     notification.Message,
+		Read:        notification.Read,
+		Type:        int32(notification.Type),
+		Timestamp:   notification.Timestamp,
+	}}, nil
+}
+
+func (m *MessageServiceImpl) RemoveNotification(ctx context.Context, request *pb.RemoveNotificationRequest) (*pb.RemoveNotificationResponse, error) {
+	err := dao.RemoveNotification(request.Id)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return &pb.RemoveNotificationResponse{Code: pb.NotFound, Message: "notification not found"}, nil
+		}
+		return &pb.RemoveNotificationResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.RemoveNotificationResponse{Code: pb.Success}, nil
+}
