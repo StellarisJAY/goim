@@ -10,7 +10,6 @@ import (
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
-	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"time"
 )
@@ -51,47 +50,17 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 		Id:          notificationId.NextID(),
 		Receiver:    request.TargetUser,
 		TriggerUser: request.UserID,
-		Message:     "", // todo 用户自定义验证消息
+		Message:     request.Message,
 		Type:        int32(model.NotificationFriendRequest),
 		Timestamp:   time.Now().UnixMilli(),
 	}
 	// 发送添加好友通知
 	addNoteResp, err := noteService.AddNotification(ctx, &pb.AddNotificationRequest{Notification: notification})
-	if err != nil && mongo.IsDuplicateKeyError(err) {
-		return &pb.AddFriendResponse{Code: pb.DuplicateKey, Message: "duplicate friend request"}, nil
-	} else if err != nil {
+	if err != nil {
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	return &pb.AddFriendResponse{Code: addNoteResp.Code, Message: addNoteResp.Message}, nil
 }
-
-//func (f *FriendServiceImpl) ListAddFriendRequests(ctx context.Context, request *pb.ListAddFriendRequest) (*pb.ListAddFriendResponse, error) {
-//	applications, err := dao.ListAddFriendRequests(request.UserID)
-//	if err != nil {
-//		if err == mongo.ErrNoDocuments {
-//			return &pb.ListAddFriendResponse{Code: pb.NotFound, Message: "no application found"}, nil
-//		}
-//		return &pb.ListAddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
-//	}
-//	friendApplications := make([]*pb.FriendApplication, 0, len(applications))
-//	for _, app := range applications {
-//		requester, err := dao.FindUserInfo(app.Requester)
-//		if err != nil {
-//			continue
-//		}
-//		friendApplications = append(friendApplications, &pb.FriendApplication{
-//			UserID:    requester.ID,
-//			Account:   requester.Account,
-//			NickName:  requester.NickName,
-//			Timestamp: app.Timestamp,
-//			Message:   app.Message,
-//		})
-//	}
-//	return &pb.ListAddFriendResponse{
-//		Code:         pb.Success,
-//		Applications: friendApplications,
-//	}, nil
-//}
 
 func (f *FriendServiceImpl) AcceptFriend(ctx context.Context, request *pb.AcceptFriendRequest) (*pb.AcceptFriendResponse, error) {
 	noteService, err := getNotificationService()

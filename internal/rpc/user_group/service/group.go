@@ -7,7 +7,6 @@ import (
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
-	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"time"
 )
@@ -144,9 +143,7 @@ func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUse
 		Type:        int32(model.NotificationGroupInvitation),
 		Timestamp:   time.Now().UnixMilli(),
 	}})
-	if err != nil && mongo.IsDuplicateKeyError(err) {
-		return &pb.InviteUserResponse{Code: pb.DuplicateKey, Message: "duplicate invitation"}, nil
-	} else if err != nil {
+	if err != nil {
 		return &pb.InviteUserResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	return &pb.InviteUserResponse{Code: addNoteResp.Code, Message: addNoteResp.Message}, nil
@@ -201,45 +198,6 @@ func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.Acc
 		Code: pb.Success,
 	}, nil
 }
-
-//// ListGroupInvitations 列出用户的进群邀请
-//// 从MongoDB获取userID下的进群邀请
-//// 从MySQL查询群名称等信息，然后封装成进群邀请返回
-//func (g *GroupServiceImpl) ListGroupInvitations(ctx context.Context, request *pb.ListInvitationRequest) (*pb.ListInvitationResponse, error) {
-//	// 从Mongo查询当前存在的邀请信息
-//	invitations, err := dao.ListInvitations(request.UserID)
-//	if err != nil {
-//		return &pb.ListInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
-//	}
-//	if len(invitations) == 0 {
-//		return &pb.ListInvitationResponse{Code: pb.NotFound, Message: "no invitations found"}, nil
-//	}
-//	groupIDs := make([]int64, len(invitations))
-//	for i, inv := range invitations {
-//		groupIDs[i] = inv.GroupID
-//	}
-//	// 查询邀请群聊的名称
-//	names, err := dao.FindGroupNames(groupIDs)
-//	if err != nil {
-//		return &pb.ListInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
-//	}
-//	groupInvitations := make([]*pb.GroupInvitation, len(invitations))
-//	// 封装proto对象
-//	for i, inv := range invitations {
-//		groupInvitations[i] = &pb.GroupInvitation{
-//			GroupID:        inv.GroupID,
-//			GroupName:      names[i],
-//			InviterID:      inv.Inviter,
-//			InviterAccount: inv.InviterAccount,
-//			Timestamp:      inv.Timestamp,
-//			ID:             inv.ID,
-//		}
-//	}
-//	return &pb.ListInvitationResponse{
-//		Code:        pb.Success,
-//		Invitations: groupInvitations,
-//	}, nil
-//}
 
 // ListGroups 查询用户已经加入的群聊信息列表
 func (g *GroupServiceImpl) ListGroups(ctx context.Context, request *pb.ListGroupsRequest) (*pb.ListGroupsResponse, error) {
