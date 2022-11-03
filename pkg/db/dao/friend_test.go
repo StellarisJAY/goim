@@ -1,12 +1,11 @@
 package dao
 
 import (
-	"github.com/stellarisJAY/goim/pkg/db/model"
 	"testing"
 )
 
 func init() {
-	_ = InsertFriendship(&model.Friend{FriendID: testUser1.ID, OwnerID: testUser2.ID}, &model.Friend{FriendID: testUser2.ID, OwnerID: testUser1.ID})
+	//_ = InsertFriendship(&model.Friend{FriendID: testUser1.ID, OwnerID: testUser2.ID}, &model.Friend{FriendID: testUser2.ID, OwnerID: testUser1.ID})
 }
 
 func TestCheckFriendship(t *testing.T) {

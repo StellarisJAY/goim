@@ -16,10 +16,10 @@ var testGroup1 = &model.Group{
 }
 
 func init() {
-	_ = InsertGroup(testGroup1)
-	_ = AddGroupMember(&model.GroupMember{GroupID: testGroup1.ID, UserID: 1001})
-	_ = AddGroupMember(&model.GroupMember{GroupID: testGroup1.ID, UserID: 1002})
-	_ = AddGroupMember(&model.GroupMember{GroupID: testGroup1.ID, UserID: 1003})
+	//_ = InsertGroup(testGroup1)
+	//_ = AddGroupMember(&model.GroupMember{GroupID: testGroup1.ID, UserID: 1001})
+	//_ = AddGroupMember(&model.GroupMember{GroupID: testGroup1.ID, UserID: 1002})
+	//_ = AddGroupMember(&model.GroupMember{GroupID: testGroup1.ID, UserID: 1003})
 }
 
 func TestAddGroupMember(t *testing.T) {
@@ -123,4 +123,27 @@ func TestListGroupMemberIDs(t *testing.T) {
 			t.FailNow()
 		}
 	})
+}
+
+func TestPrepareData(t *testing.T) {
+	for i := 1012; i <= 1999; i++ {
+		//err := InsertUser(&model.User{
+		//	ID:           int64(i),
+		//	Account:      fmt.Sprintf("test-user-%d", i),
+		//	Password:     "d232ca6a624b8a9cac6e152de5db10dc",
+		//	NickName:     fmt.Sprintf("test-user-%d", i),
+		//	Salt:         "xxvi7hvszwk1b182",
+		//	RegisterTime: time.Now().UnixMilli(),
+		//})
+		err := AddGroupMember(&model.GroupMember{
+			GroupID:  1001001,
+			UserID:   int64(i),
+			JoinTime: time.Now().UnixMilli(),
+			Status:   0,
+			Role:     6,
+		})
+		if err != nil {
+			t.Error(err)
+		}
+	}
 }
