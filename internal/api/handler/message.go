@@ -158,7 +158,7 @@ var ListNotifications = func(ctx context.Context) {
 			Code:    response.Code,
 			Message: response.Message,
 		},
-		Notifications: response.Notifications,
+		Notifications: convertNotificationStruct(response.Notifications),
 	}
 	_, _ = ctx.JSON(resp)
 }
@@ -194,4 +194,20 @@ func getMessageService() (pb.MessageClient, error) {
 	}
 	client := pb.NewMessageClient(conn)
 	return client, nil
+}
+
+func convertNotificationStruct(pbNotifications []*pb.Notification) []*http.Notification {
+	notifications := make([]*http.Notification, len(pbNotifications))
+	for i, notification := range pbNotifications {
+		notifications[i] = &http.Notification{
+			Id:          notification.Id,
+			Receiver:    notification.Receiver,
+			TriggerUser: notification.TriggerUser,
+			Type:        byte(notification.Type),
+			Message:     notification.Message,
+			Read:        notification.Read,
+			Timestamp:   notification.Timestamp,
+		}
+	}
+	return notifications
 }
