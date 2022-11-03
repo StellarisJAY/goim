@@ -60,8 +60,10 @@ func (m *MessageServiceImpl) AddNotification(_ context.Context, request *pb.AddN
 		Timestamp:   request.Notification.Timestamp,
 	}
 	err := dao.AddNotification(&notification)
-	if err != nil {
+	if err != nil && !mongo.IsDuplicateKeyError(err) {
 		return &pb.AddNotificationResponse{Code: pb.Error, Message: err.Error()}, nil
+	} else if err != nil {
+		return &pb.AddNotificationResponse{Code: pb.DuplicateKey, Message: "duplicate notification"}, nil
 	}
 	return &pb.AddNotificationResponse{Code: pb.Success}, nil
 }
