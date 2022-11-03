@@ -10,6 +10,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"time"
 )
@@ -56,7 +57,9 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 	}
 	// 发送添加好友通知
 	addNoteResp, err := noteService.AddNotification(ctx, &pb.AddNotificationRequest{Notification: notification})
-	if err != nil {
+	if err != nil && mongo.IsDuplicateKeyError(err) {
+		return &pb.AddFriendResponse{Code: pb.DuplicateKey, Message: "duplicate friend request"}, nil
+	} else if err != nil {
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	return &pb.AddFriendResponse{Code: addNoteResp.Code, Message: addNoteResp.Message}, nil

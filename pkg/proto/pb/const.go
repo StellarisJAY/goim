@@ -8,6 +8,7 @@ const (
 	AccessDenied     int32 = 403
 	WrongPassword    int32 = 5001
 	InvalidOperation int32 = 5002
+	DuplicateKey     int32 = 5003
 )
 
 const (

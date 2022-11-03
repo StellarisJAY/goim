@@ -7,6 +7,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"time"
 )
@@ -143,7 +144,9 @@ func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUse
 		Type:        int32(model.NotificationGroupInvitation),
 		Timestamp:   time.Now().UnixMilli(),
 	}})
-	if err != nil {
+	if err != nil && mongo.IsDuplicateKeyError(err) {
+		return &pb.InviteUserResponse{Code: pb.DuplicateKey, Message: "duplicate invitation"}, nil
+	} else if err != nil {
 		return &pb.InviteUserResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	return &pb.InviteUserResponse{Code: addNoteResp.Code, Message: addNoteResp.Message}, nil
