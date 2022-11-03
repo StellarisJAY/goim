@@ -3,7 +3,6 @@ package config
 import (
 	"flag"
 	"github.com/ghodss/yaml"
-	"github.com/stellarisJAY/goim/pkg/log"
 	"io/ioutil"
 	"testing"
 )
@@ -80,5 +79,4 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	log.Info("config file loaded %s, %s", Config.MySQL.Database, Config.MySQL.Address)
 }
