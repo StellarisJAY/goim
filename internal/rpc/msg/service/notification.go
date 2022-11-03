@@ -38,13 +38,20 @@ func (m *MessageServiceImpl) ListNotifications(_ context.Context, request *pb.Li
 }
 
 func (m *MessageServiceImpl) MarkNotificationRead(_ context.Context, request *pb.MarkNotificationReadRequest) (*pb.MarkNotificationReadResponse, error) {
-	err := dao.MarkNotificationRead(request.UserID)
+	notification, err := dao.GetNotification(request.NotificationID)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return &pb.MarkNotificationReadResponse{Code: pb.NotFound, Message: "notification not found"}, nil
 		} else {
 			return &pb.MarkNotificationReadResponse{Code: pb.Error, Message: err.Error()}, nil
 		}
+	}
+	// 检查notification是否属于用户
+	if notification.Receiver != request.UserID {
+		return &pb.MarkNotificationReadResponse{Code: pb.InvalidOperation, Message: "user is not the notification's receiver"}, nil
+	}
+	if !notification.Read {
+		_ = dao.MarkNotificationRead(request.NotificationID)
 	}
 	return &pb.MarkNotificationReadResponse{Code: pb.Success}, nil
 }
