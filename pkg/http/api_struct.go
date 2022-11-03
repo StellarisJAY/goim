@@ -95,12 +95,6 @@ type ListGroupMemberResponse struct {
 	Members []*pb.GroupMember `json:"members"`
 }
 
-// ListInvitationsResponse 列出邀请记录返回
-type ListInvitationsResponse struct {
-	BaseResponse
-	Invitations []*pb.GroupInvitation `json:"invitations"`
-}
-
 // AddFriendRequest 添加好友请求
 type AddFriendRequest struct {
 	TargetID        int64  `json:"targetID" validate:"required"`
@@ -110,11 +104,6 @@ type AddFriendRequest struct {
 // AcceptFriendRequest 接受好友申请请求
 type AcceptFriendRequest struct {
 	TargetID int64 `json:"targetID" validate:"required"`
-}
-
-type ListFriendApplicationsResponse struct {
-	BaseResponse
-	Applications []*pb.FriendApplication `json:"applications"`
 }
 
 type ListFriendsResponse struct {
@@ -145,5 +134,15 @@ type ListJoinedGroupsResponse struct {
 
 type ListNotificationRequest struct {
 	BaseResponse
-	Notifications []*pb.Notification
+	Notifications []*Notification
+}
+
+type Notification struct {
+	Id          int64  `json:"id"`
+	Receiver    int64  `json:"receiver"`    // 通知接收者
+	TriggerUser int64  `json:"triggerUser"` // 通知触发者
+	Type        byte   `json:"type"`        // 通知类型
+	Message     string `json:"message"`     // 内容
+	Read        bool   `json:"read"`
+	Timestamp   int64  `json:"timestamp"`
 }

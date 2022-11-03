@@ -27,16 +27,6 @@ message GroupMember{
   GroupMemberStatus status = 5;
 }
 
-// GroupInvitation 进群邀请详细记录 proto
-message GroupInvitation{
-  int64 groupID = 1;
-  string groupName = 2;
-  int64 inviterID = 3;
-  string inviterAccount = 4;
-  int64 timestamp = 5;
-  int64 ID = 6;
-}
-
 message CreateGroupRequest{
   string name = 1;
   int64 ownerID = 2;
@@ -93,16 +83,6 @@ message GetGroupInfoResponse {
   GroupInfo group = 3;
 }
 
-//message ListInvitationRequest {
-//  int64 userID = 1;
-//}
-//
-//message ListInvitationResponse{
-//  int32 code = 1;
-//  string message = 2;
-//  repeated GroupInvitation invitations = 3;
-//}
-
 message ListGroupsRequest {
   int64 userID = 1;
 }
@@ -125,8 +105,6 @@ service Group {
   rpc AcceptInvitation(AcceptInvitationRequest) returns (AcceptInvitationResponse) {}
   // GetGroupInfo 获取群聊信息
   rpc GetGroupInfo(GetGroupInfoRequest) returns (GetGroupInfoResponse) {}
-  // ListGroupInvitations 列出进群邀请记录
-//  rpc ListGroupInvitations(ListInvitationRequest) returns (ListInvitationResponse) {}
 
   rpc ListGroups(ListGroupsRequest) returns (ListGroupsResponse) {}
 }
