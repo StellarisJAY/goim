@@ -64,7 +64,11 @@ var ErrorHandler = func(ctx context.Context) {
 		if err, ok := v.(error); ok {
 			log.Errorf("Handler error, Method: %s, Path: %s, Error: %v", ctx.Method(), ctx.Path(), err)
 			ctx.StatusCode(iris.StatusInternalServerError)
-			_, _ = ctx.WriteString("Error Occurred: " + err.Error())
+			_, _ = ctx.WriteString("Internal Error: " + err.Error())
+		} else if errMsg, ok := v.(string); ok {
+			log.Errorf("Handler error, Method: %s, Path: %s, Error Msg: %s", ctx.Method(), ctx.Path(), errMsg)
+			ctx.StatusCode(iris.StatusInternalServerError)
+			_, _ = ctx.WriteString("Internal Error: " + errMsg)
 		}
 	}
 }
