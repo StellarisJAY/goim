@@ -52,3 +52,20 @@ func ListFriendIDs(userID int64) ([]int64, error) {
 func InsertFriendship(friendships ...*model.Friend) error {
 	return db.DB.MySQL.CreateInBatches(friendships[:], 2).Error
 }
+
+func RemoveFriendship(userID, friendID int64) error {
+	err := db.DB.MySQL.Transaction(func(tx *gorm.DB) error {
+		err := tx.Unscoped().Delete(&model.Friend{FriendID: userID, OwnerID: friendID}).Error
+		if err != nil {
+			return err
+		}
+		err = tx.Unscoped().Delete(&model.Friend{FriendID: friendID, OwnerID: userID}).Error
+		return err
+	})
+	if err != nil {
+		return err
+	}
+	_ = cache.Delete(fmt.Sprintf(KeyFriendIDList, userID))
+	_ = cache.Delete(fmt.Sprintf(KeyFriendIDList, friendID))
+	return nil
+}

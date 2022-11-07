@@ -225,3 +225,13 @@ func ListGroupInfos(groupIDs []int64) ([]*model.Group, error) {
 	}
 	return groups, nil
 }
+
+func RemoveGroupMember(groupID int64, memberID int64) error {
+	tx := db.DB.MySQL.Unscoped().Delete(&model.GroupMember{GroupID: groupID, UserID: memberID})
+	if tx.Error != nil {
+		return tx.Error
+	}
+	_ = cache.Delete(fmt.Sprintf(KeyGroupMembers, groupID))
+	_ = cache.Delete(fmt.Sprintf(KeyJoinedGroup, memberID))
+	return nil
+}
