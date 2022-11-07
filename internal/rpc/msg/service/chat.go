@@ -99,7 +99,7 @@ func isGroupMember(userID, groupID int64) (bool, bool, error) {
 }
 
 func GetFriendService() (pb.FriendClient, error) {
-	conn, err := naming.GetClientConn("friend")
+	conn, err := naming.GetClientConn(pb.FriendServiceName)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func GetFriendService() (pb.FriendClient, error) {
 }
 
 func GetGroupService() (pb.GroupClient, error) {
-	conn, err := naming.GetClientConn("group")
+	conn, err := naming.GetClientConn(pb.GroupServiceName)
 	if err != nil {
 		return nil, err
 	}

@@ -19,7 +19,7 @@ func Init() {
 	pb.RegisterGroupServer(server, service.NewGroupServiceImpl())
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ID:          "",
-		ServiceName: "group",
+		ServiceName: pb.GroupServiceName,
 		Address:     config.Config.RpcServer.Address,
 	})
 	if err != nil {

@@ -18,3 +18,11 @@ const (
 
 	MessagePushTopic = "goim_message_push"
 )
+
+const (
+	UserServiceName    = "goim_rpc_service_user"
+	FriendServiceName  = "goim_rpc_service_friend"
+	GroupServiceName   = "goim_rpc_service_group"
+	MessageServiceName = "goim_rpc_service_message"
+	GatewayServiceName = "goim_rpc_service_gateway"
+)

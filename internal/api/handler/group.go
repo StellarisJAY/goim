@@ -196,7 +196,7 @@ var ListJoinedGroupsHandler = func(ctx context.Context) {
 }
 
 func getGroupService() (pb.GroupClient, error) {
-	conn, err := naming.GetClientConn("group")
+	conn, err := naming.GetClientConn(pb.GroupServiceName)
 	if err != nil {
 		return nil, err
 	}

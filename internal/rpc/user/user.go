@@ -20,7 +20,7 @@ func Init() {
 	pb.RegisterAuthServer(server, &service.AuthServiceImpl{})
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ID:          "",
-		ServiceName: "user",
+		ServiceName: pb.UserServiceName,
 		Address:     config.Config.RpcServer.Address,
 	})
 	if err != nil {

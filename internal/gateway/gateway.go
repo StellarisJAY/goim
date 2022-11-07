@@ -30,7 +30,7 @@ func (s *Server) Init() {
 
 	// 注册网关服务，提供消息下行的RPC接口
 	err := naming.RegisterService(naming.ServiceRegistration{
-		ServiceName: "gateway",
+		ServiceName: pb.GatewayServiceName,
 		Address:     config.Config.RpcServer.Address,
 	})
 	if err != nil {

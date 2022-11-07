@@ -27,7 +27,7 @@ func Init() {
 		panic(err)
 	}
 	err = naming.RegisterService(naming.ServiceRegistration{
-		ServiceName: "message",
+		ServiceName: pb.MessageServiceName,
 		Address:     config.Config.RpcServer.Address,
 	})
 	if err != nil {

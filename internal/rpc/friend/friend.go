@@ -19,7 +19,7 @@ func Init() {
 	pb.RegisterFriendServer(server, service.NewFriendServiceImpl())
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ID:          "",
-		ServiceName: "friend",
+		ServiceName: pb.FriendServiceName,
 		Address:     config.Config.RpcServer.Address,
 	})
 	if err != nil {

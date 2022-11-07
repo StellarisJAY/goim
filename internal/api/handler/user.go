@@ -62,7 +62,7 @@ var UpdateUserHandler = func(ctx context.Context) {
 }
 
 func getUserService() (pb.UserClient, error) {
-	conn, err := naming.GetClientConn("user")
+	conn, err := naming.GetClientConn(pb.UserServiceName)
 	if err != nil {
 		return nil, err
 	}

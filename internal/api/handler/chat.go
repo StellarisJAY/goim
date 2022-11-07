@@ -7,7 +7,6 @@ import (
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/copier"
 	"github.com/stellarisJAY/goim/pkg/http"
-	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
 )
@@ -38,13 +37,12 @@ var SendMessageHandler = func(ctx context.Context) {
 	uid, _ := stringutil.HexStringToInt64(userID)
 	message.From = uid
 	message.DeviceId = deviceID
-	conn, err := naming.GetClientConn("message")
+	service, err := getMessageService()
 	if err != nil {
 		handleError(ctx, err)
 		return
 	}
-	client := pb.NewMessageClient(conn)
-	response, err := client.SendMessage(_context.Background(), &pb.SendMsgRequest{Msg: message})
+	response, err := service.SendMessage(_context.Background(), &pb.SendMsgRequest{Msg: message})
 	if err != nil {
 		handleError(ctx, err)
 		return

@@ -194,7 +194,7 @@ func (f *FriendServiceImpl) RemoveFriend(ctx context.Context, request *pb.Remove
 }
 
 func getNotificationService() (pb.MessageClient, error) {
-	conn, err := naming.GetClientConn("message")
+	conn, err := naming.GetClientConn(pb.MessageServiceName)
 	if err != nil {
 		return nil, err
 	}

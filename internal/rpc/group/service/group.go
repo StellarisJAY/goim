@@ -279,7 +279,7 @@ func GroupModelToDTO(group *model.Group) *pb.GroupInfo {
 }
 
 func getNotificationService() (pb.MessageClient, error) {
-	conn, err := naming.GetClientConn("message")
+	conn, err := naming.GetClientConn(pb.MessageServiceName)
 	if err != nil {
 		return nil, err
 	}
