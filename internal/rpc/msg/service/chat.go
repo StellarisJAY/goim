@@ -3,10 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/stellarisJAY/goim/pkg/db/dao"
+	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"google.golang.org/protobuf/proto"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -60,17 +59,57 @@ func (m *MessageServiceImpl) SendMessage(ctx context.Context, request *pb.SendMs
 
 // isFriends 检查消息双方是否是好友关系
 func isFriends(from, to int64) (bool, error) {
-	return dao.CheckFriendship(from, to)
+	service, err := GetFriendService()
+	if err != nil {
+		return false, nil
+	}
+	response, err := service.CheckFriendship(context.TODO(), &pb.FriendshipRequest{FriendID: to, UserID: from})
+	if err != nil {
+		return false, err
+	}
+	switch response.Code {
+	case pb.Error:
+		return false, fmt.Errorf("get friendship error %s", response.Message)
+	case pb.Success:
+		return response.IsFriend, nil
+	default:
+		return false, nil
+	}
 }
 
 // isGroupMember 检查用户是否是群成员，是否能够在群聊中发言
 func isGroupMember(userID, groupID int64) (bool, bool, error) {
-	member, err := dao.FindGroupMember(groupID, userID)
+	service, err := GetGroupService()
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return false, false, nil
-		}
 		return false, false, err
 	}
-	return true, pb.GroupMemberStatus(member.Status) == pb.GroupMemberStatus_normal, nil
+	response, err := service.GetGroupMember(context.TODO(), &pb.GetGroupMemberRequest{GroupID: groupID, UserID: userID})
+	if err != nil {
+		return false, false, err
+	}
+	switch response.Code {
+	case pb.Error:
+		return false, false, fmt.Errorf("get group member info error %s", response.Message)
+	case pb.NotFound:
+		return false, false, nil
+	case pb.Success:
+		return true, response.Member.Status == pb.GroupMemberStatus_normal, nil
+	}
+	return false, false, nil
+}
+
+func GetFriendService() (pb.FriendClient, error) {
+	conn, err := naming.GetClientConn("friend")
+	if err != nil {
+		return nil, err
+	}
+	return pb.NewFriendClient(conn), nil
+}
+
+func GetGroupService() (pb.GroupClient, error) {
+	conn, err := naming.GetClientConn("group")
+	if err != nil {
+		return nil, err
+	}
+	return pb.NewGroupClient(conn), nil
 }
