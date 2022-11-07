@@ -7,6 +7,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -31,13 +32,13 @@ func AsyncPushSendNotification() {
 		go func(notification *pb.Notification) {
 			conn, err := naming.GetClientConn("message")
 			if err != nil {
-				log.Warn("push notification get rpc service error %w", err)
+				log.Warn("get notification service failed", zap.Error(err))
 				return
 			}
 			service := pb.NewMessageClient(conn)
 			response, err := service.AddNotification(context.TODO(), &pb.AddNotificationRequest{Notification: notification})
 			if err != nil || response.Code == pb.Error {
-				log.Warn("push notification error %w", err)
+				log.Warn("push notification error", zap.Error(err))
 			}
 		}(notification)
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/gobwas/ws"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
+	"go.uber.org/zap"
 	"net"
 	"net/http"
 	"sync"
@@ -45,12 +46,16 @@ func (s *Server) Start() error {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		if err != nil {
-			log.Warn("failed to upgrade HTTP to websocket for %s , error: %v", r.RemoteAddr, err)
+			log.Warn("failed to upgrade HTTP to websocket",
+				zap.String("remoteAddr", r.RemoteAddr),
+				zap.Error(err))
 			return
 		}
 		result := s.Acceptor.Accept(conn, AcceptorContext{Gateway: config.Config.RpcServer.Address})
 		if result.Error != nil {
-			log.Warn("connection from %s failed: %v", conn.RemoteAddr().String(), result.Error)
+			log.Warn("connection not accepted",
+				zap.String("remoteAddr", conn.RemoteAddr().String()),
+				zap.Error(result.Error))
 			_ = conn.Close()
 			return
 		}

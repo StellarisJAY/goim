@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
 	"github.com/stellarisJAY/goim/pkg/log"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/resolver"
 )
 
@@ -57,12 +58,16 @@ func (c *ConsulResolver) watch() {
 	for {
 		services, meta, err := c.ns.client.Health().Service(c.serviceName, c.serviceName, true, &api.QueryOptions{WaitIndex: c.lastIndex})
 		if err != nil {
-			log.Warn("watch healthy services error %v", err)
+			log.Warn("retrieve healthy services failed",
+				zap.String("serviceName", c.serviceName),
+				zap.Error(err))
 			break
 		}
 		addresses := make([]resolver.Address, 0, len(services))
 		for _, service := range services {
-			log.Info("new address of service %s online : %s", c.serviceName, service.Service.Address)
+			log.Info("new service instance online",
+				zap.String("serviceName", c.serviceName),
+				zap.String("address", service.Service.Address))
 			addresses = append(addresses, resolver.Address{Addr: service.Service.Address})
 		}
 		c.lastIndex = meta.LastIndex

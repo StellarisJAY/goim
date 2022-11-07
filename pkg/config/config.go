@@ -9,7 +9,14 @@ import (
 
 var Config config
 
+const (
+	DevEnv     = "development"
+	ProductEnv = "production"
+	TestEnv    = "test"
+)
+
 type config struct {
+	Environment    string   `yaml:"environment"`
 	SensitiveWords []string `yaml:"sensitiveWords"`
 	MachineID      int64    `yaml:"machineID"`
 	TokenSecretKey string   `yaml:"tokenSecretKey"`

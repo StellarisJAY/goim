@@ -12,6 +12,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"net"
 	"time"
@@ -25,15 +26,22 @@ const (
 type GateAcceptor struct {
 }
 
+var logger *zap.Logger
+
+func init() {
+	var err error
+	logger, err = zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContext) websocket.AcceptorResult {
 	_ = conn.SetReadDeadline(time.Now().Add(HandshakeReadTimeout))
 	frame, err := websocket.ReadFrame(conn)
 	if err != nil {
 		return websocket.AcceptorResult{Error: fmt.Errorf("read handshake frame error: %w", err)}
 	}
-	//if frame.Header.OpCode != ws.OpBinary {
-	//	return websocket.AcceptorResult{Error: errors.New("wrong type of op code for handshake")}
-	//}
 	if frame.Header.Masked {
 		ws.Cipher(frame.Payload, frame.Header.Mask, 0)
 		frame.Header.Masked = false
@@ -60,7 +68,10 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	if err := ws.WriteFrame(conn, frame); err != nil {
 		return websocket.AcceptorResult{Error: err}
 	}
-	log.Info("Accepted websocket connection, userID: %d, Device: %d, channel:  %s", loginResp.UserID, loginResp.DeviceID, channel)
+	logger.Info("Accepted websocket connection",
+		zap.Int64("userID", loginResp.UserID),
+		zap.String("deviceID", loginResp.DeviceID),
+		zap.String("channel", channel))
 	return websocket.AcceptorResult{
 		UserID:    loginResp.UserID,
 		DeviceID:  loginResp.DeviceID,
@@ -90,7 +101,7 @@ func login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel 
 	case pb.Success:
 		return response, nil
 	case pb.Error:
-		log.Errorf("login error: %s", response.Message)
+		log.Warn("login request failed", zap.Error(err))
 		return nil, errors.New("access denied")
 	default:
 		return nil, errors.New("access denied")

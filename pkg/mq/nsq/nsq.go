@@ -5,6 +5,7 @@ import (
 	"github.com/nsqio/go-nsq"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
+	"go.uber.org/zap"
 )
 
 type Producer struct {
@@ -79,7 +80,9 @@ func (pr *Producer) PublishCallback(topic string, body []byte, callback func(*ns
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Warn("unexpected error in nsq publish callback %v", err)
+				if e, ok := err.(error); ok {
+					log.Warn("unexpected error in nsq publish callback", zap.Error(e))
+				}
 			}
 		}()
 		transaction := <-done

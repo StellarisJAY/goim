@@ -10,6 +10,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"strconv"
 )
@@ -92,7 +93,9 @@ func relayGroupMessage(s *Server, payload []byte) error {
 	}
 	for _, member := range mqMsg.GroupMembers {
 		if err := relayMqMessage(s, member, marshal); err != nil {
-			log.Debug("relay group member %s message error %w", member, err)
+			log.Warn("relay group member's message failed",
+				zap.String("groupMember", member),
+				zap.Error(err))
 		}
 	}
 	return nil
@@ -109,7 +112,7 @@ func relayMqMessage(s *Server, key string, payload []byte) error {
 	}
 	value, ok := s.wsServer.UserConns.Load(userID)
 	if !ok {
-		log.Debug("user not on gateway server: %d", userID)
+		log.Debug("user not on gateway server", zap.Int64("userID", userID))
 		return nil
 	}
 	channel := value.(*websocket.Channel)

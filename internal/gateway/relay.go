@@ -7,6 +7,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -62,7 +63,9 @@ func (s *Server) Broadcast(ctx context.Context, request *pb.BroadcastRequest) (*
 		err := channel.Push(marshal)
 		if err != nil {
 			// 推送失败，将channelID添加到失败列表
-			log.Errorf("failed to push message to channel: %s, error: %v", channel.ID(), err)
+			log.Warn("push message to channel failed",
+				zap.String("channel", channel.ID()),
+				zap.Error(err))
 			fails = append(fails, channel.ID())
 		}
 	}

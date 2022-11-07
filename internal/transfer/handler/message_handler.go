@@ -16,6 +16,7 @@ import (
 	_nsq "github.com/stellarisJAY/goim/pkg/mq/nsq"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"runtime"
 	"strconv"
@@ -65,7 +66,7 @@ var MessageTransferHandler = func(message *sarama.ConsumerMessage) error {
 	default:
 	}
 	if err != nil {
-		log.Warn("handle message failed, msgID: %d, error: %v", msg.Id, err)
+		log.Warn("handle message failed", zap.Int64("messageID", msg.Id), zap.Error(err))
 	}
 	return nil
 }
@@ -85,7 +86,7 @@ var NsqMessageHandler = func(message *nsq.Message) error {
 	default:
 	}
 	if err != nil {
-		log.Warn("handle message failed, msgID: %d, error: %v", msg.Id, err)
+		log.Warn("handle message failed", zap.Int64("messageID", msg.Id), zap.Error(err))
 	}
 	return nil
 }
@@ -182,7 +183,7 @@ func pushGroupSync(message *pb.BaseMsg) error {
 func groupPushTask(gateway string, channels []string, message *pb.BaseMsg) {
 	conn, err := naming.DialConnection(gateway)
 	if err != nil {
-		log.Warn("Connect to gateway failed, gateway: ", gateway)
+		log.Warn("Connect to gateway failed ", zap.String("gateway", gateway), zap.Error(err))
 		return
 	}
 	client := pb.NewRelayClient(conn)
@@ -192,7 +193,7 @@ func groupPushTask(gateway string, channels []string, message *pb.BaseMsg) {
 		Channels: channels,
 	})
 	if err != nil {
-		log.Warn("RPC Broadcast message failed, gateway: %s, error: %v", gateway, err)
+		log.Warn("RPC Broadcast message failed", zap.String("gateway", gateway), zap.Error(err))
 	}
 }
 
@@ -200,18 +201,18 @@ func syncPushTask(session model.Session, message *pb.BaseMsg) {
 	// 与gateway连接
 	conn, psErr := naming.DialConnection(session.Gateway)
 	if psErr != nil {
-		log.Warn("connect gateway error: ", psErr)
+		log.Warn("connect to gateway failed", zap.Error(psErr))
 		return
 	}
 	// RPC push message
 	client := pb.NewRelayClient(conn)
 	response, psErr := client.PushMessage(context.Background(), &pb.PushMsgRequest{Message: message, Channel: session.Channel})
 	if psErr != nil {
-		log.Warn("push message RPC error: ", psErr)
+		log.Warn("push message RPC failed", zap.Error(psErr))
 		return
 	}
 	if response.Base.Code != pb.Success {
-		log.Info("push message result: ", response.Base.Message)
+		log.Info("push message finished", zap.String("result", response.Base.Message))
 	}
 }
 
@@ -247,7 +248,10 @@ func pushGroupMQ(message *pb.BaseMsg) error {
 	mqMsg.GroupMembers = groupMembers
 	err = pushToMQ(mqMsg, "group")
 	if err != nil {
-		log.Warn("failed to push mq group: %d, error: %w", groupID, err)
+		log.Warn("push group message to mq failed",
+			zap.Int64("groupID", groupID),
+			zap.Int64("messageID", message.Id),
+			zap.Error(err))
 	}
 	//for _, memberID := range groupMembers {
 	//	if err := pushToMQ(message, memberID); err != nil {

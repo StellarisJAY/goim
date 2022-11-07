@@ -11,6 +11,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/websocket"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
 	"strings"
@@ -57,7 +58,7 @@ func (s *Server) Init() {
 		s.nsqConsumer = nsq.NewConsumer(pb.MessagePushTopic, group, s.HandleNSQ)
 		s.nsqConsumer.Connect()
 	}
-	log.Info("Gateway service registered, time used: %d ms", time.Now().UnixMilli()-startTime)
+	log.Info("Gateway service registered", zap.Int64("time used(ms)", time.Now().UnixMilli()-startTime))
 }
 
 func (s *Server) Start() error {

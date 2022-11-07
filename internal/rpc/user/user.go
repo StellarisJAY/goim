@@ -6,6 +6,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
 	"time"
@@ -26,7 +27,8 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-	log.Info("user service registered, time used: %d ms", time.Now().Sub(startTime).Milliseconds())
+	log.Info("user service registered",
+		zap.Int64("time used(ms)", time.Now().Sub(startTime).Milliseconds()))
 }
 
 func Start() {

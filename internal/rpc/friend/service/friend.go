@@ -10,12 +10,26 @@ import (
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/snowflake"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"time"
 )
 
 type FriendServiceImpl struct {
 	applicationId *snowflake.Snowflake
+}
+
+var (
+	logger *zap.Logger
+)
+
+func init() {
+	var err error
+
+	logger, err = zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func NewFriendServiceImpl() *FriendServiceImpl {
@@ -29,11 +43,13 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 		if err == gorm.ErrRecordNotFound {
 			return &pb.AddFriendResponse{Code: pb.NotFound, Message: "target user not found"}, nil
 		}
+		logger.Warn("DB find user info error ", zap.Error(err))
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	// 查询好友关系是否已经存在
 	friendship, err := dao.CheckFriendship(request.UserID, request.TargetUser)
 	if err != nil {
+		logger.Warn("DB check friendship error ", zap.Error(err))
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	if friendship {
@@ -44,6 +60,7 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 	}
 	noteService, err := getNotificationService()
 	if err != nil {
+		logger.Error("get notification service error ", zap.Error(err))
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	notification := &pb.Notification{
@@ -57,6 +74,7 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 	// 发送添加好友通知
 	addNoteResp, err := noteService.AddNotification(ctx, &pb.AddNotificationRequest{Notification: notification})
 	if err != nil {
+		logger.Warn("send add friend notification error ", zap.Error(err))
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
 	return &pb.AddFriendResponse{Code: addNoteResp.Code, Message: addNoteResp.Message}, nil

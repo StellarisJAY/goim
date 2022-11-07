@@ -9,6 +9,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -40,12 +41,18 @@ var TokenVerifier = func(ctx context.Context) {
 	if time.Now().Sub(time.UnixMilli(expireAt)).Minutes() <= 10 {
 		authService, err := GetAuthService()
 		if err != nil {
-			log.Errorf("update token for user %s failed, error: %v", userID, err)
+			log.Error("get user auth service error", zap.Error(err))
 		} else {
 			uid, _ := stringutil.HexStringToInt64(userID)
 			response, err := authService.UpdateToken(_context.TODO(), &pb.UpdateTokenRequest{UserID: uid, DeviceID: deviceID})
-			if err != nil || response.Code == pb.Error {
-				log.Errorf("update token for user: %s failed, message: ", userID, response.Message)
+			if err != nil {
+				log.Error("update token error",
+					zap.String("userID", userID),
+					zap.String("error", err.Error()))
+			} else if response.Code == pb.Error {
+				log.Error("update token failed",
+					zap.String("userID", userID),
+					zap.String("error", response.Message))
 			} else {
 				recorder := ctx.Recorder()
 				recorder.Header().Set("AuthUpdateToken", token)
@@ -62,11 +69,17 @@ var ErrorHandler = func(ctx context.Context) {
 	v := ctx.Values().Get(CtxKeyHandlerError)
 	if v != nil {
 		if err, ok := v.(error); ok {
-			log.Errorf("Handler error, Method: %s, Path: %s, Error: %v", ctx.Method(), ctx.Path(), err)
+			log.Warn("HTTP Handler Error",
+				zap.String("Method", ctx.Method()),
+				zap.String("Path", ctx.Path()),
+				zap.Error(err))
 			ctx.StatusCode(iris.StatusInternalServerError)
 			_, _ = ctx.WriteString("Internal Error: " + err.Error())
 		} else if errMsg, ok := v.(string); ok {
-			log.Errorf("Handler error, Method: %s, Path: %s, Error Msg: %s", ctx.Method(), ctx.Path(), errMsg)
+			log.Warn("HTTP Handler Error",
+				zap.String("Method", ctx.Method()),
+				zap.String("Path", ctx.Path()),
+				zap.String("ErrorMsg", errMsg))
 			ctx.StatusCode(iris.StatusInternalServerError)
 			_, _ = ctx.WriteString("Internal Error: " + errMsg)
 		}

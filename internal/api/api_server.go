@@ -6,6 +6,7 @@ import (
 	"github.com/stellarisJAY/goim/internal/api/middleware"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
+	"go.uber.org/zap"
 )
 
 var application *iris.Application
@@ -88,6 +89,6 @@ func Init() {
 func Start() {
 	err := application.Run(iris.Addr(":" + config.Config.ApiServer.Port))
 	if err != nil {
-		log.Errorf("iris http server error: %v", err)
+		log.Error("iris http server error", zap.Error(err))
 	}
 }

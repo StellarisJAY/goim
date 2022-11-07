@@ -8,6 +8,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"go.uber.org/zap"
 	"sync/atomic"
 )
 
@@ -48,7 +49,7 @@ func (c *Channel) Start() error {
 	go func() {
 		err := c.writeLoop()
 		if err != nil {
-			log.Warn("write loop error: %v", err)
+			log.Error("write loop error", zap.Error(err))
 		}
 		c.Close()
 	}()
@@ -109,11 +110,11 @@ func (c *Channel) gracefulShutdown() {
 		DeviceID: c.deviceID,
 	})
 	if err != nil {
-		log.Error(err)
+		log.Warn("close conn kick user session rpc error", zap.Error(err))
 		return
 	}
 	if resp.Code != pb.Success {
-		log.Warn("graceful shutdown kick session error: %s", resp.Message)
+		log.Warn("graceful shutdown kick session failed", zap.String("msg", resp.Message))
 		return
 	}
 }

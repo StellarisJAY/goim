@@ -6,6 +6,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 	"time"
@@ -61,7 +62,7 @@ func (ns *EtcdNaming) keepAlive(leaseID clientv3.LeaseID, serviceName string) er
 			select {
 			case _, ok := <-aliveChan:
 				if !ok {
-					log.Warn("service %s keepalive interrupted", serviceName)
+					log.Warn("service register keepalive interrupted", zap.String("serviceName", serviceName))
 					break
 				}
 			}

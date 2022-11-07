@@ -9,6 +9,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/db/model"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 	"runtime"
 )
@@ -70,6 +71,8 @@ func persistTask(msg *pb.BaseMsg) {
 	}
 	err := dao.InsertMessage(message)
 	if err != nil {
-		log.Warn("persist message error: ", err)
+		log.Warn("persist message failed",
+			zap.Int64("messageID", message.ID),
+			zap.Error(err))
 	}
 }
