@@ -216,6 +216,48 @@ func (g *GroupServiceImpl) ListGroups(ctx context.Context, request *pb.ListGroup
 	}, nil
 }
 
+func (g *GroupServiceImpl) GetGroupMember(ctx context.Context, request *pb.GetGroupMemberRequest) (*pb.GetGroupMemberResponse, error) {
+	member, err := dao.FindGroupMember(request.GroupID, request.UserID)
+	if err != nil {
+		return &pb.GetGroupMemberResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if member != nil {
+		groupMember := &pb.Member{
+			UserID:   member.UserID,
+			GroupID:  member.GroupID,
+			JoinTime: member.JoinTime,
+			Status:   pb.GroupMemberStatus(member.Status),
+			Role:     pb.GroupMemberRole(member.Role),
+		}
+		return &pb.GetGroupMemberResponse{Code: pb.Success, Member: groupMember}, nil
+	}
+	return &pb.GetGroupMemberResponse{Code: pb.NotFound, Message: "group member not found"}, nil
+}
+
+func (g *GroupServiceImpl) KickGroupMember(ctx context.Context, request *pb.KickGroupMemberRequest) (*pb.KickGroupMemberResponse, error) {
+	// 检查kick操作者是否是群主或管理员
+	operator, err := dao.FindGroupMember(request.GroupID, request.OperatorID)
+	if err != nil {
+		return &pb.KickGroupMemberResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	// operator不是群成员，或者不具备权限
+	if operator == nil || operator.Role != model.MemberRoleAdmin && operator.Role != model.MemberRoleOwner {
+		return &pb.KickGroupMemberResponse{Code: pb.AccessDenied}, nil
+	}
+	// 检查被删除的用户是否是该群成员
+	member, err := dao.FindGroupMember(request.GroupID, request.MemberID)
+	if err != nil {
+		return &pb.KickGroupMemberResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if member == nil {
+		return &pb.KickGroupMemberResponse{Code: pb.NotFound}, nil
+	}
+	if err = dao.RemoveGroupMember(request.GroupID, request.MemberID); err != nil {
+		return &pb.KickGroupMemberResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.KickGroupMemberResponse{Code: pb.Success}, nil
+}
+
 func GroupsToDTO(groups []*model.Group) []*pb.GroupInfo {
 	infos := make([]*pb.GroupInfo, len(groups))
 	for i, g := range groups {
