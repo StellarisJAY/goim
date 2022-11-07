@@ -12,7 +12,6 @@ require (
 	github.com/gobwas/ws v1.0.2
 	github.com/google/uuid v1.1.2
 	github.com/hashicorp/consul/api v1.13.1
-	github.com/jinzhu/copier v0.3.5
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/nsqio/go-nsq v1.1.0
 	go.mongodb.org/mongo-driver v1.10.0

@@ -5,7 +5,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
-	"github.com/stellarisJAY/goim/pkg/copier"
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
@@ -27,16 +26,14 @@ var SendMessageHandler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	message := new(pb.BaseMsg)
-	if err := copier.CopyStructFields(message, req); err != nil {
-		handleError(ctx, err)
-		return
+	message := &pb.BaseMsg{
+		To:       req.To,
+		Content:  req.Content,
+		Flag:     pb.MessageFlag(req.Flag),
+		DeviceId: deviceID,
 	}
-	// 设置消息类型
-	message.Flag = pb.MessageFlag(req.Flag)
 	uid, _ := stringutil.HexStringToInt64(userID)
 	message.From = uid
-	message.DeviceId = deviceID
 	service, err := getMessageService()
 	if err != nil {
 		handleError(ctx, err)

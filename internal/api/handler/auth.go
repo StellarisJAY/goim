@@ -5,7 +5,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
-	"github.com/stellarisJAY/goim/pkg/copier"
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
@@ -28,10 +27,10 @@ var AuthHandler context.Handler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	authReq := &pb.AuthRequest{}
-	if err := copier.CopyStructFields(authReq, req); err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		return
+	authReq := &pb.AuthRequest{
+		Account:  req.Account,
+		DeviceID: req.DeviceID,
+		Password: req.Password,
 	}
 	// 获取授权RPC服务，RPC调用获取Token
 	service, err := GetAuthService()
@@ -64,10 +63,8 @@ var RegisterHandler context.Handler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	request := &pb.RegisterRequest{}
-	if err := copier.CopyStructFields(request, regReq); err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		return
+	request := &pb.RegisterRequest{
+		Account: regReq.Account, NickName: regReq.NickName, Password: regReq.Password,
 	}
 	service, err := GetAuthService()
 	if err != nil {
