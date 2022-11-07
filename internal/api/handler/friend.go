@@ -142,7 +142,7 @@ var FriendInfoHandler = func(ctx context.Context) {
 }
 
 func getFriendService() (pb.FriendClient, error) {
-	conn, err := naming.GetClientConn("user_group")
+	conn, err := naming.GetClientConn("friend")
 	if err != nil {
 		return nil, err
 	}

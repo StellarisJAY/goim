@@ -1,7 +1,7 @@
-package user_group
+package user
 
 import (
-	"github.com/stellarisJAY/goim/internal/rpc/user_group/service"
+	"github.com/stellarisJAY/goim/internal/rpc/user/service"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
@@ -17,8 +17,6 @@ func Init() {
 	server = grpc.NewServer()
 	startTime := time.Now()
 	pb.RegisterUserServer(server, &service.UserServiceImpl{})
-	pb.RegisterGroupServer(server, service.NewGroupServiceImpl())
-	pb.RegisterFriendServer(server, service.NewFriendServiceImpl())
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ID:          "",
 		ServiceName: "user",
@@ -27,7 +25,7 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-	log.Info("user-group service registered, time used: %d ms", time.Now().Sub(startTime).Milliseconds())
+	log.Info("user service registered, time used: %d ms", time.Now().Sub(startTime).Milliseconds())
 }
 
 func Start() {
@@ -35,9 +33,6 @@ func Start() {
 	if err != nil {
 		panic(err)
 	}
-	go func() {
-		service.AsyncPushSendNotification()
-	}()
 	err = server.Serve(listener)
 	if err != nil {
 		panic(err)
