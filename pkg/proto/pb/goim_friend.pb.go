@@ -567,6 +567,234 @@ func (x *FriendInfoResponse) GetInfo() *FriendInfo {
 	return nil
 }
 
+type FriendshipRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserID   int64 `protobuf:"varint,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	FriendID int64 `protobuf:"varint,2,opt,name=friendID,proto3" json:"friendID,omitempty"`
+}
+
+func (x *FriendshipRequest) Reset() {
+	*x = FriendshipRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_friend_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FriendshipRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FriendshipRequest) ProtoMessage() {}
+
+func (x *FriendshipRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_friend_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FriendshipRequest.ProtoReflect.Descriptor instead.
+func (*FriendshipRequest) Descriptor() ([]byte, []int) {
+	return file_goim_friend_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *FriendshipRequest) GetUserID() int64 {
+	if x != nil {
+		return x.UserID
+	}
+	return 0
+}
+
+func (x *FriendshipRequest) GetFriendID() int64 {
+	if x != nil {
+		return x.FriendID
+	}
+	return 0
+}
+
+type FriendshipResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Code     int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message  string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	IsFriend bool   `protobuf:"varint,3,opt,name=isFriend,proto3" json:"isFriend,omitempty"`
+}
+
+func (x *FriendshipResponse) Reset() {
+	*x = FriendshipResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_friend_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FriendshipResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FriendshipResponse) ProtoMessage() {}
+
+func (x *FriendshipResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_friend_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FriendshipResponse.ProtoReflect.Descriptor instead.
+func (*FriendshipResponse) Descriptor() ([]byte, []int) {
+	return file_goim_friend_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *FriendshipResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *FriendshipResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *FriendshipResponse) GetIsFriend() bool {
+	if x != nil {
+		return x.IsFriend
+	}
+	return false
+}
+
+type RemoveFriendRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserID   int64 `protobuf:"varint,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	FriendID int64 `protobuf:"varint,2,opt,name=friendID,proto3" json:"friendID,omitempty"`
+}
+
+func (x *RemoveFriendRequest) Reset() {
+	*x = RemoveFriendRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_friend_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RemoveFriendRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveFriendRequest) ProtoMessage() {}
+
+func (x *RemoveFriendRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_friend_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveFriendRequest.ProtoReflect.Descriptor instead.
+func (*RemoveFriendRequest) Descriptor() ([]byte, []int) {
+	return file_goim_friend_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RemoveFriendRequest) GetUserID() int64 {
+	if x != nil {
+		return x.UserID
+	}
+	return 0
+}
+
+func (x *RemoveFriendRequest) GetFriendID() int64 {
+	if x != nil {
+		return x.FriendID
+	}
+	return 0
+}
+
+type RemoveFriendResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Code    int32  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (x *RemoveFriendResponse) Reset() {
+	*x = RemoveFriendResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_goim_friend_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RemoveFriendResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveFriendResponse) ProtoMessage() {}
+
+func (x *RemoveFriendResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_goim_friend_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveFriendResponse.ProtoReflect.Descriptor instead.
+func (*RemoveFriendResponse) Descriptor() ([]byte, []int) {
+	return file_goim_friend_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *RemoveFriendResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *RemoveFriendResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_goim_friend_proto protoreflect.FileDescriptor
 
 var file_goim_friend_proto_rawDesc = []byte{
@@ -626,29 +854,59 @@ var file_goim_friend_proto_rawDesc = []byte{
 	0x73, 0x61, 0x67, 0x65, 0x12, 0x2b, 0x0a, 0x04, 0x69, 0x6e, 0x66, 0x6f, 0x18, 0x03, 0x20, 0x01,
 	0x28, 0x0b, 0x32, 0x17, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64,
 	0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x04, 0x69, 0x6e, 0x66,
-	0x6f, 0x32, 0xd3, 0x02, 0x0a, 0x06, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x12, 0x4c, 0x0a, 0x09,
-	0x41, 0x64, 0x64, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x12, 0x1d, 0x2e, 0x67, 0x6f, 0x69, 0x6d,
-	0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x41, 0x64, 0x64, 0x46, 0x72, 0x69, 0x65, 0x6e,
-	0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f,
-	0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x41, 0x64, 0x64, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x55, 0x0a, 0x0c, 0x41, 0x63,
-	0x63, 0x65, 0x70, 0x74, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x12, 0x20, 0x2e, 0x67, 0x6f, 0x69,
-	0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x41, 0x63, 0x63, 0x65, 0x70, 0x74, 0x46,
-	0x72, 0x69, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x67,
-	0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x41, 0x63, 0x63, 0x65, 0x70,
-	0x74, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
-	0x00, 0x12, 0x50, 0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x73,
-	0x12, 0x1e, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x46,
-	0x72, 0x69, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x1f, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x46,
-	0x72, 0x69, 0x65, 0x6e, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64,
-	0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1e, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65,
-	0x6e, 0x64, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71,
+	0x6f, 0x22, 0x47, 0x0a, 0x11, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x73, 0x68, 0x69, 0x70, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x1a,
+	0x0a, 0x08, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x08, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x49, 0x44, 0x22, 0x5e, 0x0a, 0x12, 0x46, 0x72,
+	0x69, 0x65, 0x6e, 0x64, 0x73, 0x68, 0x69, 0x70, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04,
+	0x63, 0x6f, 0x64, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x1a,
+	0x0a, 0x08, 0x69, 0x73, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x08, 0x69, 0x73, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x22, 0x49, 0x0a, 0x13, 0x52, 0x65,
+	0x6d, 0x6f, 0x76, 0x65, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x1a, 0x0a, 0x08, 0x66, 0x72, 0x69,
+	0x65, 0x6e, 0x64, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x08, 0x66, 0x72, 0x69,
+	0x65, 0x6e, 0x64, 0x49, 0x44, 0x22, 0x44, 0x0a, 0x14, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x46,
+	0x72, 0x69, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a,
+	0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64,
+	0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x32, 0x80, 0x04, 0x0a, 0x06,
+	0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x12, 0x4c, 0x0a, 0x09, 0x41, 0x64, 0x64, 0x46, 0x72, 0x69,
+	0x65, 0x6e, 0x64, 0x12, 0x1d, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e,
+	0x64, 0x2e, 0x41, 0x64, 0x64, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64,
+	0x2e, 0x41, 0x64, 0x64, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x55, 0x0a, 0x0c, 0x41, 0x63, 0x63, 0x65, 0x70, 0x74, 0x46, 0x72,
+	0x69, 0x65, 0x6e, 0x64, 0x12, 0x20, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65,
+	0x6e, 0x64, 0x2e, 0x41, 0x63, 0x63, 0x65, 0x70, 0x74, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72,
+	0x69, 0x65, 0x6e, 0x64, 0x2e, 0x41, 0x63, 0x63, 0x65, 0x70, 0x74, 0x46, 0x72, 0x69, 0x65, 0x6e,
+	0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x50, 0x0a, 0x0b, 0x4c,
+	0x69, 0x73, 0x74, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x73, 0x12, 0x1e, 0x2e, 0x67, 0x6f, 0x69,
+	0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x4c,
+	0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x67, 0x6f, 0x69,
+	0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x4c,
+	0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52, 0x0a,
+	0x0d, 0x47, 0x65, 0x74, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1e,
+	0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x46, 0x72, 0x69,
+	0x65, 0x6e, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f,
+	0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x46, 0x72, 0x69,
+	0x65, 0x6e, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
+	0x00, 0x12, 0x54, 0x0a, 0x0f, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64,
+	0x73, 0x68, 0x69, 0x70, 0x12, 0x1e, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65,
+	0x6e, 0x64, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x73, 0x68, 0x69, 0x70, 0x52, 0x65, 0x71,
 	0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66, 0x72, 0x69, 0x65,
-	0x6e, 0x64, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6e, 0x64, 0x2e, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x73, 0x68, 0x69, 0x70, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x55, 0x0a, 0x0c, 0x52, 0x65, 0x6d, 0x6f, 0x76,
+	0x65, 0x46, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x12, 0x20, 0x2e, 0x67, 0x6f, 0x69, 0x6d, 0x5f, 0x66,
+	0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x46, 0x72, 0x69, 0x65,
+	0x6e, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x67, 0x6f, 0x69, 0x6d,
+	0x5f, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x46, 0x72,
+	0x69, 0x65, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x06,
+	0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -663,7 +921,7 @@ func file_goim_friend_proto_rawDescGZIP() []byte {
 	return file_goim_friend_proto_rawDescData
 }
 
-var file_goim_friend_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_goim_friend_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_goim_friend_proto_goTypes = []interface{}{
 	(*FriendInfo)(nil),           // 0: goim_friend.FriendInfo
 	(*AddFriendRequest)(nil),     // 1: goim_friend.AddFriendRequest
@@ -674,23 +932,31 @@ var file_goim_friend_proto_goTypes = []interface{}{
 	(*FriendListResponse)(nil),   // 6: goim_friend.FriendListResponse
 	(*FriendInfoRequest)(nil),    // 7: goim_friend.FriendInfoRequest
 	(*FriendInfoResponse)(nil),   // 8: goim_friend.FriendInfoResponse
+	(*FriendshipRequest)(nil),    // 9: goim_friend.FriendshipRequest
+	(*FriendshipResponse)(nil),   // 10: goim_friend.FriendshipResponse
+	(*RemoveFriendRequest)(nil),  // 11: goim_friend.RemoveFriendRequest
+	(*RemoveFriendResponse)(nil), // 12: goim_friend.RemoveFriendResponse
 }
 var file_goim_friend_proto_depIdxs = []int32{
-	0, // 0: goim_friend.FriendListResponse.friends:type_name -> goim_friend.FriendInfo
-	0, // 1: goim_friend.FriendInfoResponse.info:type_name -> goim_friend.FriendInfo
-	1, // 2: goim_friend.Friend.AddFriend:input_type -> goim_friend.AddFriendRequest
-	3, // 3: goim_friend.Friend.AcceptFriend:input_type -> goim_friend.AcceptFriendRequest
-	5, // 4: goim_friend.Friend.ListFriends:input_type -> goim_friend.FriendListRequest
-	7, // 5: goim_friend.Friend.GetFriendInfo:input_type -> goim_friend.FriendInfoRequest
-	2, // 6: goim_friend.Friend.AddFriend:output_type -> goim_friend.AddFriendResponse
-	4, // 7: goim_friend.Friend.AcceptFriend:output_type -> goim_friend.AcceptFriendResponse
-	6, // 8: goim_friend.Friend.ListFriends:output_type -> goim_friend.FriendListResponse
-	8, // 9: goim_friend.Friend.GetFriendInfo:output_type -> goim_friend.FriendInfoResponse
-	6, // [6:10] is the sub-list for method output_type
-	2, // [2:6] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0,  // 0: goim_friend.FriendListResponse.friends:type_name -> goim_friend.FriendInfo
+	0,  // 1: goim_friend.FriendInfoResponse.info:type_name -> goim_friend.FriendInfo
+	1,  // 2: goim_friend.Friend.AddFriend:input_type -> goim_friend.AddFriendRequest
+	3,  // 3: goim_friend.Friend.AcceptFriend:input_type -> goim_friend.AcceptFriendRequest
+	5,  // 4: goim_friend.Friend.ListFriends:input_type -> goim_friend.FriendListRequest
+	7,  // 5: goim_friend.Friend.GetFriendInfo:input_type -> goim_friend.FriendInfoRequest
+	9,  // 6: goim_friend.Friend.CheckFriendship:input_type -> goim_friend.FriendshipRequest
+	11, // 7: goim_friend.Friend.RemoveFriend:input_type -> goim_friend.RemoveFriendRequest
+	2,  // 8: goim_friend.Friend.AddFriend:output_type -> goim_friend.AddFriendResponse
+	4,  // 9: goim_friend.Friend.AcceptFriend:output_type -> goim_friend.AcceptFriendResponse
+	6,  // 10: goim_friend.Friend.ListFriends:output_type -> goim_friend.FriendListResponse
+	8,  // 11: goim_friend.Friend.GetFriendInfo:output_type -> goim_friend.FriendInfoResponse
+	10, // 12: goim_friend.Friend.CheckFriendship:output_type -> goim_friend.FriendshipResponse
+	12, // 13: goim_friend.Friend.RemoveFriend:output_type -> goim_friend.RemoveFriendResponse
+	8,  // [8:14] is the sub-list for method output_type
+	2,  // [2:8] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_goim_friend_proto_init() }
@@ -807,6 +1073,54 @@ func file_goim_friend_proto_init() {
 				return nil
 			}
 		}
+		file_goim_friend_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FriendshipRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_goim_friend_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FriendshipResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_goim_friend_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RemoveFriendRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_goim_friend_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RemoveFriendResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -814,7 +1128,7 @@ func file_goim_friend_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_goim_friend_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -842,14 +1156,16 @@ const _ = grpc.SupportPackageIsVersion6
 type FriendClient interface {
 	// AddFriend  添加好友
 	AddFriend(ctx context.Context, in *AddFriendRequest, opts ...grpc.CallOption) (*AddFriendResponse, error)
-	// ListAddFriendRequests  列出添加好友请求
-	//rpc ListAddFriendRequests(ListAddFriendRequest) returns (ListAddFriendResponse) {}
 	// AcceptFriend  接收添加好友请求
 	AcceptFriend(ctx context.Context, in *AcceptFriendRequest, opts ...grpc.CallOption) (*AcceptFriendResponse, error)
 	// ListFriends 获取好友列表
 	ListFriends(ctx context.Context, in *FriendListRequest, opts ...grpc.CallOption) (*FriendListResponse, error)
 	// GetFriendInfo 获取好友信息
 	GetFriendInfo(ctx context.Context, in *FriendInfoRequest, opts ...grpc.CallOption) (*FriendInfoResponse, error)
+	// CheckFriendship 检查好友关系
+	CheckFriendship(ctx context.Context, in *FriendshipRequest, opts ...grpc.CallOption) (*FriendshipResponse, error)
+	// RemoveFriend 删除好友
+	RemoveFriend(ctx context.Context, in *RemoveFriendRequest, opts ...grpc.CallOption) (*RemoveFriendResponse, error)
 }
 
 type friendClient struct {
@@ -896,18 +1212,38 @@ func (c *friendClient) GetFriendInfo(ctx context.Context, in *FriendInfoRequest,
 	return out, nil
 }
 
+func (c *friendClient) CheckFriendship(ctx context.Context, in *FriendshipRequest, opts ...grpc.CallOption) (*FriendshipResponse, error) {
+	out := new(FriendshipResponse)
+	err := c.cc.Invoke(ctx, "/goim_friend.Friend/CheckFriendship", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *friendClient) RemoveFriend(ctx context.Context, in *RemoveFriendRequest, opts ...grpc.CallOption) (*RemoveFriendResponse, error) {
+	out := new(RemoveFriendResponse)
+	err := c.cc.Invoke(ctx, "/goim_friend.Friend/RemoveFriend", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FriendServer is the server API for Friend service.
 type FriendServer interface {
 	// AddFriend  添加好友
 	AddFriend(context.Context, *AddFriendRequest) (*AddFriendResponse, error)
-	// ListAddFriendRequests  列出添加好友请求
-	//rpc ListAddFriendRequests(ListAddFriendRequest) returns (ListAddFriendResponse) {}
 	// AcceptFriend  接收添加好友请求
 	AcceptFriend(context.Context, *AcceptFriendRequest) (*AcceptFriendResponse, error)
 	// ListFriends 获取好友列表
 	ListFriends(context.Context, *FriendListRequest) (*FriendListResponse, error)
 	// GetFriendInfo 获取好友信息
 	GetFriendInfo(context.Context, *FriendInfoRequest) (*FriendInfoResponse, error)
+	// CheckFriendship 检查好友关系
+	CheckFriendship(context.Context, *FriendshipRequest) (*FriendshipResponse, error)
+	// RemoveFriend 删除好友
+	RemoveFriend(context.Context, *RemoveFriendRequest) (*RemoveFriendResponse, error)
 }
 
 // UnimplementedFriendServer can be embedded to have forward compatible implementations.
@@ -925,6 +1261,12 @@ func (*UnimplementedFriendServer) ListFriends(context.Context, *FriendListReques
 }
 func (*UnimplementedFriendServer) GetFriendInfo(context.Context, *FriendInfoRequest) (*FriendInfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFriendInfo not implemented")
+}
+func (*UnimplementedFriendServer) CheckFriendship(context.Context, *FriendshipRequest) (*FriendshipResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckFriendship not implemented")
+}
+func (*UnimplementedFriendServer) RemoveFriend(context.Context, *RemoveFriendRequest) (*RemoveFriendResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveFriend not implemented")
 }
 
 func RegisterFriendServer(s *grpc.Server, srv FriendServer) {
@@ -1003,6 +1345,42 @@ func _Friend_GetFriendInfo_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Friend_CheckFriendship_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FriendshipRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendServer).CheckFriendship(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/goim_friend.Friend/CheckFriendship",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendServer).CheckFriendship(ctx, req.(*FriendshipRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Friend_RemoveFriend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveFriendRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendServer).RemoveFriend(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/goim_friend.Friend/RemoveFriend",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendServer).RemoveFriend(ctx, req.(*RemoveFriendRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Friend_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "goim_friend.Friend",
 	HandlerType: (*FriendServer)(nil),
@@ -1022,6 +1400,14 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetFriendInfo",
 			Handler:    _Friend_GetFriendInfo_Handler,
+		},
+		{
+			MethodName: "CheckFriendship",
+			Handler:    _Friend_CheckFriendship_Handler,
+		},
+		{
+			MethodName: "RemoveFriend",
+			Handler:    _Friend_RemoveFriend_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

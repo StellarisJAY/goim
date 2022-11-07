@@ -170,6 +170,29 @@ func (f *FriendServiceImpl) GetFriendInfo(ctx context.Context, request *pb.Frien
 	}, nil
 }
 
+func (f *FriendServiceImpl) CheckFriendship(ctx context.Context, request *pb.FriendshipRequest) (*pb.FriendshipResponse, error) {
+	isFriend, err := dao.CheckFriendship(request.UserID, request.FriendID)
+	if err != nil {
+		return &pb.FriendshipResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.FriendshipResponse{Code: pb.Success, IsFriend: isFriend}, nil
+}
+
+func (f *FriendServiceImpl) RemoveFriend(ctx context.Context, request *pb.RemoveFriendRequest) (*pb.RemoveFriendResponse, error) {
+	isFriend, err := dao.CheckFriendship(request.UserID, request.FriendID)
+	if err != nil {
+		return &pb.RemoveFriendResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if !isFriend {
+		return &pb.RemoveFriendResponse{Code: pb.InvalidOperation, Message: "friendship not established"}, nil
+	}
+	err = dao.RemoveFriendship(request.UserID, request.FriendID)
+	if err != nil {
+		return &pb.RemoveFriendResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.RemoveFriendResponse{Code: pb.Success}, nil
+}
+
 func getNotificationService() (pb.MessageClient, error) {
 	conn, err := naming.GetClientConn("message")
 	if err != nil {

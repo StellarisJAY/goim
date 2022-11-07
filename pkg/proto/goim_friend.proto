@@ -2,14 +2,6 @@ syntax = "proto3";
 package goim_friend;
 option go_package = "./pb";
 
-//message FriendApplication {
-//  int64 userID = 1;
-//  string account = 2;
-//  string nickName = 3;
-//  int64 timestamp = 4;
-//  string message = 5;
-//}
-
 message FriendInfo {
   int64 userID = 1;
   string account = 2;
@@ -28,16 +20,6 @@ message AddFriendResponse{
   int32 code = 1;
   string message = 2;
 }
-
-//message ListAddFriendRequest {
-//  int64 userID = 1;
-//}
-
-//message ListAddFriendResponse {
-//  int32 code = 1;
-//  string message = 2;
-//  repeated FriendApplication applications = 3;
-//}
 
 message AcceptFriendRequest {
   int64 userID = 1;
@@ -71,16 +53,39 @@ message FriendInfoResponse{
   FriendInfo info = 3;
 }
 
+message FriendshipRequest {
+  int64 userID = 1;
+  int64 friendID = 2;
+}
+
+message FriendshipResponse {
+  int32 code = 1;
+  string message = 2;
+  bool isFriend = 3;
+}
+
+message RemoveFriendRequest {
+  int64 userID = 1;
+  int64 friendID = 2;
+}
+
+message RemoveFriendResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
 // Friend 好友相关的RPC服务
 service Friend {
   // AddFriend  添加好友
   rpc AddFriend(AddFriendRequest) returns (AddFriendResponse) {}
-  // ListAddFriendRequests  列出添加好友请求
-  //rpc ListAddFriendRequests(ListAddFriendRequest) returns (ListAddFriendResponse) {}
   // AcceptFriend  接收添加好友请求
   rpc AcceptFriend(AcceptFriendRequest) returns (AcceptFriendResponse) {}
   // ListFriends 获取好友列表
   rpc ListFriends(FriendListRequest) returns (FriendListResponse) {}
   // GetFriendInfo 获取好友信息
   rpc GetFriendInfo(FriendInfoRequest) returns (FriendInfoResponse) {}
+  // CheckFriendship 检查好友关系
+  rpc CheckFriendship(FriendshipRequest) returns (FriendshipResponse) {}
+  // RemoveFriend 删除好友
+  rpc RemoveFriend(RemoveFriendRequest) returns (RemoveFriendResponse) {}
 }
