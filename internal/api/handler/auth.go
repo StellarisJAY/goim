@@ -87,7 +87,7 @@ var RegisterHandler context.Handler = func(ctx context.Context) {
 
 func GetAuthService() (pb.AuthClient, error) {
 	// 从服务发现获取 RPC 客户端连接
-	conn, err := naming.GetClientConn("auth")
+	conn, err := naming.GetClientConn("user")
 	if err != nil {
 		return nil, err
 	}

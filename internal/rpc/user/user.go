@@ -17,6 +17,7 @@ func Init() {
 	server = grpc.NewServer()
 	startTime := time.Now()
 	pb.RegisterUserServer(server, &service.UserServiceImpl{})
+	pb.RegisterAuthServer(server, &service.AuthServiceImpl{})
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ID:          "",
 		ServiceName: "user",
