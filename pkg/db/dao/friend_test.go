@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"github.com/stellarisJAY/goim/pkg/db/model"
 	"testing"
 )
 
@@ -46,6 +47,39 @@ func TestListFriendIDs(t *testing.T) {
 		t.FailNow()
 	} else if friends[0] != testUser2.ID {
 		t.Logf("friends[0] is supposed to be %d", testUser2.ID)
+		t.FailNow()
+	}
+}
+
+func TestRemoveFriendship(t *testing.T) {
+	f1 := &model.Friend{FriendID: 10001, OwnerID: 10002}
+	f2 := &model.Friend{FriendID: 10002, OwnerID: 10001}
+	if err := InsertFriendship(f1, f2); err != nil {
+		t.Errorf("insert friendship failed %v", err)
+		t.FailNow()
+	}
+	if cf, err := CheckFriendship(f1.FriendID, f1.OwnerID); err != nil {
+		t.Errorf("insert friendship failed %v", err)
+		t.FailNow()
+	} else if !cf {
+		t.Error("friendship inserted but can't verify")
+	}
+	if cf, err := CheckFriendship(f2.FriendID, f2.OwnerID); err != nil {
+		t.Errorf("insert friendship failed %v", err)
+		t.FailNow()
+	} else if !cf {
+		t.Error("friendship inserted but can't verify")
+		t.FailNow()
+	}
+
+	if err := RemoveFriendship(f1.FriendID, f1.OwnerID); err != nil {
+		t.Errorf("remove friendship error %v", err)
+		t.FailNow()
+	}
+
+	isFriend, _ := CheckFriendship(f1.FriendID, f1.OwnerID)
+	if isFriend {
+		t.Errorf("remove friendship failed")
 		t.FailNow()
 	}
 }
