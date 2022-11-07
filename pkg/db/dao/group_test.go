@@ -125,25 +125,37 @@ func TestListGroupMemberIDs(t *testing.T) {
 	})
 }
 
-func TestPrepareData(t *testing.T) {
-	for i := 1012; i <= 1999; i++ {
-		//err := InsertUser(&model.User{
-		//	ID:           int64(i),
-		//	Account:      fmt.Sprintf("test-user-%d", i),
-		//	Password:     "d232ca6a624b8a9cac6e152de5db10dc",
-		//	NickName:     fmt.Sprintf("test-user-%d", i),
-		//	Salt:         "xxvi7hvszwk1b182",
-		//	RegisterTime: time.Now().UnixMilli(),
-		//})
-		err := AddGroupMember(&model.GroupMember{
-			GroupID:  1001001,
-			UserID:   int64(i),
-			JoinTime: time.Now().UnixMilli(),
-			Status:   0,
-			Role:     6,
-		})
+func TestRemoveGroupMember(t *testing.T) {
+	t.Run("member-exists", func(t *testing.T) {
+		err := AddGroupMember(&model.GroupMember{GroupID: 100001, UserID: 10001, Role: model.MemberRoleNormal})
 		if err != nil {
-			t.Error(err)
+			t.Errorf("insert member error %v", err)
+			t.FailNow()
 		}
-	}
+		if err = RemoveGroupMember(100001, 10001); err != nil {
+			t.Errorf("remove group member error %v", err)
+			t.FailNow()
+		}
+		member, err := FindGroupMember(100001, 10001)
+		if err != nil {
+			t.Errorf("get member info error %v", err)
+			t.FailNow()
+		}
+		if member != nil {
+			t.Error("remove group member failed")
+			t.FailNow()
+		}
+
+		members, err := ListGroupMemberIDs(100001)
+		if err != nil {
+			t.Errorf("list member error %v", err)
+			t.FailNow()
+		}
+		for _, id := range members {
+			if id == 10001 {
+				t.Error("remove member clear cache failed")
+				t.FailNow()
+			}
+		}
+	})
 }
