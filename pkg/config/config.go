@@ -71,6 +71,9 @@ type config struct {
 		UseJsonMsg    bool   `yaml:"useJsonMsg"`
 		ConsumerGroup string `yaml:"consumerGroup"`
 	} `yaml:"gateway"`
+	Metrics struct {
+		PromHttpAddr string `yaml:"promHttpAddr"`
+	}
 }
 
 func init() {
