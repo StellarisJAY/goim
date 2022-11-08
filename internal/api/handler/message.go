@@ -7,7 +7,6 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/http"
-	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
 )
@@ -185,15 +184,6 @@ var MarkNotificationReadHandler = func(ctx context.Context) {
 		panic(err)
 	}
 	_, _ = ctx.JSON(&http.BaseResponse{Code: response.Code, Message: response.Message})
-}
-
-func getMessageService() (pb.MessageClient, error) {
-	conn, err := naming.GetClientConn(pb.MessageServiceName)
-	if err != nil {
-		return nil, err
-	}
-	client := pb.NewMessageClient(conn)
-	return client, nil
 }
 
 func convertNotificationStruct(pbNotifications []*pb.Notification) []*http.Notification {

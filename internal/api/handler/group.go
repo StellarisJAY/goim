@@ -5,7 +5,6 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/http"
-	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
 )
@@ -193,12 +192,4 @@ var ListJoinedGroupsHandler = func(ctx context.Context) {
 		}
 		_, _ = ctx.JSON(result)
 	}
-}
-
-func getGroupService() (pb.GroupClient, error) {
-	conn, err := naming.GetClientConn(pb.GroupServiceName)
-	if err != nil {
-		return nil, err
-	}
-	return pb.NewGroupClient(conn), nil
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/http"
-	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
 )
@@ -59,12 +58,4 @@ var UpdateUserHandler = func(ctx context.Context) {
 		Code:    resp.Code,
 		Message: resp.Message,
 	})
-}
-
-func getUserService() (pb.UserClient, error) {
-	conn, err := naming.GetClientConn(pb.UserServiceName)
-	if err != nil {
-		return nil, err
-	}
-	return pb.NewUserClient(conn), nil
 }

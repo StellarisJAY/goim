@@ -6,7 +6,6 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/http"
-	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
 )
@@ -139,12 +138,4 @@ var FriendInfoHandler = func(ctx context.Context) {
 		},
 		Info: resp.Info,
 	})
-}
-
-func getFriendService() (pb.FriendClient, error) {
-	conn, err := naming.GetClientConn(pb.FriendServiceName)
-	if err != nil {
-		return nil, err
-	}
-	return pb.NewFriendClient(conn), nil
 }

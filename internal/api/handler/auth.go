@@ -6,7 +6,6 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/http"
-	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 )
 
@@ -80,14 +79,4 @@ var RegisterHandler context.Handler = func(ctx context.Context) {
 			Message: response.Message,
 		})
 	}
-}
-
-func GetAuthService() (pb.AuthClient, error) {
-	// 从服务发现获取 RPC 客户端连接
-	conn, err := naming.GetClientConn(pb.UserServiceName)
-	if err != nil {
-		return nil, err
-	}
-	// RPC调用用户注册服务
-	return pb.NewAuthClient(conn), nil
 }
