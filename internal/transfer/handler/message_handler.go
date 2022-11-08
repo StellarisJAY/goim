@@ -253,11 +253,6 @@ func pushGroupMQ(message *pb.BaseMsg) error {
 			zap.Int64("messageID", message.Id),
 			zap.Error(err))
 	}
-	//for _, memberID := range groupMembers {
-	//	if err := pushToMQ(message, memberID); err != nil {
-	//		log.Warn("failed to push mq group: %d member: %s, error: %w", groupID, memberID, err)
-	//	}
-	//}
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/internal/rpc/msg/service"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
@@ -9,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
+	"net/http"
 	"time"
 )
 
@@ -43,6 +45,10 @@ func Start() {
 	if err != nil {
 		panic(err)
 	}
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		_ = http.ListenAndServe(config.Config.Metrics.PromHttpAddr, nil)
+	}()
 	err = server.Serve(listen)
 	if err != nil {
 		panic(err)

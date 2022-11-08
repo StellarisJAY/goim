@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/mq/kafka"
@@ -14,6 +15,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -66,6 +68,10 @@ func (s *Server) Start() error {
 	if err != nil {
 		return err
 	}
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		_ = http.ListenAndServe(config.Config.Metrics.PromHttpAddr, nil)
+	}()
 	// 启动 RPC 和 Websocket
 	go func() {
 		_ = s.grpcServer.Serve(listener)

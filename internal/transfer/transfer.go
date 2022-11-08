@@ -3,11 +3,13 @@ package transfer
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/internal/transfer/handler"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/mq/kafka"
 	"github.com/stellarisJAY/goim/pkg/mq/nsq"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"net/http"
 	"strings"
 )
 
@@ -43,6 +45,9 @@ func Start() {
 		nsqTransferConsumer.Connect()
 		nsqPersistConsumer.Connect()
 	}
-
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		_ = http.ListenAndServe(config.Config.Metrics.PromHttpAddr, nil)
+	}()
 	<-ctx.Done()
 }
