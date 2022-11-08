@@ -4,6 +4,8 @@ import (
 	_context "context"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/stellarisJAY/goim/pkg/authutil"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
@@ -15,6 +17,17 @@ import (
 
 const (
 	CtxKeyHandlerError = "handler_error"
+)
+
+var (
+	promRequestRecorder = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "handle_requests",
+		Help: "Total count of handled requests(success and errors)",
+	})
+	errorRequestRecorder = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "error_requests",
+		Help: "Total count of error requests",
+	})
 )
 
 var TokenVerifier = func(ctx context.Context) {
@@ -68,6 +81,7 @@ var TokenVerifier = func(ctx context.Context) {
 var ErrorHandler = func(ctx context.Context) {
 	v := ctx.Values().Get(CtxKeyHandlerError)
 	if v != nil {
+		errorRequestRecorder.Inc()
 		if err, ok := v.(error); ok {
 			log.Warn("HTTP Handler Error",
 				zap.String("Method", ctx.Method()),
@@ -84,6 +98,11 @@ var ErrorHandler = func(ctx context.Context) {
 			_, _ = ctx.WriteString("Internal Error: " + errMsg)
 		}
 	}
+}
+
+var RequestRecorder = func(ctx context.Context) {
+	promRequestRecorder.Inc()
+	ctx.Next()
 }
 
 func GetAuthService() (pb.AuthClient, error) {

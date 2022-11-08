@@ -2,18 +2,20 @@ package api
 
 import (
 	"github.com/kataras/iris/v12"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/internal/api/handler"
 	"github.com/stellarisJAY/goim/internal/api/middleware"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 var application *iris.Application
 
 func Init() {
 	application = iris.New()
-
+	application.Use(middleware.RequestRecorder)
 	// 授权服务API
 	authParty := application.Party("/auth")
 	{
@@ -87,6 +89,10 @@ func Init() {
 }
 
 func Start() {
+	http.Handle("/metrics", promhttp.Handler())
+	go func() {
+		_ = http.ListenAndServe(config.Config.Metrics.PromHttpAddr, nil)
+	}()
 	err := application.Run(iris.Addr(":" + config.Config.ApiServer.Port))
 	if err != nil {
 		log.Error("iris http server error", zap.Error(err))
