@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gobwas/ws"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
@@ -24,6 +25,7 @@ const (
 
 // GateAcceptor 网关握手服务，负责接收websocket连接 并检查权限
 type GateAcceptor struct {
+	globalTracer opentracing.Tracer
 }
 
 var logger *zap.Logger
@@ -54,7 +56,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	// 生成ChannelID
 	channel := generateChannelID()
 	// 发送RPC请求，验证登录信息
-	loginResp, err := login(request, ctx, channel)
+	loginResp, err := acceptor.login(request, ctx, channel)
 	if err != nil {
 		return websocket.AcceptorResult{Error: err}
 	}
@@ -81,9 +83,9 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 }
 
 // login 设备登录，设备必须通过websocket发送握手包接入聊天服务，握手时会从授权服务检查用户Token和设备信息
-func login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel string) (*pb.LoginResponse, error) {
+func (acceptor *GateAcceptor) login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel string) (*pb.LoginResponse, error) {
 	// 连接到授权服务
-	conn, err := naming.GetClientConn("auth")
+	conn, err := naming.GetClientConn(pb.UserServiceName, acceptor.globalTracer)
 	if err != nil {
 		return nil, err
 	}

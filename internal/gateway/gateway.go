@@ -11,6 +11,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/mq/nsq"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/trace"
 	"github.com/stellarisJAY/goim/pkg/websocket"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -28,20 +29,7 @@ type Server struct {
 }
 
 func (s *Server) Init() {
-	s.grpcServer = grpc.NewServer()
-	startTime := time.Now().UnixMilli()
 
-	// 注册网关服务，提供消息下行的RPC接口
-	err := naming.RegisterService(naming.ServiceRegistration{
-		ServiceName: pb.GatewayServiceName,
-		Address:     config.Config.RpcServer.Address,
-	})
-	if err != nil {
-		panic(err)
-	}
-	pb.RegisterRelayServer(s.grpcServer, s)
-	s.wsServer = websocket.NewServer(config.Config.WebsocketServer.Address)
-	s.wsServer.Acceptor = &GateAcceptor{}
 	useMQ := strings.ToLower(config.Config.MessageQueue)
 	group := config.Config.Gateway.ConsumerGroup
 	if group == "" {
@@ -56,14 +44,29 @@ func (s *Server) Init() {
 		s.kafkaCG = kafka.NewConsumerGroup(group, config.Config.Kafka.Addrs, []string{pb.MessagePushTopic})
 		s.kafkaCG.Start(context.TODO(), s.HandleKafka)
 	case "nsq":
-		//todo gateway 单独的channel
 		s.nsqConsumer = nsq.NewConsumer(pb.MessagePushTopic, group, s.HandleNSQ)
 		s.nsqConsumer.Connect()
 	}
-	log.Info("Gateway service registered", zap.Int64("time used(ms)", time.Now().UnixMilli()-startTime))
 }
 
 func (s *Server) Start() error {
+	tracer, closer := trace.NewTracer(pb.GatewayServiceName)
+	defer closer.Close()
+	s.grpcServer = grpc.NewServer(grpc.UnaryInterceptor(trace.ServerInterceptor(tracer)))
+	startTime := time.Now().UnixMilli()
+	// 注册网关服务，提供消息下行的RPC接口
+	err := naming.RegisterService(naming.ServiceRegistration{
+		ServiceName: pb.GatewayServiceName,
+		Address:     config.Config.RpcServer.Address,
+	})
+	if err != nil {
+		panic(err)
+	}
+	pb.RegisterRelayServer(s.grpcServer, s)
+	log.Info("Gateway service registered", zap.Int64("time used(ms)", time.Now().UnixMilli()-startTime))
+
+	s.wsServer = websocket.NewServer(config.Config.WebsocketServer.Address)
+	s.wsServer.Acceptor = &GateAcceptor{globalTracer: tracer}
 	listener, err := net.Listen("tcp", config.Config.RpcServer.Address)
 	if err != nil {
 		return err
