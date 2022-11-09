@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/internal/rpc/user/service"
 	"github.com/stellarisJAY/goim/pkg/config"
@@ -24,6 +25,7 @@ func Init() {
 func Start() {
 	tracer, closer := trace.NewTracer(pb.UserServiceName)
 	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 	server = grpc.NewServer(grpc.UnaryInterceptor(trace.ServerInterceptor(tracer)))
 	startTime := time.Now()
 	pb.RegisterUserServer(server, &service.UserServiceImpl{})

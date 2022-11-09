@@ -9,7 +9,6 @@ import (
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
-	"github.com/stellarisJAY/goim/pkg/trace"
 )
 
 func init() {
@@ -32,9 +31,7 @@ var SyncOfflineMessageHandler = func(ctx context.Context) {
 		_, _ = ctx.WriteString("invalid sequence number: " + err.Error())
 		return
 	}
-	tracer, closer := trace.NewTracer("api-sync-offline-msgs-handler")
-	defer closer.Close()
-	service, err := getMessageService(tracer)
+	service, err := getMessageService()
 	if err != nil {
 		panic(err)
 	}
@@ -78,9 +75,7 @@ var SyncOfflineGroupMessages = func(ctx context.Context) {
 		_, _ = ctx.WriteString(fmt.Sprintf("request validate failed, error: %v", err))
 		return
 	}
-	tracer, closer := trace.NewTracer("api-sync-offline-group-msgs-handler")
-	defer closer.Close()
-	service, err := getMessageService(tracer)
+	service, err := getMessageService()
 	if err != nil {
 		panic(err)
 	}
@@ -117,9 +112,7 @@ var SyncLatestGroupMessages = func(ctx context.Context) {
 		_, _ = ctx.WriteString("bad request")
 		return
 	}
-	tracer, closer := trace.NewTracer("api-latest-group-msgs-handler")
-	defer closer.Close()
-	service, err := getMessageService(tracer)
+	service, err := getMessageService()
 	if err != nil {
 		panic(err)
 	}
@@ -151,9 +144,7 @@ var ListNotifications = func(ctx context.Context) {
 		_, _ = ctx.WriteString("wrong read option")
 		return
 	}
-	tracer, closer := trace.NewTracer("api-list-notifications-handler")
-	defer closer.Close()
-	service, err := getMessageService(tracer)
+	service, err := getMessageService()
 	if err != nil {
 		panic(err)
 	}
@@ -184,9 +175,7 @@ var MarkNotificationReadHandler = func(ctx context.Context) {
 		_, _ = ctx.WriteString("invalid notification id")
 		return
 	}
-	tracer, closer := trace.NewTracer("api-mark-notification-read-handler")
-	defer closer.Close()
-	service, err := getMessageService(tracer)
+	service, err := getMessageService()
 	if err != nil {
 		panic(err)
 	}

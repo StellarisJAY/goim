@@ -7,7 +7,6 @@ import (
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
-	"github.com/stellarisJAY/goim/pkg/trace"
 )
 
 // CreateGroupHandler 创建群聊处理器
@@ -20,9 +19,7 @@ var CreateGroupHandler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	tracer, closer := trace.NewTracer("api-create-group-handler")
-	defer closer.Close()
-	service, err := getGroupService(tracer)
+	service, err := getGroupService()
 	if err != nil {
 		handleError(ctx, err)
 		return
@@ -52,9 +49,7 @@ var GroupInfoHandler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	tracer, closer := trace.NewTracer("api-group-info-handler")
-	defer closer.Close()
-	service, err := getGroupService(tracer)
+	service, err := getGroupService()
 	if err != nil {
 		handleError(ctx, err)
 		return
@@ -83,9 +78,7 @@ var GroupMemberHandler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	tracer, closer := trace.NewTracer("api-list-members-handler")
-	defer closer.Close()
-	service, err := getGroupService(tracer)
+	service, err := getGroupService()
 	if err != nil {
 		panic(err)
 	}
@@ -125,9 +118,7 @@ var InviteUserHandler = func(ctx context.Context) {
 		return
 	}
 	inviterID, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
-	tracer, closer := trace.NewTracer("api-invite-group-member-handler")
-	defer closer.Close()
-	service, err := getGroupService(tracer)
+	service, err := getGroupService()
 	if err != nil {
 		panic(err)
 	}
@@ -164,9 +155,7 @@ var AcceptInvitationHandler = func(ctx context.Context) {
 		return
 	}
 	uid, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
-	tracer, closer := trace.NewTracer("api-accept-invitation-handler")
-	defer closer.Close()
-	service, err := getGroupService(tracer)
+	service, err := getGroupService()
 	if err != nil {
 		panic(err)
 	}
@@ -190,9 +179,7 @@ var ListJoinedGroupsHandler = func(ctx context.Context) {
 		}
 	}()
 	userID, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
-	tracer, closer := trace.NewTracer("api-list-groups-handler")
-	defer closer.Close()
-	service, err := getGroupService(tracer)
+	service, err := getGroupService()
 	if err != nil {
 		panic(err)
 	}

@@ -8,7 +8,6 @@ import (
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
-	"github.com/stellarisJAY/goim/pkg/trace"
 )
 
 func init() {
@@ -32,9 +31,7 @@ var InsertFriendApplicationHandler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	tracer, closer := trace.NewTracer("api-insert-friend-application-handler")
-	defer closer.Close()
-	service, err := getFriendService(tracer)
+	service, err := getFriendService()
 	if err != nil {
 		panic(err)
 	}
@@ -73,9 +70,7 @@ var AcceptFriendHandler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	tracer, closer := trace.NewTracer("api-accept-friend-handler")
-	defer closer.Close()
-	service, err := getFriendService(tracer)
+	service, err := getFriendService()
 	if err != nil {
 		panic(err)
 	}
@@ -99,9 +94,7 @@ var FriendListHandler = func(ctx context.Context) {
 		}
 	}()
 	uid, _ := stringutil.HexStringToInt64(ctx.Params().Get("userID"))
-	tracer, closer := trace.NewTracer("api-list-friend-handler")
-	defer closer.Close()
-	service, err := getFriendService(tracer)
+	service, err := getFriendService()
 	if err != nil {
 		panic(err)
 	}
@@ -127,9 +120,7 @@ var FriendInfoHandler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	tracer, closer := trace.NewTracer("api-friend-info-handler")
-	defer closer.Close()
-	service, err := getFriendService(tracer)
+	service, err := getFriendService()
 	if err != nil {
 		panic(err)
 	}

@@ -2,11 +2,13 @@ package api
 
 import (
 	"github.com/kataras/iris/v12"
+	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/internal/api/handler"
 	"github.com/stellarisJAY/goim/internal/api/middleware"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
+	"github.com/stellarisJAY/goim/pkg/trace"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -89,6 +91,9 @@ func Init() {
 }
 
 func Start() {
+	tracer, closer := trace.NewTracer("api-server")
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 	http.Handle("/metrics", promhttp.Handler())
 	go func() {
 		_ = http.ListenAndServe(config.Config.Metrics.PromHttpAddr, nil)

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/opentracing/opentracing-go"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
@@ -14,12 +13,11 @@ import (
 )
 
 type GroupServiceImpl struct {
-	idGenerator  *snowflake.Snowflake
-	globalTracer opentracing.Tracer
+	idGenerator *snowflake.Snowflake
 }
 
-func NewGroupServiceImpl(tracer opentracing.Tracer) *GroupServiceImpl {
-	return &GroupServiceImpl{idGenerator: snowflake.NewSnowflake(config.Config.MachineID), globalTracer: tracer}
+func NewGroupServiceImpl() *GroupServiceImpl {
+	return &GroupServiceImpl{idGenerator: snowflake.NewSnowflake(config.Config.MachineID)}
 }
 
 func (g *GroupServiceImpl) CreateGroup(ctx context.Context, request *pb.CreateGroupRequest) (*pb.CreateGroupResponse, error) {
@@ -281,7 +279,7 @@ func GroupModelToDTO(group *model.Group) *pb.GroupInfo {
 }
 
 func (g *GroupServiceImpl) getNotificationService() (pb.MessageClient, error) {
-	conn, err := naming.GetClientConn(pb.MessageServiceName, g.globalTracer)
+	conn, err := naming.GetClientConn(pb.MessageServiceName)
 	if err != nil {
 		return nil, err
 	}

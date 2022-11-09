@@ -7,7 +7,6 @@ import (
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
-	"github.com/stellarisJAY/goim/pkg/trace"
 )
 
 var validate = validator.New()
@@ -32,10 +31,8 @@ var LoginHandler context.Handler = func(ctx context.Context) {
 		DeviceID: req.DeviceID,
 		Password: req.Password,
 	}
-	tracer, closer := trace.NewTracer("api-login-handler")
-	defer closer.Close()
 	// 获取授权RPC服务，RPC调用获取Token
-	service, err := GetAuthService(tracer)
+	service, err := GetAuthService()
 	if err != nil {
 		handleError(ctx, err)
 		return
@@ -68,9 +65,7 @@ var RegisterHandler context.Handler = func(ctx context.Context) {
 	request := &pb.RegisterRequest{
 		Account: regReq.Account, NickName: regReq.NickName, Password: regReq.Password,
 	}
-	tracer, closer := trace.NewTracer("api-register-handler")
-	defer closer.Close()
-	service, err := GetAuthService(tracer)
+	service, err := GetAuthService()
 	if err != nil {
 		handleError(ctx, err)
 		return

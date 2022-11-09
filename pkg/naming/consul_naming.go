@@ -32,8 +32,8 @@ func (ns *ConsulNaming) Init() {
 }
 
 // GetClientConn 获取一个指定服务的客户端连接
-func (ns *ConsulNaming) GetClientConn(serviceName string, tracer opentracing.Tracer) (*grpc.ClientConn, error) {
-	options := buildDialOptions(tracer)
+func (ns *ConsulNaming) GetClientConn(serviceName string) (*grpc.ClientConn, error) {
+	options := buildDialOptions(opentracing.GlobalTracer())
 	return grpc.DialContext(context.Background(), consulScheme+"://"+ns.consulAddress+"/"+serviceName, options...)
 }
 

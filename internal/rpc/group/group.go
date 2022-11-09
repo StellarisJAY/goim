@@ -1,6 +1,7 @@
 package group
 
 import (
+	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/internal/rpc/group/service"
 	"github.com/stellarisJAY/goim/pkg/config"
@@ -24,9 +25,10 @@ func Init() {
 func Start() {
 	tracer, closer := trace.NewTracer(pb.GroupServiceName)
 	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 	server = grpc.NewServer(grpc.UnaryInterceptor(trace.ServerInterceptor(tracer)))
 	startTime := time.Now()
-	pb.RegisterGroupServer(server, service.NewGroupServiceImpl(tracer))
+	pb.RegisterGroupServer(server, service.NewGroupServiceImpl())
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ID:          "",
 		ServiceName: pb.GroupServiceName,
@@ -45,7 +47,7 @@ func Start() {
 		_ = http.ListenAndServe(config.Config.Metrics.PromHttpAddr, nil)
 	}()
 	go func() {
-		service.AsyncPushSendNotification(tracer)
+		service.AsyncPushSendNotification()
 	}()
 	err = server.Serve(listener)
 	if err != nil {

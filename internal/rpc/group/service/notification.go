@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/opentracing/opentracing-go"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
@@ -28,10 +27,10 @@ func NotifyUser(userID int64, triggerUser int64, nType byte, message string) {
 	notificationChan <- notification
 }
 
-func AsyncPushSendNotification(tracer opentracing.Tracer) {
+func AsyncPushSendNotification() {
 	for notification := range notificationChan {
 		go func(notification *pb.Notification) {
-			conn, err := naming.GetClientConn("message", tracer)
+			conn, err := naming.GetClientConn("message")
 			if err != nil {
 				log.Warn("get notification service failed", zap.Error(err))
 				return

@@ -31,8 +31,8 @@ func (ns *EtcdNaming) Init() {
 	resolver.Register(&EtcdResolverBuilder{ns: ns})
 }
 
-func (ns *EtcdNaming) GetClientConn(serviceName string, tracer opentracing.Tracer) (*grpc.ClientConn, error) {
-	options := buildDialOptions(tracer)
+func (ns *EtcdNaming) GetClientConn(serviceName string) (*grpc.ClientConn, error) {
+	options := buildDialOptions(opentracing.GlobalTracer())
 	return grpc.DialContext(context.TODO(), etcdScheme+"://host:8888/"+serviceName, options...)
 }
 
