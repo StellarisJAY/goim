@@ -37,7 +37,8 @@ func (ns *EtcdNaming) GetClientConn(serviceName string, tracer opentracing.Trace
 }
 
 func (ns *EtcdNaming) DialConnection(address string) (*grpc.ClientConn, error) {
-	return grpc.Dial(address, grpc.WithInsecure())
+	options := buildDialOptions(opentracing.GlobalTracer())
+	return grpc.Dial(address, options...)
 }
 
 func (ns *EtcdNaming) CurrentServiceName() string {

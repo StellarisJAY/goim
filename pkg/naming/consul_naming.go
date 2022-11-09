@@ -39,7 +39,8 @@ func (ns *ConsulNaming) GetClientConn(serviceName string, tracer opentracing.Tra
 
 // DialConnection 获取指定地址的客户端连接
 func (ns *ConsulNaming) DialConnection(address string) (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	options := buildDialOptions(opentracing.GlobalTracer())
+	conn, err := grpc.Dial(address, options...)
 	return conn, err
 }
 

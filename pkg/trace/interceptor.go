@@ -92,7 +92,5 @@ func NewTracer(serviceName string) (opentracing.Tracer, io.Closer) {
 	if err != nil {
 		panic(err)
 	}
-	// 设置当前服务的globalTracer
-	opentracing.SetGlobalTracer(tracer)
 	return tracer, closer
 }

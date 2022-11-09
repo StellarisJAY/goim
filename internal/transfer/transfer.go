@@ -3,12 +3,14 @@ package transfer
 import (
 	"context"
 	"fmt"
+	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/internal/transfer/handler"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/mq/kafka"
 	"github.com/stellarisJAY/goim/pkg/mq/nsq"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/trace"
 	"net/http"
 	"strings"
 )
@@ -35,6 +37,9 @@ func Init() {
 }
 
 func Start() {
+	tracer, closer := trace.NewTracer("message_transfer")
+	defer closer.Close()
+	opentracing.SetGlobalTracer(tracer)
 	ctx := context.Background()
 	mq := strings.ToLower(config.Config.MessageQueue)
 	switch mq {
