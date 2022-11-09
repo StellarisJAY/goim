@@ -3,6 +3,7 @@ package naming
 import (
 	"context"
 	"github.com/hashicorp/consul/api"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"google.golang.org/grpc"
@@ -12,6 +13,7 @@ import (
 type ConsulNaming struct {
 	consulAddress string
 	client        *api.Client
+	registration  ServiceRegistration
 }
 
 func (ns *ConsulNaming) Init() {
@@ -30,8 +32,9 @@ func (ns *ConsulNaming) Init() {
 }
 
 // GetClientConn 获取一个指定服务的客户端连接
-func (ns *ConsulNaming) GetClientConn(serviceName string) (*grpc.ClientConn, error) {
-	return grpc.DialContext(context.Background(), consulScheme+"://"+ns.consulAddress+"/"+serviceName, grpc.WithInsecure())
+func (ns *ConsulNaming) GetClientConn(serviceName string, tracer opentracing.Tracer) (*grpc.ClientConn, error) {
+	options := buildDialOptions(tracer)
+	return grpc.DialContext(context.Background(), consulScheme+"://"+ns.consulAddress+"/"+serviceName, options...)
 }
 
 // DialConnection 获取指定地址的客户端连接
@@ -42,6 +45,7 @@ func (ns *ConsulNaming) DialConnection(address string) (*grpc.ClientConn, error)
 
 // RegisterService 注册服务
 func (ns *ConsulNaming) RegisterService(registration ServiceRegistration) error {
+	ns.registration = registration
 	err := ns.client.Agent().ServiceRegister(&api.AgentServiceRegistration{
 		Name:    registration.ServiceName,
 		Address: registration.Address,
@@ -51,4 +55,8 @@ func (ns *ConsulNaming) RegisterService(registration ServiceRegistration) error 
 		return err
 	}
 	return nil
+}
+
+func (ns *ConsulNaming) CurrentServiceName() string {
+	return ns.registration.ServiceName
 }

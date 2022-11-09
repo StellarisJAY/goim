@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/coreos/etcd/clientv3"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
 	"go.uber.org/zap"
@@ -13,7 +14,8 @@ import (
 )
 
 type EtcdNaming struct {
-	client *clientv3.Client
+	client       *clientv3.Client
+	registration ServiceRegistration
 }
 
 func (ns *EtcdNaming) Init() {
@@ -29,15 +31,21 @@ func (ns *EtcdNaming) Init() {
 	resolver.Register(&EtcdResolverBuilder{ns: ns})
 }
 
-func (ns *EtcdNaming) GetClientConn(serviceName string) (*grpc.ClientConn, error) {
-	return grpc.DialContext(context.TODO(), etcdScheme+"://host:8888/"+serviceName, grpc.WithInsecure())
+func (ns *EtcdNaming) GetClientConn(serviceName string, tracer opentracing.Tracer) (*grpc.ClientConn, error) {
+	options := buildDialOptions(tracer)
+	return grpc.DialContext(context.TODO(), etcdScheme+"://host:8888/"+serviceName, options...)
 }
 
 func (ns *EtcdNaming) DialConnection(address string) (*grpc.ClientConn, error) {
 	return grpc.Dial(address, grpc.WithInsecure())
 }
 
+func (ns *EtcdNaming) CurrentServiceName() string {
+	return ns.registration.ServiceName
+}
+
 func (ns *EtcdNaming) RegisterService(registration ServiceRegistration) error {
+	ns.registration = registration
 	lease, err := ns.client.Grant(context.TODO(), 5000)
 	if err != nil {
 		return fmt.Errorf("etcd grant lease error: %w", err)
