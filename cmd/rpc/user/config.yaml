@@ -1,0 +1,32 @@
+# MySQL configs
+mysql:
+  user: root
+  password: 12345678
+  address: localhost:3306
+  database: db_goim
+# Server machine ID
+machineId: 6001
+# RPC Server configs
+rpcServer:
+  address: localhost:9400
+# etcd configs
+etcd:
+  endpoints:
+    - localhost:2379
+naming: etcd
+# redis configs
+redis:
+  address: 127.0.0.1:6379
+# message queue configs
+messageQueue: nsq
+nsq:
+  lookupAddresses:
+    - localhost:4161
+  nsqdAddress: localhost:4150
+# deploy environment
+environment: development
+metrics:
+  promHttpAddr: localhost:50006
+trace:
+  jaeger:
+    collectorEndpoint: http://localhost:14268/api/traces

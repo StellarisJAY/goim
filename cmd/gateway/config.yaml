@@ -1,0 +1,36 @@
+# server machine ID
+machineId: 2001
+# RPC server configs
+rpcServer:
+  Address: localhost:9100
+# Websocket server configs
+websocketServer:
+  Address: localhost:9101
+# JWT secret key
+tokenSecretKey: xdedfaedcdafefadfaeadfdc
+# etcd configs
+etcd:
+  endpoints:
+    - localhost:2379
+naming: etcd
+# Message queue option
+messageQueue: nsq
+# nsq configs
+nsq:
+  lookupAddresses:
+    - localhost:4161
+  nsqdAddress: localhost:4150
+# gateway server configs
+gateway:
+  # use JSON format for gateway messages
+  useJsonMsg: true
+# deploy environment
+environment: development
+# prometheus http
+metrics:
+  promHttpAddr: localhost:50002
+# opentracing configs
+trace:
+  jaeger:
+    # jaeger collector http address
+    collectorEndpoint: http://localhost:14268/api/traces

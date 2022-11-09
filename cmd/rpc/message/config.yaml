@@ -1,0 +1,25 @@
+# MySQL configs
+mysql:
+  user: root
+  password: 12345678
+  address: localhost:3306
+  database: db_goim
+# Server machine ID
+machineId: 5001
+# JWT Secret key
+tokenSecretKey: xdedfaedcdafefadfaeadfdc
+# RPC Server configs
+rpcServer:
+  address: localhost:9300
+# etcd configs
+etcd:
+  endpoints:
+    - localhost:2379
+naming: etcd
+# deploy environment
+environment: development
+metrics:
+  promHttpAddr: localhost:50005
+trace:
+  jaeger:
+    collectorEndpoint: http://localhost:14268/api/traces

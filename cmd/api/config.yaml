@@ -1,0 +1,20 @@
+
+# api server configs
+apiServer:
+  port: 8000
+# jwt secret key
+tokenSecretKey: @_fof(0&+_wbqe7*g29_*5t2%&uru%isw$uf0*(&f=6767zn)
+# etcd configs
+etcd:
+  endpoints:
+    - localhost:2379
+naming: etcd
+environment: development
+# prometheus http addr
+metrics:
+  promHttpAddr: localhost:50001
+# trace configs
+trace:
+  jaeger:
+    # jaeger collector http address
+    collectorEndpoint: http://127.0.0.1:14268/api/traces
