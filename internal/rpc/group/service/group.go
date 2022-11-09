@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
 	"github.com/stellarisJAY/goim/pkg/db/model"
@@ -13,11 +14,12 @@ import (
 )
 
 type GroupServiceImpl struct {
-	idGenerator *snowflake.Snowflake
+	idGenerator  *snowflake.Snowflake
+	globalTracer opentracing.Tracer
 }
 
-func NewGroupServiceImpl() *GroupServiceImpl {
-	return &GroupServiceImpl{idGenerator: snowflake.NewSnowflake(config.Config.MachineID)}
+func NewGroupServiceImpl(tracer opentracing.Tracer) *GroupServiceImpl {
+	return &GroupServiceImpl{idGenerator: snowflake.NewSnowflake(config.Config.MachineID), globalTracer: tracer}
 }
 
 func (g *GroupServiceImpl) CreateGroup(ctx context.Context, request *pb.CreateGroupRequest) (*pb.CreateGroupResponse, error) {
@@ -130,7 +132,7 @@ func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUse
 	if inviter == nil || inviter.Role == model.MemberRoleNormal {
 		return &pb.InviteUserResponse{Code: pb.Error, Message: "operation not allowed"}, nil
 	}
-	noteService, err := getNotificationService()
+	noteService, err := g.getNotificationService()
 	if err != nil {
 		return &pb.InviteUserResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
@@ -152,7 +154,7 @@ func (g *GroupServiceImpl) InviteUser(ctx context.Context, request *pb.InviteUse
 
 // AcceptInvitation 接收邀请，进入群聊
 func (g *GroupServiceImpl) AcceptInvitation(ctx context.Context, request *pb.AcceptInvitationRequest) (*pb.AcceptInvitationResponse, error) {
-	noteService, err := getNotificationService()
+	noteService, err := g.getNotificationService()
 	if err != nil {
 		return &pb.AcceptInvitationResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
@@ -278,8 +280,8 @@ func GroupModelToDTO(group *model.Group) *pb.GroupInfo {
 	}
 }
 
-func getNotificationService() (pb.MessageClient, error) {
-	conn, err := naming.GetClientConn(pb.MessageServiceName)
+func (g *GroupServiceImpl) getNotificationService() (pb.MessageClient, error) {
+	conn, err := naming.GetClientConn(pb.MessageServiceName, g.globalTracer)
 	if err != nil {
 		return nil, err
 	}

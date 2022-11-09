@@ -7,6 +7,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/trace"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
@@ -17,9 +18,15 @@ import (
 var server *grpc.Server
 
 func Init() {
-	server = grpc.NewServer()
+
+}
+
+func Start() {
+	tracer, closer := trace.NewTracer(pb.FriendServiceName)
+	defer closer.Close()
+	server = grpc.NewServer(grpc.UnaryInterceptor(trace.ServerInterceptor(tracer)))
 	startTime := time.Now()
-	pb.RegisterFriendServer(server, service.NewFriendServiceImpl())
+	pb.RegisterFriendServer(server, service.NewFriendServiceImpl(tracer))
 	err := naming.RegisterService(naming.ServiceRegistration{
 		ID:          "",
 		ServiceName: pb.FriendServiceName,
@@ -29,9 +36,6 @@ func Init() {
 		panic(err)
 	}
 	log.Info("friend service registered", zap.Int64("time used(ms)", time.Now().Sub(startTime).Milliseconds()))
-}
-
-func Start() {
 	listener, err := net.Listen("tcp", config.Config.RpcServer.Address)
 	if err != nil {
 		panic(err)
@@ -41,7 +45,7 @@ func Start() {
 		_ = http.ListenAndServe(config.Config.Metrics.PromHttpAddr, nil)
 	}()
 	go func() {
-		service.AsyncPushSendNotification()
+		service.AsyncPushSendNotification(tracer)
 	}()
 	err = server.Serve(listener)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/trace"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
@@ -17,7 +18,13 @@ import (
 var server *grpc.Server
 
 func Init() {
-	server = grpc.NewServer()
+
+}
+
+func Start() {
+	tracer, closer := trace.NewTracer(pb.MessageServiceName)
+	defer closer.Close()
+	server = grpc.NewServer(grpc.UnaryInterceptor(trace.ServerInterceptor(tracer)))
 	pb.RegisterMessageServer(server, service.NewMessageServiceImpl())
 	startTime := time.Now()
 	// 注册聊天服务
@@ -38,9 +45,6 @@ func Init() {
 	}
 	log.Info("message service registered",
 		zap.Int64("time used(ms)", time.Now().Sub(startTime).Milliseconds()))
-}
-
-func Start() {
 	listen, err := net.Listen("tcp", config.Config.RpcServer.Address)
 	if err != nil {
 		panic(err)

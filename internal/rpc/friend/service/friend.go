@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/opentracing/opentracing-go"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/db/cache"
 	"github.com/stellarisJAY/goim/pkg/db/dao"
@@ -17,6 +18,7 @@ import (
 
 type FriendServiceImpl struct {
 	applicationId *snowflake.Snowflake
+	globalTracer  opentracing.Tracer
 }
 
 var (
@@ -32,8 +34,8 @@ func init() {
 	}
 }
 
-func NewFriendServiceImpl() *FriendServiceImpl {
-	return &FriendServiceImpl{applicationId: snowflake.NewSnowflake(config.Config.MachineID)}
+func NewFriendServiceImpl(tracer opentracing.Tracer) *FriendServiceImpl {
+	return &FriendServiceImpl{applicationId: snowflake.NewSnowflake(config.Config.MachineID), globalTracer: tracer}
 }
 
 func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriendRequest) (*pb.AddFriendResponse, error) {
@@ -58,7 +60,7 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 			Message: "already established friendship",
 		}, nil
 	}
-	noteService, err := getNotificationService()
+	noteService, err := f.getNotificationService()
 	if err != nil {
 		logger.Error("get notification service error ", zap.Error(err))
 		return &pb.AddFriendResponse{Code: pb.Error, Message: err.Error()}, nil
@@ -81,7 +83,7 @@ func (f *FriendServiceImpl) AddFriend(ctx context.Context, request *pb.AddFriend
 }
 
 func (f *FriendServiceImpl) AcceptFriend(ctx context.Context, request *pb.AcceptFriendRequest) (*pb.AcceptFriendResponse, error) {
-	noteService, err := getNotificationService()
+	noteService, err := f.getNotificationService()
 	if err != nil {
 		return &pb.AcceptFriendResponse{Code: pb.Error, Message: err.Error()}, nil
 	}
@@ -211,8 +213,8 @@ func (f *FriendServiceImpl) RemoveFriend(ctx context.Context, request *pb.Remove
 	return &pb.RemoveFriendResponse{Code: pb.Success}, nil
 }
 
-func getNotificationService() (pb.MessageClient, error) {
-	conn, err := naming.GetClientConn(pb.MessageServiceName)
+func (f *FriendServiceImpl) getNotificationService() (pb.MessageClient, error) {
+	conn, err := naming.GetClientConn(pb.MessageServiceName, f.globalTracer)
 	if err != nil {
 		return nil, err
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/log"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/trace"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
@@ -17,7 +18,13 @@ import (
 var server *grpc.Server
 
 func Init() {
-	server = grpc.NewServer()
+
+}
+
+func Start() {
+	tracer, closer := trace.NewTracer(pb.UserServiceName)
+	defer closer.Close()
+	server = grpc.NewServer(grpc.UnaryInterceptor(trace.ServerInterceptor(tracer)))
 	startTime := time.Now()
 	pb.RegisterUserServer(server, &service.UserServiceImpl{})
 	pb.RegisterAuthServer(server, &service.AuthServiceImpl{})
@@ -31,9 +38,6 @@ func Init() {
 	}
 	log.Info("user service registered",
 		zap.Int64("time used(ms)", time.Now().Sub(startTime).Milliseconds()))
-}
-
-func Start() {
 	listener, err := net.Listen("tcp", config.Config.RpcServer.Address)
 	if err != nil {
 		panic(err)
