@@ -20,7 +20,7 @@ func Init() {
 	authParty := application.Party("/auth")
 	{
 		authParty.Done(middleware.ErrorHandler)
-		authParty.Post("/login", handler.AuthHandler)
+		authParty.Post("/login", handler.LoginHandler)
 		authParty.Post("/register", handler.RegisterHandler)
 	}
 	// 聊天服务API

@@ -4,6 +4,7 @@ import (
 	_context "context"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/stellarisJAY/goim/pkg/authutil"
@@ -11,6 +12,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
+	"github.com/stellarisJAY/goim/pkg/trace"
 	"go.uber.org/zap"
 	"time"
 )
@@ -52,7 +54,9 @@ var TokenVerifier = func(ctx context.Context) {
 	}
 	// token有效时间小于等于10分钟，更新token
 	if time.Now().Sub(time.UnixMilli(expireAt)).Minutes() <= 10 {
-		authService, err := GetAuthService()
+		tracer, closer := trace.NewTracer("api-update-token")
+		defer closer.Close()
+		authService, err := GetAuthService(tracer)
 		if err != nil {
 			log.Error("get user auth service error", zap.Error(err))
 		} else {
@@ -105,9 +109,9 @@ var RequestRecorder = func(ctx context.Context) {
 	ctx.Next()
 }
 
-func GetAuthService() (pb.AuthClient, error) {
+func GetAuthService(tracer opentracing.Tracer) (pb.AuthClient, error) {
 	// 从服务发现获取 RPC 客户端连接
-	conn, err := naming.GetClientConn(pb.UserServiceName)
+	conn, err := naming.GetClientConn(pb.UserServiceName, tracer)
 	if err != nil {
 		return nil, err
 	}

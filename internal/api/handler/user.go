@@ -7,6 +7,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
+	"github.com/stellarisJAY/goim/pkg/trace"
 )
 
 // FindUserHandler 通过ID获取用户基本信息
@@ -17,7 +18,9 @@ var FindUserHandler = func(ctx context.Context) {
 		_, _ = ctx.WriteString(err.Error())
 		return
 	}
-	service, err := getUserService()
+	tracer, closer := trace.NewTracer("api-find-user-handler")
+	defer closer.Close()
+	service, err := getUserService(tracer)
 	if err != nil {
 		handleError(ctx, err)
 		return
@@ -44,7 +47,9 @@ var UpdateUserHandler = func(ctx context.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	service, err := getUserService()
+	tracer, closer := trace.NewTracer("api-update-user-info-handler")
+	defer closer.Close()
+	service, err := getUserService(tracer)
 	if err != nil {
 		handleError(ctx, err)
 		return

@@ -1,20 +1,21 @@
 package handler
 
 import (
+	"github.com/opentracing/opentracing-go"
 	"github.com/stellarisJAY/goim/pkg/naming"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 )
 
-func getUserService() (pb.UserClient, error) {
-	conn, err := naming.GetClientConn(pb.UserServiceName)
+func getUserService(tracer opentracing.Tracer) (pb.UserClient, error) {
+	conn, err := naming.GetClientConn(pb.UserServiceName, tracer)
 	if err != nil {
 		return nil, err
 	}
 	return pb.NewUserClient(conn), nil
 }
 
-func getMessageService() (pb.MessageClient, error) {
-	conn, err := naming.GetClientConn(pb.MessageServiceName)
+func getMessageService(tracer opentracing.Tracer) (pb.MessageClient, error) {
+	conn, err := naming.GetClientConn(pb.MessageServiceName, tracer)
 	if err != nil {
 		return nil, err
 	}
@@ -22,25 +23,25 @@ func getMessageService() (pb.MessageClient, error) {
 	return client, nil
 }
 
-func getGroupService() (pb.GroupClient, error) {
-	conn, err := naming.GetClientConn(pb.GroupServiceName)
+func getGroupService(tracer opentracing.Tracer) (pb.GroupClient, error) {
+	conn, err := naming.GetClientConn(pb.GroupServiceName, tracer)
 	if err != nil {
 		return nil, err
 	}
 	return pb.NewGroupClient(conn), nil
 }
 
-func getFriendService() (pb.FriendClient, error) {
-	conn, err := naming.GetClientConn(pb.FriendServiceName)
+func getFriendService(tracer opentracing.Tracer) (pb.FriendClient, error) {
+	conn, err := naming.GetClientConn(pb.FriendServiceName, tracer)
 	if err != nil {
 		return nil, err
 	}
 	return pb.NewFriendClient(conn), nil
 }
 
-func GetAuthService() (pb.AuthClient, error) {
+func GetAuthService(tracer opentracing.Tracer) (pb.AuthClient, error) {
 	// 从服务发现获取 RPC 客户端连接
-	conn, err := naming.GetClientConn(pb.UserServiceName)
+	conn, err := naming.GetClientConn(pb.UserServiceName, tracer)
 	if err != nil {
 		return nil, err
 	}

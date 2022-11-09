@@ -8,6 +8,7 @@ import (
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
 	"github.com/stellarisJAY/goim/pkg/stringutil"
+	"github.com/stellarisJAY/goim/pkg/trace"
 )
 
 func init() {
@@ -34,7 +35,9 @@ var SendMessageHandler = func(ctx context.Context) {
 	}
 	uid, _ := stringutil.HexStringToInt64(userID)
 	message.From = uid
-	service, err := getMessageService()
+	tracer, closer := trace.NewTracer("api-chat-handler")
+	defer closer.Close()
+	service, err := getMessageService(tracer)
 	if err != nil {
 		handleError(ctx, err)
 		return

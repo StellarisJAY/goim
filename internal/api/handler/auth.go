@@ -7,6 +7,7 @@ import (
 	"github.com/kataras/iris/v12/context"
 	"github.com/stellarisJAY/goim/pkg/http"
 	"github.com/stellarisJAY/goim/pkg/proto/pb"
+	"github.com/stellarisJAY/goim/pkg/trace"
 )
 
 var validate = validator.New()
@@ -15,8 +16,8 @@ func init() {
 	validate.RegisterStructValidation(func(sl validator.StructLevel) {}, http.AuthRequest{})
 }
 
-// AuthHandler 授权用户设备，返回访问Token
-var AuthHandler context.Handler = func(ctx context.Context) {
+// LoginHandler 授权用户设备，返回访问Token
+var LoginHandler context.Handler = func(ctx context.Context) {
 	req := new(http.AuthRequest)
 	if err := ctx.ReadJSON(req); err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -31,8 +32,10 @@ var AuthHandler context.Handler = func(ctx context.Context) {
 		DeviceID: req.DeviceID,
 		Password: req.Password,
 	}
+	tracer, closer := trace.NewTracer("api-login-handler")
+	defer closer.Close()
 	// 获取授权RPC服务，RPC调用获取Token
-	service, err := GetAuthService()
+	service, err := GetAuthService(tracer)
 	if err != nil {
 		handleError(ctx, err)
 		return
@@ -65,7 +68,9 @@ var RegisterHandler context.Handler = func(ctx context.Context) {
 	request := &pb.RegisterRequest{
 		Account: regReq.Account, NickName: regReq.NickName, Password: regReq.Password,
 	}
-	service, err := GetAuthService()
+	tracer, closer := trace.NewTracer("api-register-handler")
+	defer closer.Close()
+	service, err := GetAuthService(tracer)
 	if err != nil {
 		handleError(ctx, err)
 		return
