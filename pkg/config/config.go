@@ -74,6 +74,11 @@ type config struct {
 	Metrics struct {
 		PromHttpAddr string `yaml:"promHttpAddr"`
 	}
+	Trace struct {
+		Jaeger struct {
+			CollectorEndpoint string `yaml:"collectorEndpoint"`
+		} `yaml:"jaeger"`
+	}
 }
 
 func init() {

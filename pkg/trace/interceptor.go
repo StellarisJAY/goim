@@ -5,6 +5,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
+	goimConfig "github.com/stellarisJAY/goim/pkg/config"
 	_log "github.com/stellarisJAY/goim/pkg/log"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
@@ -18,7 +19,7 @@ import (
 func ClientInterceptor(tracer opentracing.Tracer) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn,
 		invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		span, _ := opentracing.StartSpanFromContext(ctx, "gRPC Call", nil)
+		span, _ := opentracing.StartSpanFromContext(ctx, "gRPC Call")
 		defer span.Finish()
 		// 从context获得grpc的metadata
 		md, ok := metadata.FromOutgoingContext(ctx)
@@ -73,6 +74,8 @@ func ServerInterceptor(tracer opentracing.Tracer) grpc.UnaryServerInterceptor {
 	}
 }
 
+// NewTracer 创建一个属于serviceName服务的tracer
+// 返回io.Closer用于关闭Tracer
 func NewTracer(serviceName string) (opentracing.Tracer, io.Closer) {
 	jConfig := config.Configuration{
 		ServiceName: serviceName,
@@ -80,18 +83,16 @@ func NewTracer(serviceName string) (opentracing.Tracer, io.Closer) {
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,
 		},
-		// todo add reporter configs
 		Reporter: &config.ReporterConfig{
 			LogSpans:          true,
-			CollectorEndpoint: "",
-			User:              "",
-			Password:          "",
+			CollectorEndpoint: goimConfig.Config.Trace.Jaeger.CollectorEndpoint,
 		},
 	}
 	tracer, closer, err := jConfig.NewTracer(config.Logger(jaeger.StdLogger))
 	if err != nil {
 		panic(err)
 	}
+	// 设置当前服务的globalTracer
 	opentracing.SetGlobalTracer(tracer)
 	return tracer, closer
 }
