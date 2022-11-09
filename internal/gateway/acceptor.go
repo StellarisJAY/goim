@@ -28,16 +28,6 @@ type GateAcceptor struct {
 	globalTracer opentracing.Tracer
 }
 
-var logger *zap.Logger
-
-func init() {
-	var err error
-	logger, err = zap.NewDevelopment()
-	if err != nil {
-		panic(err)
-	}
-}
-
 func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContext) websocket.AcceptorResult {
 	_ = conn.SetReadDeadline(time.Now().Add(HandshakeReadTimeout))
 	frame, err := websocket.ReadFrame(conn)
@@ -70,7 +60,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	if err := ws.WriteFrame(conn, frame); err != nil {
 		return websocket.AcceptorResult{Error: err}
 	}
-	logger.Info("Accepted websocket connection",
+	log.Info("Accepted websocket connection",
 		zap.Int64("userID", loginResp.UserID),
 		zap.String("deviceID", loginResp.DeviceID),
 		zap.String("channel", channel))
