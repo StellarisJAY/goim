@@ -1,6 +1,6 @@
 # Go IM Server
 
-![](https://docs-1257369645.cos.ap-chengdu.myqcloud.com/goim/goim.png)
+![](https://docs-1257369645.cos.ap-chengdu.myqcloud.com/goim/goimv2.png)
 
 ## 主要功能
 
