@@ -75,7 +75,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 // login 设备登录，设备必须通过websocket发送握手包接入聊天服务，握手时会从授权服务检查用户Token和设备信息
 func (acceptor *GateAcceptor) login(request *pb.HandshakeRequest, ctx websocket.AcceptorContext, channel string) (*pb.LoginResponse, error) {
 	// 连接到授权服务
-	conn, err := naming.GetClientConn(pb.UserServiceName, acceptor.globalTracer)
+	conn, err := naming.GetClientConn(pb.UserServiceName)
 	if err != nil {
 		return nil, err
 	}
