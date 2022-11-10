@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/stellarisJAY/goim/pkg/config"
 	"github.com/stellarisJAY/goim/pkg/log"
@@ -29,7 +30,6 @@ type Server struct {
 }
 
 func (s *Server) Init() {
-
 	useMQ := strings.ToLower(config.Config.MessageQueue)
 	group := config.Config.Gateway.ConsumerGroup
 	if group == "" {
@@ -51,6 +51,7 @@ func (s *Server) Init() {
 
 func (s *Server) Start() error {
 	tracer, closer := trace.NewTracer(pb.GatewayServiceName)
+	opentracing.SetGlobalTracer(tracer)
 	defer closer.Close()
 	s.grpcServer = grpc.NewServer(grpc.UnaryInterceptor(trace.ServerInterceptor(tracer)))
 	startTime := time.Now().UnixMilli()
