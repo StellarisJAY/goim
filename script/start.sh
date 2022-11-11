@@ -1,0 +1,1 @@
+./target/api --config="./config/config.yaml"
