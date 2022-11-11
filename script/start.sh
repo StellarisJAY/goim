@@ -1,1 +1,1 @@
-./target/api --config="./config/config.yaml"
+./target/api --config=/goim/config/config.yaml
