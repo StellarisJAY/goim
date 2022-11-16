@@ -16,7 +16,7 @@ func init() {
 }
 
 // SyncOfflineMessageHandler 同步离线消息
-var SyncOfflineMessageHandler = func(ctx context.Context) {
+var SyncOfflineMessageHandler = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); err != nil && ok {
 			handleError(ctx, err)
@@ -54,10 +54,10 @@ var SyncOfflineMessageHandler = func(ctx context.Context) {
 		resp.BaseResponse.Code = response.Code
 		resp.BaseResponse.Message = response.Message
 	}
-	_, _ = ctx.JSON(resp)
+	_ = ctx.JSON(resp)
 }
 
-var SyncOfflineGroupMessages = func(ctx context.Context) {
+var SyncOfflineGroupMessages = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); err != nil && ok {
 			handleError(ctx, err)
@@ -90,11 +90,11 @@ var SyncOfflineGroupMessages = func(ctx context.Context) {
 			BaseResponse:  http.BaseResponse{Code: resp.Code, Message: resp.Message},
 			GroupMessages: resp.GroupMessages,
 		}
-		_, _ = ctx.JSON(response)
+		_ = ctx.JSON(response)
 	}
 }
 
-var SyncLatestGroupMessages = func(ctx context.Context) {
+var SyncLatestGroupMessages = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); err != nil && ok {
 			handleError(ctx, err)
@@ -128,10 +128,10 @@ var SyncLatestGroupMessages = func(ctx context.Context) {
 		BaseResponse: http.BaseResponse{Code: resp.Code, Message: resp.Message},
 		Msgs:         resp.Msgs,
 	}
-	_, _ = ctx.JSON(response)
+	_ = ctx.JSON(response)
 }
 
-var ListNotifications = func(ctx context.Context) {
+var ListNotifications = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); err != nil && ok {
 			handleError(ctx, err)
@@ -159,10 +159,10 @@ var ListNotifications = func(ctx context.Context) {
 		},
 		Notifications: convertNotificationStruct(response.Notifications),
 	}
-	_, _ = ctx.JSON(resp)
+	_ = ctx.JSON(resp)
 }
 
-var MarkNotificationReadHandler = func(ctx context.Context) {
+var MarkNotificationReadHandler = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); err != nil && ok {
 			handleError(ctx, err)
@@ -183,7 +183,7 @@ var MarkNotificationReadHandler = func(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	_, _ = ctx.JSON(&http.BaseResponse{Code: response.Code, Message: response.Message})
+	_ = ctx.JSON(&http.BaseResponse{Code: response.Code, Message: response.Message})
 }
 
 func convertNotificationStruct(pbNotifications []*pb.Notification) []*http.Notification {

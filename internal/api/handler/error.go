@@ -5,7 +5,7 @@ import (
 	"github.com/stellarisJAY/goim/internal/api/middleware"
 )
 
-func handleError(ctx context.Context, err error) {
+func handleError(ctx *context.Context, err error) {
 	ctx.Values().Set(middleware.CtxKeyHandlerError, err)
 	ctx.Next()
 }

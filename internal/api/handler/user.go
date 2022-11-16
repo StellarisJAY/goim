@@ -10,7 +10,7 @@ import (
 )
 
 // FindUserHandler 通过ID获取用户基本信息
-var FindUserHandler = func(ctx context.Context) {
+var FindUserHandler = func(ctx *context.Context) {
 	id, err := ctx.Params().GetInt64("id")
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -31,11 +31,11 @@ var FindUserHandler = func(ctx context.Context) {
 	response.Code = findUserResponse.Code
 	response.Message = findUserResponse.Message
 	response.UserInfo = findUserResponse.User
-	_, _ = ctx.JSON(response)
+	_ = ctx.JSON(response)
 }
 
 // UpdateUserHandler 更新用户信息
-var UpdateUserHandler = func(ctx context.Context) {
+var UpdateUserHandler = func(ctx *context.Context) {
 	userId := ctx.Params().Get("userID")
 	uid, _ := stringutil.HexStringToInt64(userId)
 	req := &http.UpdateUserRequest{}
@@ -54,7 +54,7 @@ var UpdateUserHandler = func(ctx context.Context) {
 		handleError(ctx, err)
 		return
 	}
-	_, _ = ctx.JSON(&http.BaseResponse{
+	_ = ctx.JSON(&http.BaseResponse{
 		Code:    resp.Code,
 		Message: resp.Message,
 	})

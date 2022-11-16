@@ -16,7 +16,7 @@ func init() {
 }
 
 // LoginHandler 授权用户设备，返回访问Token
-var LoginHandler context.Handler = func(ctx context.Context) {
+var LoginHandler context.Handler = func(ctx *context.Context) {
 	req := new(http.AuthRequest)
 	if err := ctx.ReadJSON(req); err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -42,7 +42,7 @@ var LoginHandler context.Handler = func(ctx context.Context) {
 		handleError(ctx, err)
 		return
 	}
-	_, _ = ctx.JSON(&http.AuthResponse{
+	_ = ctx.JSON(&http.AuthResponse{
 		BaseResponse: http.BaseResponse{
 			Code: response.Code, Message: response.Message,
 		},
@@ -51,11 +51,11 @@ var LoginHandler context.Handler = func(ctx context.Context) {
 }
 
 // RegisterHandler 用户注册API
-var RegisterHandler context.Handler = func(ctx context.Context) {
+var RegisterHandler context.Handler = func(ctx *context.Context) {
 	// 读取JSON请求
 	regReq := new(http.RegisterRequest)
 	if err := ctx.ReadJSON(regReq); err != nil {
-		_, _ = ctx.Problem(iris.NewProblem().Status(iris.StatusBadRequest))
+		_ = ctx.Problem(iris.NewProblem().Status(iris.StatusBadRequest))
 		return
 	}
 	if err := validate.Struct(regReq); err != nil {
@@ -74,7 +74,7 @@ var RegisterHandler context.Handler = func(ctx context.Context) {
 		handleError(ctx, err)
 		return
 	} else {
-		_, _ = ctx.JSON(&http.BaseResponse{
+		_ = ctx.JSON(&http.BaseResponse{
 			Code:    response.Code,
 			Message: response.Message,
 		})

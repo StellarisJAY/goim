@@ -15,7 +15,7 @@ func init() {
 	validate.RegisterStructValidation(func(sl validator.StructLevel) {}, &http.AcceptFriendRequest{})
 }
 
-var InsertFriendApplicationHandler = func(ctx context.Context) {
+var InsertFriendApplicationHandler = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); ok {
 			handleError(ctx, err)
@@ -51,10 +51,10 @@ var InsertFriendApplicationHandler = func(ctx context.Context) {
 		response.Code = resp.Code
 		response.Message = resp.Message
 	}
-	_, _ = ctx.JSON(response)
+	_ = ctx.JSON(response)
 }
 
-var AcceptFriendHandler = func(ctx context.Context) {
+var AcceptFriendHandler = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); ok {
 			handleError(ctx, err)
@@ -81,13 +81,13 @@ var AcceptFriendHandler = func(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	_, _ = ctx.JSON(&http.BaseResponse{
+	_ = ctx.JSON(&http.BaseResponse{
 		Code:    resp.Code,
 		Message: resp.Message,
 	})
 }
 
-var FriendListHandler = func(ctx context.Context) {
+var FriendListHandler = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); ok {
 			handleError(ctx, err)
@@ -102,13 +102,13 @@ var FriendListHandler = func(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	_, _ = ctx.JSON(&http.ListFriendsResponse{BaseResponse: http.BaseResponse{
+	_ = ctx.JSON(&http.ListFriendsResponse{BaseResponse: http.BaseResponse{
 		Code:    resp.Code,
 		Message: resp.Message,
 	}, Friends: resp.Friends})
 }
 
-var FriendInfoHandler = func(ctx context.Context) {
+var FriendInfoHandler = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); ok {
 			handleError(ctx, err)
@@ -131,7 +131,7 @@ var FriendInfoHandler = func(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	_, _ = ctx.JSON(&http.GetFriendInfoResponse{
+	_ = ctx.JSON(&http.GetFriendInfoResponse{
 		BaseResponse: http.BaseResponse{
 			Code:    resp.Code,
 			Message: resp.Message,

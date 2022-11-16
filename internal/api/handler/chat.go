@@ -14,7 +14,7 @@ func init() {
 	validate.RegisterStructValidation(func(sl validator.StructLevel) {}, &http.SendMessageRequest{})
 }
 
-var SendMessageHandler = func(ctx context.Context) {
+var SendMessageHandler = func(ctx *context.Context) {
 	userID := ctx.Params().Get("userID")
 	deviceID := ctx.Params().Get("deviceID")
 	req := new(http.SendMessageRequest)
@@ -46,7 +46,7 @@ var SendMessageHandler = func(ctx context.Context) {
 	}
 
 	ctx.StatusCode(iris.StatusOK)
-	_, _ = ctx.JSON(&http.SendMessageResponse{
+	_ = ctx.JSON(&http.SendMessageResponse{
 		BaseResponse: http.BaseResponse{Code: response.Code, Message: response.Message},
 		MessageID:    response.MessageId,
 		Timestamp:    response.Timestamp,

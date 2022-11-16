@@ -2,6 +2,7 @@ package middleware
 
 import (
 	_context "context"
+	"fmt"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/prometheus/client_golang/prometheus"
@@ -30,7 +31,7 @@ var (
 	})
 )
 
-var TokenVerifier = func(ctx context.Context) {
+var TokenVerifier = func(ctx *context.Context) {
 	var token string
 	if token = ctx.GetHeader("Authorization"); token == "" {
 		ctx.StatusCode(iris.StatusUnauthorized)
@@ -78,7 +79,7 @@ var TokenVerifier = func(ctx context.Context) {
 }
 
 // ErrorHandler 统一错误处理
-var ErrorHandler = func(ctx context.Context) {
+var ErrorHandler = func(ctx *context.Context) {
 	v := ctx.Values().Get(CtxKeyHandlerError)
 	if v != nil {
 		errorRequestRecorder.Inc()
@@ -100,7 +101,20 @@ var ErrorHandler = func(ctx context.Context) {
 	}
 }
 
-var RequestRecorder = func(ctx context.Context) {
+var CorsHandler = func(ctx *context.Context) {
+	fmt.Println("cors")
+	log.Info("cors handler", zap.String("method", ctx.Method()))
+	ctx.ResponseWriter().Header().Set("Access-Control-Allow-Origin", "*")
+	if ctx.Method() == iris.MethodOptions {
+		ctx.ResponseWriter().Header().Set("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS")
+		ctx.ResponseWriter().Header().Set("Access-Control-Allow-Credentials", "true")
+		return
+	}
+	ctx.Next()
+}
+
+var RequestRecorder = func(ctx *context.Context) {
+	fmt.Println("logg")
 	promRequestRecorder.Inc()
 	ctx.Next()
 }
