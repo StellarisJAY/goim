@@ -17,7 +17,8 @@ var application *iris.Application
 
 func Init() {
 	application = iris.New()
-	application.Use(middleware.RequestRecorder)
+
+	application.UseRouter(middleware.Cors)
 	// 授权服务API
 	authParty := application.Party("/auth")
 	{
