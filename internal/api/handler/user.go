@@ -34,6 +34,26 @@ var FindUserHandler = func(ctx *context.Context) {
 	_ = ctx.JSON(response)
 }
 
+var GetSelfInfoHandler = func(ctx *context.Context) {
+	userId := ctx.Params().Get("userID")
+	uid, _ := stringutil.HexStringToInt64(userId)
+	service, err := getUserService()
+	if err != nil {
+		handleError(ctx, err)
+		return
+	}
+	findUserResponse, err := service.FindUserByID(_context.TODO(), &pb.FindUserByIdRequest{Id: uid})
+	if err != nil {
+		handleError(ctx, err)
+		return
+	}
+	response := &http.FindUserResponse{}
+	response.Code = findUserResponse.Code
+	response.Message = findUserResponse.Message
+	response.UserInfo = findUserResponse.User
+	_ = ctx.JSON(response)
+}
+
 // UpdateUserHandler 更新用户信息
 var UpdateUserHandler = func(ctx *context.Context) {
 	userId := ctx.Params().Get("userID")

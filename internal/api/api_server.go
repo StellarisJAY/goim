@@ -62,6 +62,7 @@ func Init() {
 		userParty.Done(middleware.ErrorHandler)
 		userParty.Get("/{id:int64}", handler.FindUserHandler)
 		userParty.Put("", handler.UpdateUserHandler)
+		userParty.Get("", handler.GetSelfInfoHandler)
 	}
 	// 群聊相关API
 	groupParty := application.Party("/group")
