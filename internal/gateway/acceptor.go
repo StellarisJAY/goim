@@ -56,7 +56,7 @@ func (acceptor *GateAcceptor) Accept(conn net.Conn, ctx websocket.AcceptorContex
 	if err != nil {
 		return websocket.AcceptorResult{Error: err}
 	}
-	frame = ws.NewFrame(ws.OpBinary, true, marshal)
+	frame = ws.NewFrame(ws.OpText, true, marshal)
 	if err := ws.WriteFrame(conn, frame); err != nil {
 		return websocket.AcceptorResult{Error: err}
 	}
