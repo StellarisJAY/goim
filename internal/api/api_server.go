@@ -44,6 +44,7 @@ func Init() {
 		messageParty.Get("/offline/group", handler.SyncOfflineGroupMessages)
 		// 查询最新的群聊消息
 		messageParty.Get("/offline/group/latest", handler.SyncLatestGroupMessages)
+		messageParty.Get("/offline/group/{groupID:int64}/{seq:int64}", handler.SyncGroupMessages)
 	}
 	// 通知API
 	notificationParty := application.Party("/notification")

@@ -94,12 +94,54 @@ var SyncOfflineGroupMessages = func(ctx *context.Context) {
 	}
 }
 
+var SyncGroupMessages = func(ctx *context.Context) {
+	defer func() {
+		if err, ok := recover().(error); err != nil && ok {
+			handleError(ctx, err)
+		}
+	}()
+	userID := ctx.Params().Get("userID")
+	uid, _ := stringutil.HexStringToInt64(userID)
+	groupID, err := ctx.Params().GetInt64("groupID")
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		_, _ = ctx.WriteString("invalid seq number")
+		return
+	}
+	lastSeq, err := ctx.Params().GetInt64("seq")
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		_, _ = ctx.WriteString("invalid seq number")
+		return
+	}
+	service, err := getMessageService()
+	if err != nil {
+		panic(err)
+	}
+	resp, err := service.SyncGroupMessages(_context.TODO(), &pb.SyncGroupMessageRequest{
+		GroupID: groupID,
+		Seq:     lastSeq,
+		UserID:  uid,
+	})
+	if err != nil {
+		panic(err)
+	} else {
+		response := &http.SyncGroupMessageResponse{
+			BaseResponse: http.BaseResponse{Code: resp.Code, Message: resp.Message},
+			Messages:     resp.Msgs,
+		}
+		_ = ctx.JSON(response)
+	}
+}
+
 var SyncLatestGroupMessages = func(ctx *context.Context) {
 	defer func() {
 		if err, ok := recover().(error); err != nil && ok {
 			handleError(ctx, err)
 		}
 	}()
+	userID := ctx.Params().Get("userID")
+	uid, _ := stringutil.HexStringToInt64(userID)
 	request := new(http.SyncGroupLatestMessagesRequest)
 	err := ctx.ReadJSON(request)
 	if err != nil {
@@ -116,16 +158,18 @@ var SyncLatestGroupMessages = func(ctx *context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	resp, err := service.SyncGroupLatestMessages(_context.TODO(), &pb.SyncGroupLatestMessagesRequest{
-		GroupID:       request.GroupID,
-		Limit:         request.Limit,
-		LastTimestamp: request.LastTimestamp,
+	resp, err := service.SyncLatestGroupMessages(_context.TODO(), &pb.SyncLatestGroupMessageRequest{
+		GroupID: request.GroupID,
+		Limit:   request.Limit,
+		UserID:  uid,
 	})
 	if err != nil {
 		panic(err)
 	}
 	response := &http.SyncGroupLatestMessagesResponse{
 		BaseResponse: http.BaseResponse{Code: resp.Code, Message: resp.Message},
+		FirstSeq:     resp.FirstSeq,
+		LastSeq:      resp.LastSeq,
 		Msgs:         resp.Msgs,
 	}
 	_ = ctx.JSON(response)

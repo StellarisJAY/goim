@@ -61,6 +61,11 @@ type SyncOfflineGroupMessageResponse struct {
 	GroupMessages []*pb.SingleGroupMessages
 }
 
+type SyncGroupMessageResponse struct {
+	BaseResponse
+	Messages []*pb.BaseMsg `json:"messages"`
+}
+
 // CreateGroupRequest 创建群聊请求
 type CreateGroupRequest struct {
 	Name        string `json:"name" validate:"required"`
@@ -117,19 +122,20 @@ type GetFriendInfoResponse struct {
 }
 
 type SyncGroupLatestMessagesRequest struct {
-	GroupID       int64 `json:"groupID" validate:"required"`
-	Limit         int32 `json:"limit" validate:"required"`
-	LastTimestamp int64 `json:"lastTimestamp"`
+	GroupID int64 `json:"groupID" validate:"required"`
+	Limit   int64 `json:"limit" validate:"required"`
 }
 
 type SyncGroupLatestMessagesResponse struct {
 	BaseResponse
-	Msgs []*pb.BaseMsg `json:"msgs"`
+	FirstSeq int64         `json:"firstSeq"`
+	LastSeq  int64         `json:"lastSeq"`
+	Msgs     []*pb.BaseMsg `json:"msgs"`
 }
 
 type ListJoinedGroupsResponse struct {
 	BaseResponse
-	Groups []*pb.GroupInfo
+	Groups []*pb.GroupInfo `json:"groups"`
 }
 
 type ListNotificationRequest struct {
