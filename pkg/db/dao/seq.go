@@ -7,27 +7,22 @@ import (
 )
 
 // 用户收件箱序列号用 Redis 的 Hash保存，结构如下
-// user_seq_#userId: {
-//     group_1: 0
-//     group_2: 122
-//     group_3: 22
-//     non_group: 100
-// }
+// user_seq_{userID}
 // 序列号表示当前群聊中的最新消息序号，用户通过与本地记录的序号比较来判断是否同步新消息
-//
+// 每个群聊拥有单独的收件序号，格式：group_seq_{groupID}
 const (
 	userSeqKey  = "user_seq_%d"
-	nonGroupKey = "0"
+	groupSeqKey = "group_seq_%d"
 )
 
 // IncrUserSeq 增加用户收件箱的 序列号
 func IncrUserSeq(userId int64) (int64, error) {
-	command := db.DB.Redis.HIncrBy(context.Background(), fmt.Sprintf(userSeqKey, userId), nonGroupKey, 1)
+	command := db.DB.Redis.IncrBy(context.Background(), fmt.Sprintf(userSeqKey, userId), 1)
 	return command.Result()
 }
 
-// IncrUserGroupChatSeq 增加某个用户在某个群聊中的收件序列号
-func IncrUserGroupChatSeq(userId, groupId int64) (int64, error) {
-	command := db.DB.Redis.HIncrBy(context.Background(), fmt.Sprintf(userSeqKey, userId), fmt.Sprintf("%d", groupId), 1)
+// IncrGroupChatSeq 增加群聊的收件序列号
+func IncrGroupChatSeq(groupId int64) (int64, error) {
+	command := db.DB.Redis.IncrBy(context.Background(), fmt.Sprintf(groupSeqKey, groupId), 1)
 	return command.Result()
 }

@@ -119,16 +119,20 @@ func handleSingleMessage(message *pb.BaseMsg) error {
 
 // handleGroupChat 群聊消息处理
 func handleGroupChat(message *pb.BaseMsg) error {
+	seq, err := dao.IncrGroupChatSeq(message.To)
+	if err != nil {
+		return fmt.Errorf("incr group in-box seq error %w", err)
+	}
 	offlineMessage := &model.OfflineMessage{
 		ID:        message.Id,
 		From:      message.From,
 		To:        message.To,
 		Content:   []byte(message.Content),
 		Timestamp: message.Timestamp,
-		Seq:       0,
+		Seq:       seq,
 		Flag:      byte(pb.MessageFlag_Group),
 	}
-	err := dao.InsertOfflineMessage(offlineMessage)
+	err = dao.InsertOfflineMessage(offlineMessage)
 	if err != nil {
 		return fmt.Errorf("insert offline message error %w", err)
 	}
