@@ -87,6 +87,8 @@ var NsqMessageHandler = func(message *nsq.Message) error {
 	}
 	if err != nil {
 		log.Warn("handle message failed", zap.Int64("messageID", msg.Id), zap.Error(err))
+		// 失败返回错误，使nsq client回复REQUEUE
+		return err
 	}
 	return nil
 }
@@ -114,7 +116,10 @@ func handleSingleMessage(message *pb.BaseMsg) error {
 	if err != nil {
 		return fmt.Errorf("insert offline message error %w", err)
 	}
-	return pushMessage(message)
+	if err := pushMessage(message); err != nil {
+		return fmt.Errorf("push message error %w", err)
+	}
+	return nil
 }
 
 // handleGroupChat 群聊消息处理
