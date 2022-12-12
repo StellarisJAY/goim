@@ -94,7 +94,7 @@ func (m *MessageServiceImpl) SyncOfflineGroupMessages(ctx context.Context, reque
 	groupMessages := make([]*pb.SingleGroupMessages, len(groups))
 	for i := 0; i < len(groups) && i < len(timestamps); i++ {
 		groupID, lastTimestamp := groups[i], timestamps[i]
-		messages, err := dao.ListOfflineGroupMessages(request.UserID, groupID, lastTimestamp)
+		messages, err := dao.ListOfflineGroupMessages(groupID, lastTimestamp)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				continue
@@ -129,6 +129,46 @@ func (m *MessageServiceImpl) SyncGroupLatestMessages(ctx context.Context, reques
 	return &pb.SyncGroupLatestMessagesResponse{
 		Code: pb.Success,
 		Msgs: OfflineMessagesToBaseMessages(messages),
+	}, nil
+}
+
+func (m *MessageServiceImpl) SyncGroupMessages(ctx context.Context, request *pb.SyncGroupMessageRequest) (*pb.SyncGroupMessageResponse, error) {
+	isMember, _, err := isGroupMember(request.UserID, request.GroupID)
+	if err != nil {
+		return &pb.SyncGroupMessageResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if !isMember {
+		return &pb.SyncGroupMessageResponse{Code: pb.AccessDenied, Message: "not a group member"}, nil
+	}
+	messages, err := dao.ListGroupMessages(request.GroupID, request.Seq)
+	if err != nil {
+		return &pb.SyncGroupMessageResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	return &pb.SyncGroupMessageResponse{Code: pb.Success, Msgs: OfflineMessagesToBaseMessages(messages)}, nil
+}
+
+func (m *MessageServiceImpl) SyncLatestGroupMessages(ctx context.Context, request *pb.SyncLatestGroupMessageRequest) (*pb.SyncLatestGroupMessageResponse, error) {
+	isMember, _, err := isGroupMember(request.UserID, request.GroupID)
+	if err != nil {
+		return &pb.SyncLatestGroupMessageResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	if !isMember {
+		return &pb.SyncLatestGroupMessageResponse{Code: pb.AccessDenied, Message: "not a group member"}, nil
+	}
+	messages, err := dao.ListLatestGroupMessages(request.GroupID, request.Limit)
+	if err != nil {
+		return &pb.SyncLatestGroupMessageResponse{Code: pb.Error, Message: err.Error()}, nil
+	}
+	var firstSeq, lastSeq int64 = -1, -1
+	if messages != nil || len(messages) != 0 {
+		firstSeq, lastSeq = messages[len(messages)-1].Seq, messages[0].Seq
+	}
+	return &pb.SyncLatestGroupMessageResponse{
+		Code:     pb.Success,
+		Message:  "",
+		FirstSeq: firstSeq,
+		LastSeq:  lastSeq,
+		Msgs:     OfflineMessagesToBaseMessages(messages),
 	}, nil
 }
 

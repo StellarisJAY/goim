@@ -71,7 +71,7 @@ func ListOfflineMessages(userID int64, lastSeq int64) ([]*model.OfflineMessage, 
 	return messages, nil
 }
 
-func ListOfflineGroupMessages(userID int64, groupID int64, lastTimestamp int64) ([]*model.OfflineMessage, error) {
+func ListOfflineGroupMessages(groupID int64, lastTimestamp int64) ([]*model.OfflineMessage, error) {
 	database := db.DB.MongoDB.Database(db.MongoDBName)
 	// 按照seq排序
 	opts := options.Find().SetSort(bson.D{{"timestamp", 1}})
@@ -115,6 +115,41 @@ func ListLatestOfflineGroupMessages(groupID int64, lastTimestamp int64, limit in
 		return nil, err
 	}
 	messages := make([]*model.OfflineMessage, 0)
+	if err = cur.All(context.TODO(), &messages); err != nil {
+		return nil, err
+	}
+	return messages, nil
+}
+
+func ListGroupMessages(groupID int64, seq int64) ([]*model.OfflineMessage, error) {
+	collection := db.DB.MongoDB.Database(db.MongoDBName).Collection(db.CollectionOfflineMessage)
+	opts := options.Find().SetSort(bson.D{{"seq", 1}})
+	query := bson.D{
+		{"to", groupID},
+		{"seq", bson.D{{"$gte", seq}}},
+	}
+	cur, err := collection.Find(context.TODO(), query, opts)
+	if err != nil {
+		return nil, err
+	}
+	var messages []*model.OfflineMessage
+	if err = cur.All(context.TODO(), &messages); err != nil {
+		return nil, err
+	}
+	return messages, nil
+}
+
+func ListLatestGroupMessages(groupID int64, limit int64) ([]*model.OfflineMessage, error) {
+	collection := db.DB.MongoDB.Database(db.MongoDBName).Collection(db.CollectionOfflineMessage)
+	opts := options.Find().SetSort(bson.D{{"seq", -1}}).SetLimit(limit)
+	query := bson.D{
+		{"to", groupID},
+	}
+	cur, err := collection.Find(context.TODO(), query, opts)
+	if err != nil {
+		return nil, err
+	}
+	var messages []*model.OfflineMessage
 	if err = cur.All(context.TODO(), &messages); err != nil {
 		return nil, err
 	}

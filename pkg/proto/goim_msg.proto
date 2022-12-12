@@ -164,12 +164,41 @@ message RemoveNotificationResponse {
   string message = 2;
 }
 
+message SyncGroupMessageRequest {
+  int64 groupID = 1;
+  int64 seq = 2;
+  int64 userID = 3;
+}
+
+message SyncGroupMessageResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated BaseMsg msgs = 3;
+}
+
+message SyncLatestGroupMessageRequest {
+  int64 groupID = 1;
+  int64 limit = 2;
+  int64 userID = 3;
+}
+
+message SyncLatestGroupMessageResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 firstSeq = 3;
+  int64 lastSeq = 4;
+  repeated BaseMsg msgs = 5;
+}
+
 service message {
   rpc SyncOfflineMessages(SyncMsgRequest) returns (SyncMsgResponse) {}
   // SendMessage 发送消息
   rpc SendMessage(SendMsgRequest) returns (SendMsgResponse) {}
   rpc SyncOfflineGroupMessages(SyncGroupMsgRequest) returns (SyncGroupMsgResponse) {}
   rpc SyncGroupLatestMessages(SyncGroupLatestMessagesRequest) returns (SyncGroupLatestMessagesResponse) {}
+
+  rpc SyncGroupMessages(SyncGroupMessageRequest) returns (SyncGroupMessageResponse) {}
+  rpc SyncLatestGroupMessages(SyncLatestGroupMessageRequest) returns (SyncLatestGroupMessageResponse) {}
 
   rpc ListNotifications(ListNotificationRequest) returns (ListNotificationResponse) {}
   rpc MarkNotificationRead(MarkNotificationReadRequest) returns (MarkNotificationReadResponse) {}
